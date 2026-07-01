@@ -156,10 +156,28 @@ if [[ "$MODE" == "update" ]] && [[ -s "$MERGE_CANDS" ]]; then
   echo "   wholesale-replace. See skill deploy-files § update-merge protocol.)"
 fi
 
+# ── In-place scaffold (when target is the current directory) ──────────
+# Chain bootstrap.sh so the target gets .work/ + .cursorrules + DOCS_TECH_STACK.md
+# in the same invocation (per skill.md § I2). Outbound mode (different target)
+# leaves next-step instructions.
+if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
+  REPO_ROOT="$(cd "$PARENT" && pwd)"
+  BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT="$REPO_ROOT" bash "$AI_ROOT/templates/bootstrap.sh" \
+    > /tmp/deploy-files-bootstrap.$$.log 2>&1 || { cat /tmp/deploy-files-bootstrap.$$.log; rm -f /tmp/deploy-files-bootstrap.$$.log; exit 1; }
+  grep -E '^(created:|skip )' /tmp/deploy-files-bootstrap.$$.log | sed 's/^/  scaffold: /'
+  rm -f /tmp/deploy-files-bootstrap.$$.log
+  SCAFFOLD_DONE=1
+fi
+
 echo ""
 echo "=== Done: files deployed to $DEST_DIR ==="
 echo ""
-echo "Next steps in target project:"
-echo "  1. Run @project-bootstrap init (creates .cursorrules + .work/ from templates)"
-echo "  2. Edit .cursorrules — fill every REPLACE: token"
+if [[ -n "${SCAFFOLD_DONE:-}" ]]; then
+  echo "  Scaffold created (.work/, .cursorrules, DOCS_TECH_STACK.md)"
+  echo "  Next: edit .cursorrules — fill every REPLACE: token"
+else
+  echo "Next steps in target project:"
+  echo "  1. Run @project-bootstrap init (creates .cursorrules + .work/ from templates)"
+  echo "  2. Edit .cursorrules — fill every REPLACE: token"
+fi
 echo "  3. Run @session-control start"

@@ -11,7 +11,7 @@ description: >-
 
 # deploy-repo
 
-**Shell:** `bash .ai/scripts/deploy-repo.sh <clone|archive> <target-path>`
+**Shell:** `bash <source>/.ai/scripts/deploy-repo.sh <clone|archive> <target-path>`
 
 Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.gitignore`, and root `.cursorrules`) into a target directory. Two modes cover both git-mirror and snapshot deployments.
 
@@ -46,7 +46,7 @@ Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.g
 
 ## I1 — Clone mode
 
-1. `bash .ai/scripts/deploy-repo.sh clone "<resolved-path>"`
+1. `bash <source>/.ai/scripts/deploy-repo.sh clone "<resolved-path>"`
 2. Requires git remote `origin` on source repo.
 3. Target must not exist or must be empty.
 4. Full `git clone` preserves all branches and tags.
@@ -57,7 +57,7 @@ Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.g
 
 ## I2 — Archive mode
 
-1. `bash .ai/scripts/deploy-repo.sh archive "<resolved-path>"`
+1. `bash <source>/.ai/scripts/deploy-repo.sh archive "<resolved-path>"`
 2. Uses `git archive HEAD` — no remote required.
 3. Includes `.github/`, `.gitignore`, `.cursorrules` (everything except `.git` directory).
 4. Idempotent — re-runs safely overwrite files.

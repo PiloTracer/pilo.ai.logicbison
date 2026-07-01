@@ -13,12 +13,17 @@
 # Usage:
 #   bash scripts/deploy-repo.sh clone    /absolute/path/to/target
 #   bash scripts/deploy-repo.sh archive  /absolute/path/to/target
+#   AI_SOURCE=/path/.ai bash scripts/deploy-repo.sh clone /absolute/path/to/target
 #
 set -euo pipefail
 
 MODE="${1:?Usage: $0 <clone|archive> <target-path>}"
 RAW_TARGET="${2:?Usage: $0 <clone|archive> <target-path>}"
-AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -n "${AI_SOURCE:-}" ]]; then
+  AI_ROOT="$(cd "$AI_SOURCE" && pwd)"
+else
+  AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
 
 # ── Resolve target ──────────────────────────────────────────────────
 # Always use as-is (unlike deploy-files, this is a full repo deploy)

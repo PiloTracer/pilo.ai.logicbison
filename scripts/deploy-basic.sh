@@ -85,6 +85,23 @@ echo "=== deploy-basic → $DEST_ROOT (thin-client bootstrap) ==="
 echo "  source: $AI_ROOT"
 echo "  mode:   $MODE (no-overwrite by default)"
 
+# ── Pre-check: fat-client leak ───────────────────────────────────────
+# If the target already has a local .ai/skills/ directory, warn and block
+# (thin-client would create a mixed state; skills resolve locally first).
+# --force skips the block (operator explicitly confirmed).
+if [[ -d "${DEST_ROOT}/.ai/skills" ]]; then
+  echo "  WARN: target has local .ai/skills/ directory (fat-client leak)"
+  echo "    Thin-client bootstrap would create a mixed state where skills"
+  echo "    resolve locally first instead of from \$AGENT_OS_SOURCE."
+  if [[ "$MODE" != "force" ]]; then
+    echo "  BLOCKED: use --force to confirm you want thin-client on a fat-client target,"
+    echo "    or remove the local .ai/ directory first."
+    exit 1
+  else
+    echo "  --force: proceeding (mixed state accepted by operator)"
+  fi
+fi
+
 # Build the substituted .cursorrules content.
 # Substitutes:
 #   1. AGENT_OS_SOURCE=REPLACE_BASICSOURCE → absolute AI_ROOT

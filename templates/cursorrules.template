@@ -188,7 +188,9 @@ Reusable agent skills live under `.ai/skills/`. Each skill is a subfolder contai
 | feature-spec | `.ai/skills/feature-spec/` | Author, review, amend feature SPECs |
 | concept-run | `.ai/skills/concept-run/` | Run MOD-01…MOD-06 concept prompts |
 | project-bootstrap | `.ai/skills/project-bootstrap/` | Copy `.work/` skeleton, `.cursorrules`, stack doc from templates |
+| deploy-files | `.ai/skills/deploy-files/` | Fat-client deploy (vendored): copies full `.ai/` tree into target; no-overwrite; `update` mode with rules-aware merge candidates |
 | deploy-basic | `.ai/skills/deploy-basic/` | Thin-client bootstrap / `update`: re-sync `AGENT_OS_SOURCE` pointer + merge the local scaffold surface; skills resolve from source at runtime (see § Source resolution) |
+| deploy-repo | `.ai/skills/deploy-repo/` | Full repo deploy: clone (git mirror) or archive (snapshot with .github) |
 | ai-director | `.ai/skills/ai-director/` | Free-text request orchestrator; routes to correct `.ai` skill chain; new skill gap detection |
 | x-director | `.ai/skills/x-director/` | Cross-framework orchestrator (`.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`); resolves sibling paths from § Frameworks registry |
 
