@@ -81,7 +81,11 @@ Sister frameworks live as siblings on disk. x-director and ai-director use this 
 **Path resolution (in order):**
 
 1. Resolve from the table above. Empty/unset cells → fall through.
-2. **Auto-discover from `.ai` parent:** `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"`; check `${parent}/.ai.ui`, `${parent}/.ai.biz`, and `${parent}/.ai.soc`. Use whichever exists; treat missing as "framework not installed".
+2. **Auto-discover from `.ai` parent or source:**
+   - **Fat-client** (`$REPO_ROOT/.ai/` exists): `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"`
+   - **Thin-client** (`$REPO_ROOT/.ai/` absent, `$AGENT_OS_SOURCE` is set and readable): `parent="$(cd "$AGENT_OS_SOURCE/.." && pwd)"`
+   - **Neither** (no source to scan from): skip auto-discover — no sister frameworks.
+   Check `${parent}/.ai.ui`, `${parent}/.ai.biz`, and `${parent}/.ai.soc`. Use whichever exists; treat missing as "framework not installed".
 3. **Preflight:** before routing to a director, verify its framework directory exists **and** its `skills/README.md` is readable. If absent, stop routing with a one-line `framework not installed here` message — never silently route into the void.
 
 Read these at the start of every conversation and when relevant:

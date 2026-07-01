@@ -18,7 +18,11 @@ description: >-
 The x-director knows about every framework in the workspace. **Path resolution is dynamic** — never assume the framework dirs sit at a fixed absolute path. Resolve in this order:
 
 1. **Authoritative:** `.cursorrules` § *Frameworks registry* (the file shipped to every adopter repo). If the registry names a path for `.ai.ui` / `.ai.biz` / `.ai.soc`, use it.
-2. **Auto-discover from `.ai` parent:** `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"`; a sibling dir at `${parent}/.ai.ui`, `${parent}/.ai.biz`, or `${parent}/.ai.soc` is a valid framework root.
+2. **Auto-discover from `.ai` parent or source:**
+   - **Fat-client** (`$REPO_ROOT/.ai/` exists): `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"`
+   - **Thin-client** (`$REPO_ROOT/.ai/` absent, `$AGENT_OS_SOURCE` is set and readable): `parent="$(cd "$AGENT_OS_SOURCE/.." && pwd)"`
+   - **Neither** (no source to scan from): skip auto-discover — no sister frameworks.
+   A sibling dir at `${parent}/.ai.ui`, `${parent}/.ai.biz`, or `${parent}/.ai.soc` is a valid framework root.
 3. **Preflight:** before routing to any director, verify `<framework_root>/skills/README.md` is readable. If not → output one line `framework not installed here` and stop. Never route into the void.
 
 | Framework | Default sibling path | Director | Role (one line only — fine-grained routing lives in each director) |
