@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-06-30
+**Updated:** 2026-07-01
 
 ---
 
@@ -17,6 +17,7 @@
 | .work/ dir structure | `.work/analysis/` and `.work/scripts/` + READMEs; `.work/README.md`, `DIRECTORY_MAP`, `bootstrap.sh` |
 | .ai.soc integration + x-director sole router | `.cursorrules`, `templates/cursorrules.template`, `x-director/skill.md`, `ai-director/skill.md`, `ai-director/reference.md`, `SKILL_DEPENDENCIES.md`, `.quick/directors.md`, `skills/README.md`, `README.md`, `PROCESS_ROUTER.md`, `context/README.md` |
 | session-control local task registry | `skills/session-control/skill.md` — replaced network curl call with local `.github/task-registry.json` file read |
+| deploy-basic + session-control context + deploy-files merge | `skills/deploy-basic/`, `scripts/deploy-basic.sh`, `skills/deploy-files/skill.md`, `skills/session-control/skill.md`, `skills/session-control/reference.md`, `.cursorrules`, `templates/`, `skills/README.md`, `SKILL_DEPENDENCIES.md`, `.quick/`, `PROCESS_ROUTER.md`, `START_HERE.md` — new deploy-basic thin-client bootstrap skill; deploy-files in-place no-overwrite bootstrap + rules-aware merge; session-control context mode with uncommitted-aware dirty-tree summary; registries, templates, docs updated |
 
 ---
 
@@ -33,9 +34,8 @@
 | Priority | Item | Notes |
 |----------|------|-------|
 | **0** | Restore `scripts/framework-verify.sh` | Recover from `.Trash-1000/files/framework-verify-backup.sh` — adds toolchain preflight, skill context budget, gate-verify self-test, markdown link fix |
-| **1** | Tag release `v0.2.1` (optional) | After merge; CHANGELOG Unreleased documents coverage work |
-| **2** | `@plan-foundation greenfield` | For greenfield adopters only — not required for mature repos |
-| **3** | Consumer repos: `@plan-verify coverage` | After pulling framework update (e.g. codeiva) |
+| **1** | `@plan-foundation greenfield` | For greenfield adopters only — not required for mature repos |
+| **2** | Consumer repos: `@plan-verify coverage` | After pulling framework update (e.g. codeiva) |
 
 ---
 
