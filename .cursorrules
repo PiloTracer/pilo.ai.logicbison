@@ -146,13 +146,14 @@ Reusable agent skills live under `skills/`. Each skill is a subfolder containing
 
 | Skill | Folder | Purpose |
 |-------|--------|---------|
-| deploy-files | `skills/deploy-files/` | Deploy Agent OS files into target project (clean rsync, no VCS artifacts) |
+| deploy-files | `skills/deploy-files/` | Deploy Agent OS files into target project (in-place no-overwrite bootstrap + `update` rules-aware merge; clean rsync, no VCS artifacts) |
+| deploy-basic | `skills/deploy-basic/` | Thin-client bootstrap: copies only `.cursorrules` + `.work/` + `DOCS_TECH_STACK.md` to target; skills/standards/concepts/docs/scripts stay in source and resolve via `AGENT_OS_SOURCE` pointer at runtime; `update` re-syncs pointer + merges the small local surface |
 | deploy-repo | `skills/deploy-repo/` | Full repo deploy: clone (git mirror) or archive (snapshot with .github) |
 | plan-foundation | `skills/plan-foundation/` | P0–P6 orchestration; certify plan-master-ready |
 | plan-master | `skills/plan-master/` | Master implementation plan; certify implementation-ready |
 | plan-verify | `skills/plan-verify/` | Plan audits: foundation, master, alignment, **coverage** (code→SPEC), **brownfield** |
 | plan-repair | `skills/plan-repair/` | Remediate plan gaps; **brownfield synthesis** from repo evidence; mandatory re-verify |
-| session-control | `skills/session-control/` | Session open/close; HANDOFF, NEXT; optional git |
+| session-control | `skills/session-control/` | Session open/close; HANDOFF, NEXT; `context` read-only load + uncommitted-aware; optional git |
 | db-migration | `skills/db-migration/` | Idempotent numbered SQL migration scripts |
 | code-implementation | `skills/code-implementation/` | Iteration execution from NEXT.md |
 | code-verify | `skills/code-verify/` | Milestone/uncommitted/last audits; open-language → Request interpretation |

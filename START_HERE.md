@@ -58,6 +58,7 @@ You forgot where you were? Run **one** of these - pick the lightest that answers
 | **Process question (signpost only)** | `@process-router - <question>` · [`PROCESS_ROUTER.md`](PROCESS_ROUTER.md) · `@process-router help` |
 | **Where am I / what's next?** | `@session-control status` + `.work/context/HANDOFF.md` + `.work/plans/NEXT.md` |
 | One-paragraph status (no writes) | `@session-control status` |
+| Full context + uncommitted-aware (no writes, no bookend) | `@session-control context` |
 | Where the iteration is (read-only) | `@code-implementation status` |
 | Are we still planning or coding? | `@plan-verify status` **or** `@plan-foundation status` / `@plan-master status` |
 
@@ -236,7 +237,7 @@ Use **`@process-router - <question>`** for anything not listed - it routes to th
 |----------|--------|
 | What is `process-router`? | Read-only **signpost** - [`PROCESS_ROUTER.md`](PROCESS_ROUTER.md); maps questions → skill + guide (no writes) |
 | How do I use `process-router`? | `@process-router help` · `@process-router - how do I start M1?` · `@process-router - which MOD prompt for AI-assisted code?` |
-| Where am I / what's next? | `@session-control status` + `.work/context/HANDOFF.md` + `.work/plans/NEXT.md` |
+| Where am I / what's next? | `@session-control status` + `.work/context/HANDOFF.md` + `.work/plans/NEXT.md` — or `@session-control context` for full load + dirty-tree summary (no writes) |
 | What does each `@skill` do? | [`README.md`](README.md) § Skills at a glance |
 | Ready to code? | `@plan-master status` (implementation-ready) → `@code-implementation start` |
 | Free-text feature idea? | `@feature-spec intake - <free sentence>` (classifies + routes) |

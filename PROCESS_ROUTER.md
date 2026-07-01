@@ -39,7 +39,13 @@ For a **one-paragraph repo snapshot** ("where am I right now?"):
 @session-control status  +  .work/context/HANDOFF.md  +  .work/plans/NEXT.md
 ```
 
-Use `@process-router` for *how-to* questions; use the line above for *where am I*.
+For a **full context load + uncommitted-aware summary** without opening a session bookend (no HANDOFF writes):
+
+```text
+@session-control context
+```
+
+Use `@process-router` for *how-to* questions; use the lines above for *where am I*.
 
 ---
 
@@ -62,7 +68,7 @@ The verb is optional - `@process-router - <question>` is enough. Aliases: `ask`,
 
 | Situation | Use |
 |-----------|-----|
-| First-time / empty `.work` | `@project-bootstrap init` · `bash templates/bootstrap.sh` |
+| First-time / empty `.work` | `@project-bootstrap init` · `bash templates/bootstrap.sh` · `@deploy-basic - <path>` (thin-client) · `@deploy-files copy - <path>` (fat-client) |
 | Lost in the workflow | `@process-router - I'm lost` |
 | How-to for a specific step | `@process-router - how do I fix NEXT.md?` |
 | Which concept (MOD) applies | `@process-router - AI-assisted PR, which prompt?` |
@@ -82,7 +88,7 @@ The verb is optional - `@process-router - <question>` is enough. Aliases: `ask`,
 
 | Skill | Role |
 |-------|------|
-| `session-control` | Open/close session; HANDOFF + NEXT |
+| `session-control` | Open/close session; HANDOFF + NEXT; `context` read-only load + uncommitted-aware |
 | `plan-foundation` | Foundation P0–P6; plan-master-ready |
 | `plan-master` | Master plan; implementation-ready |
 | `code-implementation` | Iteration tasks, task gates, complete |
@@ -91,6 +97,7 @@ The verb is optional - `@process-router - <question>` is enough. Aliases: `ask`,
 | `concept-run` | Run MOD-01…06 prompts |
 | `db-migration` | Idempotent SQL scripts |
 | `dev-stack` | Local Docker helper |
+| `deploy-basic` / `deploy-files` / `deploy-repo` | Thin-client / fat-client / full-repo deploy into target projects |
 
 Full registry: [`.ai/skills/README.md`](skills/README.md)
 

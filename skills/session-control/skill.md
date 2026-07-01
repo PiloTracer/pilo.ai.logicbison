@@ -4,10 +4,12 @@ description: >-
   Open or close an AI working session with verified context load, HANDOFF and NEXT
   updates, and optional git commit/push. Also supports standalone commit/push
   without closing (commit task ref, git add + git commit + git push, no
-  HANDOFF/NEXT update). Use when the user says session-control start, session-control
-  close, @session-control start, close commit, close commit push, commit, or commit push.
-  Never commits unless the invocation includes commit. On commit, MUST run
-  git add + git commit in the shell for all safe dirty paths (not HANDOFF-only).
+  HANDOFF/NEXT update). `context` loads all mandatory context read-only and is
+  uncommitted-aware (surfaces dirty-tree status without writing HANDOFF). Use
+  when the user says session-control start, session-control close, @session-control
+  start, close commit, close commit push, commit, commit push, or session-control
+  context. Never commits unless the invocation includes commit. On commit, MUST
+  run git add + git commit in the shell for all safe dirty paths (not HANDOFF-only).
 ---
 
 # session-control
@@ -62,6 +64,7 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 | `session-control` **close** **push** | close | treat as **commit push** (`push` requires commit) |
 | `session-control` **commit** | commit | commit all safe dirty paths (default scope), NO close |
 | `session-control` **commit** **push** | commit | commit then push, NO close |
+| `@session-control` **context** | context | - |
 | `@session-control` **status** | status | - |
 
 **Aliases (same verb):** `begin`, `open` → start; `end`, `handoff` → close.
@@ -81,6 +84,7 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 | **start** | `start`, optional goal | [Start protocol](#start-protocol) |
 | **close** | `close` [commit] [push] | [Close protocol](#close-protocol) |
 | **commit** | `commit` [push] | [Commit protocol](#commit-protocol) - git only; no HANDOFF/NEXT writes |
+| **context** | `context` | [Context protocol](#context-protocol) - full mandatory context load + uncommitted-aware summary; no HANDOFF writes |
 | **status** | `status` | [Status protocol](#status-protocol) - compact snapshot; no HANDOFF writes |
 
 If the user gives a **task goal** with start (e.g. `start - work on payments SPEC`), capture it in the start report and use HANDOFF's conditional reading table.
@@ -271,6 +275,86 @@ Read-only snapshot. **No** HANDOFF/NEXT writes. **No** completion checklist.
 ```
 
 Optional: one line on dirty files (no full diff). For full context load, use **start**.
+
+For full context load **without** HANDOFF writes + uncommitted-aware detail, use **context**.
+
+---
+
+## Context protocol
+
+Read-only full context load. **No** HANDOFF/NEXT/active-ref writes. **No** completion checklist (it is read-only, like `status`); end with the context report. Sits between `status` (one-line compact) and `start` (full load + marks HANDOFF Open).
+
+Difference from `start`: writes nothing. Difference from `status`: loads the **full mandatory context set** (S1) plus a dirty-tree **diff summary**, not just a one-liner.
+
+Use when: an operator (or agent) wants full session context for ad-hoc reasoning without opening/closing a session bookend — e.g. mid-session orientation, a second agent joining, debugging "what changed and what's next" without mutating HANDOFF.
+
+### X1 - Mandatory context reads (read in full)
+
+Same set as [S1](#s1--baseline-reads-mandatory):
+
+| # | File (repo-root path) | Pass criteria |
+|---|----------------------|----------------|
+| 1 | `.cursorrules` | identity, 7 core principles, protected files, no-commit rule |
+| 2 | `.work/context/HANDOFF.md` | §Session status → §Open owner actions |
+| 3 | `.work/plans/NEXT.md` | Recommended next + owner blockers |
+| 4 | `.work/plans/UNKNOWNS.md` | every open unknown + owner + Blocks |
+| 5 | `.work/plans/foundation/*-01-*-initial-scope.md` **if present** | one-sentence product intent (or skip) |
+
+Conditional reads per [S2](#s2--conditional-reads-task-based) only when the operator named a domain.
+
+### X2 - Uncommitted-aware snapshot (evidence)
+
+Run:
+
+```bash
+git status -sb
+git diff --stat
+git diff --cached --stat
+git log -1 --oneline
+```
+
+Classify the working tree:
+- **clean:** state explicitly; report last commit only.
+- **dirty:** summarize by top-level area (e.g. `3 files .ai/skills/`, `1 file .work/plans/`); list staged vs unstaged vs untracked counts. **Do not** paste full diffs — file paths + per-area counts only (per `.cursorrules` no-PII/scope discipline). Flag any path matching secrets scan patterns (§C1) without printing content.
+
+### X3 - Context report (mandatory output)
+
+```markdown
+## Session context - <Project Name>
+
+**Date:** <ISO date> · **Branch:** <branch> · **Working tree:** clean | dirty (N files)
+**Last commit:** <sha - subject>
+
+### Context loaded
+| # | File | Result | Note |
+|---|------|--------|------|
+| 1 | .cursorrules | pass | |
+| 2 | .work/context/HANDOFF.md | pass (or missing) | §Session status: Open|Closed … |
+| 3 | .work/plans/NEXT.md | pass (or missing) | |
+| 4 | .work/plans/UNKNOWNS.md | pass (or missing) | |
+| 5 | P0 initial scope | pass|skip | |
+
+### Uncommitted status (read-only)
+- Staged: <N files> · Unstaged: <N files> · Untracked: <N files>
+- Areas touched: <top-level dirs with counts>
+- Secrets scan: clean | <flagged paths (not printed)>
+- (Clean tree → omit this section; state "working tree clean".)
+
+### Pick up here
+<quote recommended next from NEXT.md, or "no NEXT.md" >
+
+### Open blockers (owner)
+<from HANDOFF / NEXT, or none>
+
+### No files written
+This mode is read-only: HANDOFF, NEXT, UNKNOWNS, and `.work/active-ref` are **not** modified. To open a session bookend, run `@session-control start`.
+```
+
+### Anti-patterns (context)
+- Treating `context` as `start` (writing the HANDOFF "Open" line) — `context` writes nothing.
+- Pasting raw `git diff` output (use per-area counts; respect no-PII/scope).
+- Skipping the secrets-flag pass on a dirty tree.
+- Claiming "context loaded" without reading all of S1 set every time the verb runs.
 
 ---
 

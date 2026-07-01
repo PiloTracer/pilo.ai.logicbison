@@ -69,6 +69,7 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **session-control** `start` | `{HANDOFF}` (offer bootstrap if missing) | Recommended: `@project-bootstrap init` |
 | **session-control** `close` | Prior `start` or dirty tree | - |
 | **session-control** `commit` | Dirty tree (offer `start` first if HANDOFF missing) | - |
+| **session-control** `context` | - | Read-only (full context load + uncommitted-aware; no HANDOFF writes) |
 | **session-control** `status` | - | Read-only |
 | **plan-foundation** `greenfield` | `.cursorrules`, `{HANDOFF}` (GF0 gate) | Recommended: `@project-bootstrap init` |
 | **plan-foundation** `continue` | Prior foundation work started | - |
@@ -106,8 +107,13 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **db-migration** `init` | Repo at Agent OS root; **IB0** brownfield gate detects existing runner + `001_init.sql` | - (brownfield prompts keep / overwrite-runner / overwrite-all / abort) |
 | **db-migration** `create` / `add` / `run` / `verify` | `db-migration init` already run (runner module + `001_init.sql` baseline present); `create` / `add` auto-invokes idempotency double-run (`@db-migration verify` on the new script, see § Self-verify auto-invoke) | **Required** |
 | **db-migration** `status` | - | Read-only |
-| **deploy-files** `copy` | Target parent dir must exist (I0 gate); source is this `.ai` repo | - |
+| **deploy-files** (in-place) | Target dir is cwd; source `.ai` resolved (ask if not auto-discoverable) | - (no-overwrite; chains scaffold into target) |
+| **deploy-files** `copy` | Target parent dir must exist (I0 gate); source is this `.ai` repo (outbound) | - |
+| **deploy-files** `update` | In-place; existing-but-differing files present (merges, never wholesale-replace) | - (no-overwrite + agent rules-aware merge) |
 | **deploy-files** `status` | - | Read-only |
+| **deploy-basic** (outbound / in-place) | Target dir exists; source `templates/cursorrules.template` readable; warns if target has local `.ai/skills/` (fat-client leak) | - (no-overwrite; writes `AGENT_OS_SOURCE` pointer) |
+| **deploy-basic** `update` | Target `.cursorrules` exists (in-place); existing-but-differing local-surface files merged, source pointer re-synced if stale | - (no-overwrite + agent rules-aware merge; never wholesale-replace) |
+| **deploy-basic** `status` | - | Read-only |
 | **deploy-repo** `clone` | Target must not exist; source must have origin remote (I0 gate) | - |
 | **deploy-repo** `archive` | Target parent dir must exist (I0 gate) | - |
 | **deploy-repo** `status` | - | Read-only |
@@ -192,6 +198,7 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 | `verify` | Audit planning artifacts (foundation / master / alignment) | plan-verify |
 | `probe` | Adaptive gap-driven interrogation loop; scores knowledge/plan coverage, asks targeted questions, fills gaps into registries. **New verb** (distinct from `status` read-only, `continue` resume-phase, `integrity` auto-sweep). Engine: [`probe-protocol.md`](probe-protocol.md) | plan-foundation, plan-master |
 | `commit` | Git commit/push without close | session-control |
+| `context` | Read-only full context load + uncommitted-aware summary; no writes | session-control |
 | `start` | Begin a unit of work | session-control, code-implementation |
 | `continue` | Resume in-progress work | plan-foundation, plan-master, code-implementation |
 | `continue` + target (`code-implementation` only) | Batch tasks: `- N`, `- until blocked`, `- M{N}-T{a}..T{b}`; stop on gate fail or blocker | code-implementation |
@@ -199,6 +206,7 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 | `complete` | Mark a unit as done | code-implementation |
 | `plan` | Prepare next unit | code-implementation *(alias: `plan-iteration`)* |
 | `init` | One-time setup | project-bootstrap, db-migration, dev-stack |
+| `update` | Rules-aware merge of existing-but-differing files (append new, update shared, preserve target customizations, never wholesale-replace) | deploy-files, deploy-basic |
 | `intake` | Classify a free-text feature request → route to the right executor; records to `NEXT.md § Intake queue` (does not auto-execute cross-cutting/brownfield paths) | feature-spec |
 | `create` | Make a new artifact | feature-spec, db-migration, docs |
 | `amend` | Modify an existing artifact | feature-spec |

@@ -4,11 +4,12 @@
 
 ## Session status
 
-**Closed:** 2026-06-30 — Replaced GitHub task registry network API with local `.github/task-registry.json` file read in session-control skill (S4c, M4, C4).
+**Open:** *(no open session)*
+**Closed:** 2026-07-01 — Added deploy-basic thin-client bootstrap skill, enhanced deploy-files with in-place no-overwrite merge, added session-control context mode with uncommitted-aware dirty-tree summary.
 
-**Updated:** 2026-06-30
+**Updated:** 2026-07-01
 
-**Repository state:** Agent OS framework repo (self-hosted). Session-control task ref extraction now reads a local file instead of making a network call — no API, no JWT, no running stack required. `.ai.soc` integration and x-director sole-router refactor completed previous session. `scripts/framework-verify.sh` local recovery still pending in Trash.
+**Repository state:** Agent OS framework repo (self-hosted). Deploy-basic skill added (thin-client bootstrap with AGENT_OS_SOURCE pointer). Deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge. Session-control gained `context` mode (read-only full context load + uncommitted dirty-tree diff summary). Registries, templates, and quick-ref docs updated for the new skill. Tagged v0.4.2. `scripts/framework-verify.sh` local recovery still pending in Trash.
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
@@ -54,6 +55,7 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | Date | Session | Artifacts |
 |------|---------|-----------|
+| 2026-07-01 | deploy-basic + session-control context + deploy-files merge | `skills/deploy-basic/skill.md`, `scripts/deploy-basic.sh`, `skills/deploy-files/skill.md`, `skills/session-control/skill.md`, `skills/session-control/reference.md`, `.cursorrules`, `templates/cursorrules.template`, `templates/bootstrap.sh`, `skills/README.md`, `SKILL_DEPENDENCIES.md`, `.quick/deploy-to-project.md`, `.quick/session-lifecycle.md`, `PROCESS_ROUTER.md`, `START_HERE.md` — new deploy-basic thin-client bootstrap skill; deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge; session-control context mode (read-only full context + uncommitted-aware dirty-tree); all registries and templates updated |
 | 2026-06-30 | .ai.soc integration + x-director sole router | `.cursorrules`, `templates/cursorrules.template`, `x-director/skill.md`, `ai-director/skill.md`, `ai-director/reference.md`, `SKILL_DEPENDENCIES.md`, `.quick/directors.md`, `skills/README.md`, `README.md`, `PROCESS_ROUTER.md`, `context/README.md` — .ai.soc added to frameworks registry, auto-discovery, bucket tables; ai-director refactored to channel non-.ai to x-director; x-director named sole cross-framework routing authority |
 | 2026-06-30 | session-control local task registry | `skills/session-control/skill.md` — replaced network-dependent curl call with local `.github/task-registry.json` file read for S4c, M4, C4 ref extraction |
 | 2026-06-25 | prepare-commit-msg hook + cursorrules refs | `hooks/prepare-commit-msg` git hook; Task Refs section in cursorrules.template; human-readable commit rule; clarified `auto_prefix_enabled` docs |

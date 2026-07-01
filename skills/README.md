@@ -29,13 +29,14 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 
 | Skill id | Folder | Role |
 |----------|--------|------|
-| deploy-files | `deploy-files/` | **Files-only deploy:** rsync `.ai/` to target project; excludes VCS artifacts |
+| deploy-files | `deploy-files/` | **Files-only deploy (fat-client):** in-place no-overwrite bootstrap from a target dir, or outbound `copy - <path>`; `update` performs rules-aware merge (append/Update, preserve target customizations); excludes VCS artifacts |
+| deploy-basic | `deploy-basic/` | **Thin-client deploy:** copies only `.cursorrules` + `.work/` + `DOCS_TECH_STACK.md`; skills/standards/concepts/docs/scripts stay in source, loaded at runtime via `AGENT_OS_SOURCE` pointer in `.cursorrules`; `update` re-syncs pointer + merges local surface |
 | deploy-repo | `deploy-repo/` | **Full repo deploy:** git clone (mirror) or archive (snapshot with `.github`) |
 | plan-foundation | `plan-foundation/` | **Orchestrator:** P0–P6 foundation gates, ADRs, SPECs, registries; **probe** (adaptive understanding loop); certifies **plan-master-ready** |
 | plan-master | `plan-master/` | Master implementation plan, **probe** (plan-completeness loop), integrity, traceability; certifies **implementation-ready** |
 | plan-verify | `plan-verify/` | Plan audits: foundation, master, alignment, **coverage** (code→SPEC), **brownfield** (framework slots) |
 | plan-repair | `plan-repair/` | Fix plan gaps; **brownfield synthesis** from code/README/ROADMAP; optional formal certify later |
-| session-control | `session-control/` | Session open/close, HANDOFF, NEXT, optional git |
+| session-control | `session-control/` | Session open/close, HANDOFF, NEXT; `context` read-only load + uncommitted-aware; optional git |
 | db-migration | `db-migration/` | Idempotent numbered SQL migration scripts; no version table, no chain conflicts |
 | code-implementation | `code-implementation/` | Iteration execution: `NEXT.md` scope, task gates, completion |
 | tauri-development | `tauri-development/` | Domain guidance for Tauri desktop apps: IPC security, shell/webview patterns, Rust backend conventions, API bridge, event-driven state |

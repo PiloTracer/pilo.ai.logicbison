@@ -10,7 +10,8 @@
 ## Check session state
 
 ```text
-@session-control status
+@session-control status          # one-line compact snapshot
+@session-control context         # full context load (read-only, no writes) + uncommitted-aware summary
 ```
 
 ## Close a session (default: no git)

@@ -84,6 +84,31 @@ Sister frameworks live as siblings on disk. x-director and ai-director use this 
 2. **Auto-discover from `.ai` parent:** `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"`; check `${parent}/.ai.ui`, `${parent}/.ai.biz`, and `${parent}/.ai.soc`. Use whichever exists; treat missing as "framework not installed".
 3. **Preflight:** before routing to a director, verify its framework directory exists **and** its `skills/README.md` is readable. If absent, stop routing with a one-line `framework not installed here` message — never silently route into the void.
 
+## Source resolution — fat-client vs thin-client (MANDATORY before reading any `.ai/...` path)
+
+This repo was bootstrapped in one of two modes. The agent MUST apply the matching resolution rule before reading any framework path. Read this section at the start of every conversation.
+
+**Agent OS source (thin-client only — set by `@deploy-basic`):**
+
+AGENT_OS_SOURCE=REPLACE_BASICSOURCE
+
+*(If the line above still shows `REPLACE_BASICSOURCE`, the repo is **fat-client** — see below.)*
+
+| Mode | Bootstrapped via | Where framework assets live | `AGENT_OS_SOURCE` |
+|------|------------------|----------------------------|-------------------|
+| **Fat-client** (vendored) | `@deploy-files` or `@project-bootstrap init` | this repo's `.ai/` | unset (token left as `REPLACE_BASICSOURCE`) |
+| **Thin-client** (remote) | `@deploy-basic` | the **source** Agent OS; this repo holds only `.cursorrules` + `.work/` | set to an absolute path (e.g. `/mnt/work/Projects/.ai`) |
+
+**Resolution rule (agents MUST apply before reading any `.ai/...` reference):**
+
+1. `.cursorrules` (this file) and `.work/**` — read from the **local** project (this repo), always, in both modes.
+2. **Thin-client** (`AGENT_OS_SOURCE` is set and readable as a directory): read every other `.ai/<path>` reference from `$AGENT_OS_SOURCE/<path>` — i.e. `skills/<id>/skill.md`, `skills/SKILL_DEPENDENCIES.md`, `standards/**`, `concepts/**`, `docs/guides/**`, `scripts/**`, `templates/**`, `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`. **Never** assume a local `.ai/` exists. When you invoke `@<skill>`, read `$AGENT_OS_SOURCE/skills/<id>/skill.md`; inside it, any `.ai/<x>` reference resolves to `$AGENT_OS_SOURCE/<x>`.
+3. **Fat-client** (`AGENT_OS_SOURCE` is unset or still `REPLACE_BASICSOURCE`): read `.ai/<path>` locally in this repo.
+4. `.work/...` references and project app code (`REPLACE:APP_ROOT`, etc.) resolve locally in this repo in both modes.
+5. **Thin-client + unreachable source:** if `$AGENT_OS_SOURCE` is set but the directory does not exist or `skills/README.md` is unreadable, **stop** and report `agent-os source unreachable: $AGENT_OS_SOURCE` — do **not** silently fall back to a local `.ai/` (there isn't one) and do **not** guess a different path.
+
+**First bootstrap in thin-client mode** is a chicken-and-egg escape: before `@deploy-basic` runs, the target has no local skill to invoke. Bootstrap is initiated either (a) from the **source** repo — `@deploy-basic - /abs/path/to/target` — or (b) by invoking the shell directly from the target: `bash /abs/path/to/source/scripts/deploy-basic.sh .` After that, the source pointer in `.cursorrules` lets the local agent load `@deploy-basic update` and every other skill from source.
+
 Read these at the start of every conversation and when relevant:
 
 | File | Purpose |
@@ -149,7 +174,7 @@ Reusable agent skills live under `.ai/skills/`. Each skill is a subfolder contai
 | plan-master | `.ai/skills/plan-master/` | Master implementation plan; certify implementation-ready |
 | plan-verify | `.ai/skills/plan-verify/` | Plan audits: foundation, master, alignment, **coverage** (code→SPEC), **brownfield** |
 | plan-repair | `.ai/skills/plan-repair/` | Remediate plan gaps; **brownfield synthesis** from repo evidence; mandatory re-verify |
-| session-control | `.ai/skills/session-control/` | Session open/close; HANDOFF, NEXT; optional git |
+| session-control | `.ai/skills/session-control/` | Session open/close; HANDOFF, NEXT; `context` read-only load + uncommitted-aware; optional git |
 | db-migration | `.ai/skills/db-migration/` | Idempotent numbered SQL migration scripts |
 | code-implementation | `.ai/skills/code-implementation/` | Iteration execution from NEXT.md |
 | code-verify | `.ai/skills/code-verify/` | Milestone/uncommitted/last audits; open-language → Request interpretation |
@@ -159,6 +184,7 @@ Reusable agent skills live under `.ai/skills/`. Each skill is a subfolder contai
 | feature-spec | `.ai/skills/feature-spec/` | Author, review, amend feature SPECs |
 | concept-run | `.ai/skills/concept-run/` | Run MOD-01…MOD-06 concept prompts |
 | project-bootstrap | `.ai/skills/project-bootstrap/` | Copy `.work/` skeleton, `.cursorrules`, stack doc from templates |
+| deploy-basic | `.ai/skills/deploy-basic/` | Thin-client bootstrap / `update`: re-sync `AGENT_OS_SOURCE` pointer + merge the local scaffold surface; skills resolve from source at runtime (see § Source resolution) |
 | ai-director | `.ai/skills/ai-director/` | Free-text request orchestrator; routes to correct `.ai` skill chain; new skill gap detection |
 | x-director | `.ai/skills/x-director/` | Cross-framework orchestrator (`.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`); resolves sibling paths from § Frameworks registry |
 

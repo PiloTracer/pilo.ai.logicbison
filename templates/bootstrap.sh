@@ -5,8 +5,14 @@ set -euo pipefail
 AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TPL="${AI_ROOT}/templates/work"
 
-# Repo root: git root containing .ai/, or AI_ROOT itself when this repository *is* the Agent OS tree
-if [[ -d "${AI_ROOT}/.git" ]]; then
+# Repo root: git root containing .ai/, or AI_ROOT itself when this repository *is* the Agent OS tree.
+# Honor an explicit REPO_ROOT env override so scaffold can write into a TARGET
+# directory when bootstrap.sh is invoked from an external source .ai
+# (in-place bootstrap via @deploy-files). e.g.
+#   REPO_ROOT=/mnt/work/Projects/tools-project bash /mnt/work/Projects/.ai/templates/bootstrap.sh
+if [[ -n "${REPO_ROOT:-}" ]]; then
+  REPO_ROOT="$(cd "$REPO_ROOT" && pwd)"
+elif [[ -d "${AI_ROOT}/.git" ]]; then
   REPO_ROOT="${AI_ROOT}"
 elif [[ -d "${AI_ROOT}/../.git" ]] && [[ -d "${AI_ROOT}/templates" ]]; then
   REPO_ROOT="$(cd "${AI_ROOT}/.." && pwd)"
@@ -63,7 +69,9 @@ for dir in guides tutorials reference; do
   touch "${WORK}/docs/${dir}/.gitkeep"
 done
 
-if [[ ! -f "${REPO_ROOT}/.cursorrules" ]]; then
+if [[ -n "${BOOTSTRAP_SKIP_CURSERRULES:-}" ]]; then
+  echo "skip (.cursorrules owned by caller): ${REPO_ROOT}/.cursorrules"
+elif [[ ! -f "${REPO_ROOT}/.cursorrules" ]]; then
   if [[ -f "${AI_ROOT}/templates/cursorrules.template" ]]; then
     cp "${AI_ROOT}/templates/cursorrules.template" "${REPO_ROOT}/.cursorrules"
     echo "created: ${REPO_ROOT}/.cursorrules (from template — edit all REPLACE: tokens)"

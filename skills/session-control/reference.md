@@ -18,6 +18,7 @@ Supplement to `skill.md`. Invocation examples, HANDOFF templates, and edge cases
 | Close + commit + push | `session-control` **close** **commit** **push** |
 | **Commit only (no close)** | `@session-control` **commit** |
 | **Commit + push (no close)** | `session-control` **commit** **push** |
+| **Full context load (no writes, uncommitted-aware)** | `@session-control` **context** |
 | Load check | `@session-control` **status** |
 
 Legacy aliases still work: `session start`, `session close`, `handoff`, `begin`, `end`.
@@ -33,6 +34,7 @@ Prior Cursor skill ids (treat as equivalent prompts): `@session-manager` → **s
 @session-control close commit push
 @session-control commit
 @session-control commit push
+@session-control context
 ```
 
 ### Claude Code / opencode / Codex
