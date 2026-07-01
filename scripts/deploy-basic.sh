@@ -85,12 +85,42 @@ echo "=== deploy-basic → $DEST_ROOT (thin-client bootstrap) ==="
 echo "  source: $AI_ROOT"
 echo "  mode:   $MODE (no-overwrite by default)"
 
-# Build the substituted .cursorrules content (AGENT_OS_SOURCE → absolute source path).
+# Build the substituted .cursorrules content.
+# Substitutes:
+#   1. AGENT_OS_SOURCE=REPLACE_BASICSOURCE → absolute AI_ROOT
+#   2. REPLACE:AI_UI_PATH → absolute path if .ai.ui/ exists as sibling, else leave token
+#   3. REPLACE:AI_BIZ_PATH → absolute path if .ai.biz/ exists as sibling, else leave token
+#   4. REPLACE:AI_SOC_PATH → absolute path if .ai.soc/ exists as sibling, else leave token
 subst_cursorules() {
-  # Replace the REPLACE_BASICSOURCE token with the absolute source path.
-  # Use a perl one-liner to avoid sed escaping pitfalls with slashes in paths.
-  AI_ROOT_ESC="${AI_ROOT//\//\\/}"
-  perl -pe "s/AGENT_OS_SOURCE=REPLACE_BASICSOURCE/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$TPL_CURS"
+  local AI_ROOT_ESC="${AI_ROOT//\//\\/}"
+  local SIBLING_PARENT
+  SIBLING_PARENT="$(cd "$AI_ROOT/.." && pwd)"
+  local tmpfile
+  tmpfile="$(mktemp)"
+
+  # Step 1: substitute AGENT_OS_SOURCE
+  perl -pe "s/AGENT_OS_SOURCE=REPLACE_BASICSOURCE/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$TPL_CURS" > "$tmpfile"
+
+  # Step 2: discover and fill sister framework paths at bootstrap time.
+  # If a sister exists on disk, write its absolute path. If absent, leave the
+  # REPLACE: token — the Frameworks registry thin-client fallback (step 2) will
+  # auto-discover from $AGENT_OS_SOURCE/.. at runtime.
+  for fw in ui biz soc; do
+    local fw_dir_abs="${SIBLING_PARENT}/.ai.${fw}"
+    local token_upper
+    token_upper="$(echo "$fw" | tr '[:lower:]' '[:upper:]')"
+    local token="REPLACE:AI_${token_upper}_PATH"
+    if [[ -d "$fw_dir_abs" ]] && [[ -f "${fw_dir_abs}/skills/README.md" ]]; then
+      local fw_esc="${fw_dir_abs//\//\\/}"
+      perl -i -pe "s{${token} \\(default: \\\`[^)]*\\)}{${fw_esc} (discovered at deploy time)}" "$tmpfile"
+      echo "  frameworks: resolved ${token} → ${fw_dir_abs}"
+    else
+      echo "  frameworks: ${token} not found on disk — leaving for runtime auto-discover"
+    fi
+  done
+
+  cat "$tmpfile"
+  rm -f "$tmpfile"
 }
 
 write_cursorules() {
