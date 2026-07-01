@@ -33,9 +33,7 @@
 
 | Priority | Item | Notes |
 |----------|------|-------|
-| **0** | Restore `scripts/framework-verify.sh` | Recover from `.Trash-1000/files/framework-verify-backup.sh` — adds toolchain preflight, skill context budget, gate-verify self-test, markdown link fix |
-| **1** | `@plan-foundation greenfield` | For greenfield adopters only — not required for mature repos |
-| **2** | Consumer repos: `@plan-verify coverage` | After pulling framework update (e.g. codeiva) |
+| **—** | *(none — repo is clean, v0.4.2 tagged)* | |
 
 ---
 

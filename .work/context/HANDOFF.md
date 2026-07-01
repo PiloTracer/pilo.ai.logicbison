@@ -9,7 +9,7 @@
 
 **Updated:** 2026-07-01
 
-**Repository state:** Agent OS framework repo (self-hosted). Deploy-basic skill added (thin-client bootstrap with AGENT_OS_SOURCE pointer). Deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge. Session-control gained `context` mode (read-only full context load + uncommitted dirty-tree diff summary). Registries, templates, and quick-ref docs updated for the new skill. Tagged v0.4.2. `scripts/framework-verify.sh` local recovery still pending in Trash.
+**Repository state:** Agent OS framework repo (self-hosted). Deploy-basic skill added (thin-client bootstrap with AGENT_OS_SOURCE pointer). Deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge. Session-control gained `context` mode (read-only full context load + uncommitted dirty-tree diff summary). Registries, templates, and quick-ref docs updated for the new skill. Tagged v0.4.2.
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
