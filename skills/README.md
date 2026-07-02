@@ -48,6 +48,7 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | concept-run | `concept-run/` | Run MOD-01…MOD-06 concept prompts; attach output to PR/NEXT/SPEC |
 | project-bootstrap | `project-bootstrap/` | Bootstrap `.work/`, `.cursorrules`, `DOCS_TECH_STACK.md` from templates |
 | docs | `docs/` | **Documentation:** create guides, tutorials, reference docs under `.work/docs/` |
+| project-query-setup | `project-query-setup/` | **Optional integration:** guide through tools-project API key creation, MCP registration, connectivity test. OS-aware (tailors guidance per framework). |
 | ai-director | `ai-director/` | **Orchestrator:** free-text request → optimal `.ai` skill chain; new skill gap detection |
 | x-director | `x-director/` | **Cross-framework director:** orchestrates `.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc` via directors |
 

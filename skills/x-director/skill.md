@@ -23,7 +23,7 @@ The x-director knows about every framework in the workspace. **Path resolution i
    - **Thin-client** (`$REPO_ROOT/.ai/` absent, `$AGENT_OS_SOURCE` is set and readable): `parent="$(cd "$AGENT_OS_SOURCE/.." && pwd)"`
    - **Neither** (no source to scan from): skip auto-discover — no sister frameworks.
    A sibling dir at `${parent}/.ai.ui`, `${parent}/.ai.biz`, or `${parent}/.ai.soc` is a valid framework root.
-3. **Preflight:** before routing to any director, verify `<framework_root>/skills/README.md` is readable. If not → output one line `framework not installed here` and stop. Never route into the void.
+3. **Preflight + graceful degradation:** before routing to any director, verify `<framework_root>/skills/README.md` is readable. If not → note `framework not installed here` and **degrade gracefully**: handle the request through `.ai` engineering skills + direct LLM capabilities instead. Never route into the void and never silently drop the request.
 
 | Framework | Default sibling path | Director | Role (one line only — fine-grained routing lives in each director) |
 |-----------|---------------------|----------|------|
@@ -50,7 +50,7 @@ The x-director knows about every framework in the workspace. **Path resolution i
 4. Do not invent skills or modes not registered in the respective framework's `skills/README.md`. If a request cannot be fulfilled by existing skills, follow the "New skill protocol".
 5. Route through existing directors (`@ai-director`, `@ui-director`, `@biz-director`, `@soc-director`) whenever possible — they own their domain's skill chain and gates. x-director only classifies the framework; the director classifies the sub-bucket. ai-director never routes outside `.ai` directly — it channels all non-`.ai` and `unsure` requests to x-director.
 6. Never duplicate a skill that exists in another framework. If in doubt, check all installed framework skill registries.
-7. **Preflight before every route:** if a target director's framework is not installed (per § Framework registry resolution), stop and say so — never route into the void.
+7. **Preflight + graceful degradation before every route:** if a target director's framework is not installed (per § Framework registry resolution), note it and **degrade gracefully**: handle the request through `.ai` (engineering) skills + direct LLM capabilities. Do not stop — the agent's native reasoning covers most UI, business, and social tasks when the dedicated framework is absent.
 
 ---
 
@@ -88,15 +88,15 @@ The x-director knows about every framework in the workspace. **Path resolution i
 | Bucket | Signals | Route to |
 |--------|---------|----------|
 | `engineering` | backend, API, database, migration, server, code, plan, architecture, documentation, guide, tutorial, how-to, feature doc | `@ai-director - <verbatim request>` |
-| `ui` | UI, frontend, design, screen, component, visual, tailwind, CSS, a11y | `@ui-director - <verbatim request>` |
-| `business` | business, strategy, niche, offer, pricing, brand, community, referral, proposal, objection, deal, pipeline, discovery, validate, content, writing, idea, product | `@biz-director - <verbatim request>` |
-| `social` | social, community, social media, engagement, content moderation, forum, discussion, chat, user generated content, ucg, social network | `@soc-director - <verbatim request>` |
+| `ui` | UI, frontend, design, screen, component, visual, tailwind, CSS, a11y | `@ui-director` if installed, else `@ai-director` (native LLM) with `[degraded: .ai.ui not installed]` prefix |
+| `business` | business, strategy, niche, offer, pricing, brand, community, referral, proposal, objection, deal, pipeline, discovery, validate, content, writing, idea, product | `@biz-director` if installed, else `@ai-director` (native LLM) with `[degraded: .ai.biz not installed]` prefix |
+| `social` | social, community, social media, engagement, content moderation, forum, discussion, chat, user generated content, ucg, social network | `@soc-director` if installed, else `@ai-director` (native LLM) with `[degraded: .ai.soc not installed]` prefix |
 | `cross-framework` | Naturally requires ≥2 of the above | Coordinate across directors (see § ROUTE) |
 | `unsure` | Cannot classify (including requests channelled from `@ai-director`'s own unsure cases) | Ask one clarifying question (≤3 options). If still unclear, route to `@ai-director - <verbatim request>` as `.ai` (engineering) is the broadest fallback. Never loop back to yourself. |
 
 ### 4. Channel to the right director(s)
-- Single-framework: route to the chosen director with the user's verbatim request.
-- Cross-framework: coordinate sequentially by dependency; update each director's HANDOFF after its part.
+- Single-framework: route to the chosen director with the user's verbatim request. If the director's framework is **not installed**, degrade gracefully: route to `@ai-director` with a `[degraded: <framework> not installed]` prefix prepended to the request.
+- Cross-framework: coordinate sequentially by dependency. For any framework in the chain that is not installed, skip it and handle that portion natively via `.ai` skills + direct LLM; note the degradation in the coordination.
 - Use canonical syntax: `@<director> - <free-text request>`.
 - Never execute a skill directly when a director already owns the chain.
 
@@ -178,15 +178,18 @@ Render the routing plan per § Confirm gate; obtain ack (or rely on `-y`/`--dry-
 
 @x-director - "Design a login screen for the app"
   → Classify framework: ui
-  → Route: @ui-director - "Design a login screen for the app"  (verbatim)
+  → Preflight: .ai.ui installed? YES → @ui-director - "Design a login screen for the app"  (verbatim)
+  → Preflight: .ai.ui installed? NO  → @ai-director - "[degraded: .ai.ui not installed] Design a login screen for the app"
 
 @x-director - "Define my business niche and target audience"
   → Classify framework: business
-  → Route: @biz-director - "Define my business niche and target audience"  (verbatim)
+  → Preflight: .ai.biz installed? YES → @biz-director - "Define my business niche and target audience"  (verbatim)
+  → Preflight: .ai.biz installed? NO  → @ai-director - "[degraded: .ai.biz not installed] Define my business niche and target audience"
 
 @x-director - "Set up a community forum for our users"
   → Classify framework: social
-  → Route: @soc-director - "Set up a community forum for our users"  (verbatim)
+  → Preflight: .ai.soc installed? YES → @soc-director - "Set up a community forum for our users"  (verbatim)
+  → Preflight: .ai.soc installed? NO  → @ai-director - "[degraded: .ai.soc not installed] Set up a community forum for our users"
 ```
 
 #### Multi-framework (cross-framework) requests
@@ -204,26 +207,27 @@ Render the routing plan per § Confirm gate; obtain ack (or rely on `-y`/`--dry-
 
 1. Identify dependency order between frameworks (e.g., API usually precedes UI that consumes it).
 2. Route to each director sequentially respecting dependencies — each director re-classifies sub-buckets internally.
-3. After each director completes its part, verify the output before proceeding.
-4. Record the coordination in ALL relevant HANDOFF files with a cross-reference.
-5. If the request requires simultaneous work (e.g., strategy + brand), directors can run in parallel.
+3. **Graceful degradation:** if a framework in the chain is not installed, skip its director and handle that portion natively via `.ai` skills + direct LLM. Prefix the request with `[degraded: <framework> not installed]` so the receiving agent knows context was lost.
+4. After each director completes its part, verify the output before proceeding. For degraded steps, verify the native output meets the same bar.
+5. Record the coordination in ALL relevant HANDOFF files with a cross-reference. Note any degradations in `Coordination notes`.
+6. If the request requires simultaneous work (e.g., strategy + brand), directors can run in parallel.
 
-**Common cross-framework patterns:**
+**Common cross-framework patterns (all show degraded fallbacks):**
 
-| Request | Coordination |
-|---------|-------------|
-| "Build a full-stack feature" | `@ai-director` → backend (verbatim) → `@ui-director` → UI screens |
-| "Create a landing page for my business" | `@biz-director` → strategy/brand (verbatim) → `@ui-director` → landing page |
-| "Launch a SaaS product" | `@biz-director` → strategy/pricing → `@ai-director` → engineering → `@ui-director` → UI |
-| "Fix my LinkedIn and build a portfolio site" | `@biz-director` → brand overhaul → `@ui-director` → portfolio site |
-| "Build a product and its landing page" | `@biz-director` → strategy → `@ui-director` → landing page |
-| "Launch a community feature" | `@soc-director` → community strategy → `@ai-director` → backend → `@ui-director` → UI |
+| Request | Coordination (all frameworks installed) | If sister OS missing |
+|---------|----------------------------------------|----------------------|
+| "Build a full-stack feature" | `@ai-director` → backend → `@ui-director` → UI screens | `.ai.ui` absent → `@ai-director` does both |
+| "Create a landing page for my business" | `@biz-director` → strategy → `@ui-director` → landing page | `.ai.biz` absent → `@ai-director [degraded: .ai.biz]` then `@ui-director` |
+| "Launch a SaaS product" | `@biz-director` → strategy → `@ai-director` → eng → `@ui-director` → UI | Each absent framework falls back to `@ai-director [degraded]` |
+| "Fix my LinkedIn and build a portfolio site" | `@biz-director` → brand → `@ui-director` → portfolio | Same pattern |
+| "Build a product and its landing page" | `@biz-director` → strategy → `@ui-director` → landing page | Same pattern |
+| "Launch a community feature" | `@soc-director` → strategy → `@ai-director` → backend → `@ui-director` → UI | `.ai.soc` absent → `@ai-director [degraded: .ai.soc]` handles community strategy natively |
 
 ### 4. EXECUTE
 
 For each director in the chain:
-1. Invoke with the appropriate mode (`@<director> - <request>`).
-2. Verify the director's completion gate passed before proceeding.
+1. Invoke with the appropriate mode (`@<director> - <request>`). If the framework is not installed, invoke `@ai-director - "[degraded: <framework> not installed] <verbatim request>"` instead.
+2. Verify the director's completion gate passed before proceeding. For degraded steps, verify the native `.ai` output meets the same quality bar.
 3. If a director reports a gap or blocker, route to the corrective skill — do not skip.
 4. If routing is found wrong mid-flow (user redirects), record it under `User correction` (step 5).
 
@@ -293,6 +297,7 @@ If the user request cannot be fulfilled by any existing skill across all framewo
 | 7 | Prerequisites met for each skill in chain (gates respected) |
 | 8 | Cross-framework dependencies ordered correctly |
 | 9 | Blockers/gaps reported and routed (not silently skipped) |
+| 9b | Unavailable frameworks gracefully degraded to `.ai` + direct LLM (not silently dropped) |
 | 10 | All touched HANDOFF files updated with action summary including `Routing confidence` + `User correction` |
 | 11 | New skill registered properly (if created) |
 

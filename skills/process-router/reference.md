@@ -32,6 +32,7 @@ Update this table when registering a new skill or guide. Keep **Run next** comma
 | **security** | "Threat model", "New column classification" | Read section only | `.ai/standards/*threat-model*` · `*data-classification*` |
 | **observability** | "Metrics/traces for feature" | SPEC §9 + standard | `{OBSERVABILITY_SPEC}` · `20260518-guide-observability-traceability-in-workflow.md` |
 | **integration** | External API, vendor contract, signing | Read domain SPEC + integration mirror on demand | `{FEATURE_SPEC_ROOT}/<slug>/*-SPEC.md` · `.ai/docs/integration/MANIFEST.txt` |
+| **project-query** | "Connect my agent to tools-project", "Setup project query", "Is my agent connected to tools-project?" | `@project-query-setup install` · `@project-query-setup status` | `.ai/skills/project-query-setup/skill.md` |
 | **learn** | "Understand the system", "Reading order" | `.ai/START_HERE.md` §7 | `.ai/README.md` · `20260518-guide-workflows-index.md` |
 
 ---

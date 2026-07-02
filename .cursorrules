@@ -86,7 +86,7 @@ Sister frameworks live as siblings on disk. x-director and ai-director use this 
    - **Thin-client** (`$REPO_ROOT/.ai/` absent, `$AGENT_OS_SOURCE` is set and readable): `parent="$(cd "$AGENT_OS_SOURCE/.." && pwd)"`
    - **Neither** (no source to scan from): skip auto-discover — no sister frameworks.
    Check `${parent}/.ai.ui`, `${parent}/.ai.biz`, and `${parent}/.ai.soc`. Use whichever exists; treat missing as "framework not installed".
-3. **Preflight:** before routing to a director, verify its framework directory exists **and** its `skills/README.md` is readable. If absent, stop routing with a one-line `framework not installed here` message — never silently route into the void.
+3. **Preflight + graceful degradation:** before routing to a director, verify its framework directory exists **and** its `skills/README.md` is readable. If absent, note `framework not installed here` and **degrade gracefully**: route the request to `@ai-director` with a `[degraded: <framework> not installed]` prefix. Never route into the void.
 
 Read these at the start of every conversation and when relevant:
 
@@ -153,6 +153,7 @@ Reusable agent skills live under `skills/`. Each skill is a subfolder containing
 | deploy-files | `skills/deploy-files/` | Deploy Agent OS files into target project (in-place no-overwrite bootstrap + `update` rules-aware merge; clean rsync, no VCS artifacts) |
 | deploy-basic | `skills/deploy-basic/` | Thin-client bootstrap: copies only `.cursorrules` + `.work/` + `DOCS_TECH_STACK.md` to target; skills/standards/concepts/docs/scripts stay in source and resolve via `AGENT_OS_SOURCE` pointer at runtime; `update` re-syncs pointer + merges the small local surface |
 | deploy-repo | `skills/deploy-repo/` | Full repo deploy: clone (git mirror) or archive (snapshot with .github) |
+| project-query-setup | `skills/project-query-setup/` | Optional. Guide through tools-project API key setup, MCP server registration, and connectivity test. Detects OS context and tailors guidance. |
 | plan-foundation | `skills/plan-foundation/` | P0–P6 orchestration; certify plan-master-ready |
 | plan-master | `skills/plan-master/` | Master implementation plan; certify implementation-ready |
 | plan-verify | `skills/plan-verify/` | Plan audits: foundation, master, alignment, **coverage** (code→SPEC), **brownfield** |

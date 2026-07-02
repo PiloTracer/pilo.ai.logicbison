@@ -86,7 +86,7 @@ Sister frameworks live as siblings on disk. x-director and ai-director use this 
    - **Thin-client** (`$REPO_ROOT/.ai/` absent, `$AGENT_OS_SOURCE` is set and readable): `parent="$(cd "$AGENT_OS_SOURCE/.." && pwd)"`
    - **Neither** (no source to scan from): skip auto-discover — no sister frameworks.
    Check `${parent}/.ai.ui`, `${parent}/.ai.biz`, and `${parent}/.ai.soc`. Use whichever exists; treat missing as "framework not installed".
-3. **Preflight:** before routing to a director, verify its framework directory exists **and** its `skills/README.md` is readable. If absent, stop routing with a one-line `framework not installed here` message — never silently route into the void.
+3. **Preflight + graceful degradation:** before routing to a director, verify its framework directory exists **and** its `skills/README.md` is readable. If absent, note `framework not installed here` and **degrade gracefully**: route the request to `@ai-director` with a `[degraded: <framework> not installed]` prefix. Never route into the void.
 
 ## Source resolution — fat-client vs thin-client (MANDATORY before reading any `.ai/...` path)
 
