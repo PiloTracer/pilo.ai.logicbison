@@ -4,11 +4,11 @@
 
 ## Session status
 
-**Open:** 2026-07-02 — goal: Deploy/opencode verification; live consumer + clone smoke (no commit)
+**Closed:** 2026-07-02 — Deploy/opencode verification shipped (`17658f4`); README customization note added and pushed.
 
 **Updated:** 2026-07-02
 
-**Repository state:** Agent OS framework repo (self-hosted). Deploy/opencode work complete in working tree (uncommitted). Live smoke: **tools-project** fat-client `deploy-files --update` (184 files → `.ai/`); **test-test** `deploy-repo clone` pass. Root cause fixed: `compute_os_prefix` double-echo; tools-project `opencode.json` repaired (`.ai/skills`, MCP env + agent-api preserved).
+**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`. Deploy/opencode work committed: `install-opencode-config.sh`, deploy-basic/files `--status`/`--sync-paths`, framework-verify smoke (thin + fat-client). Live smoke: **tools-project** fat-client `deploy-files --update`; **test-test** `deploy-repo clone`. tools-project `opencode.json` repaired (`.ai/skills`, MCP env + agent-api preserved).
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
@@ -54,6 +54,7 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | Date | Session | Artifacts |
 |------|---------|-----------|
+| 2026-07-02 | deploy + opencode verification + README customization | `install-opencode-config.sh`, `deploy-basic.sh`, `deploy-files.sh`, `framework-verify.sh`, deploy/opencode skills, `CHANGELOG.md`, `.quick/deploy-to-project.md`; live smoke tools-project + test-test clone; commit `17658f4`; README Customization section |
 | 2026-07-01 | deploy-basic + session-control context + deploy-files merge | `skills/deploy-basic/skill.md`, `scripts/deploy-basic.sh`, `skills/deploy-files/skill.md`, `skills/session-control/skill.md`, `skills/session-control/reference.md`, `.cursorrules`, `templates/cursorrules.template`, `templates/bootstrap.sh`, `skills/README.md`, `SKILL_DEPENDENCIES.md`, `.quick/deploy-to-project.md`, `.quick/session-lifecycle.md`, `PROCESS_ROUTER.md`, `START_HERE.md` — new deploy-basic thin-client bootstrap skill; deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge; session-control context mode (read-only full context + uncommitted-aware dirty-tree); all registries and templates updated |
 | 2026-06-30 | .ai.soc integration + x-director sole router | `.cursorrules`, `templates/cursorrules.template`, `x-director/skill.md`, `ai-director/skill.md`, `ai-director/reference.md`, `SKILL_DEPENDENCIES.md`, `.quick/directors.md`, `skills/README.md`, `README.md`, `PROCESS_ROUTER.md`, `context/README.md` — .ai.soc added to frameworks registry, auto-discovery, bucket tables; ai-director refactored to channel non-.ai to x-director; x-director named sole cross-framework routing authority |
 | 2026-06-30 | session-control local task registry | `skills/session-control/skill.md` — replaced network-dependent curl call with local `.github/task-registry.json` file read for S4c, M4, C4 ref extraction |

@@ -10,6 +10,8 @@
 
 **Platform:** Developed and verified on **Linux** (bash, git, rsync, Docker Compose). Shell scripts and docs assume a POSIX environment. macOS, Windows (WSL2), and other OSes work when you adapt paths, line endings, and local tooling in your consumer repo — run `bash scripts/framework-verify.sh` to confirm the baseline toolchain on your host.
 
+**Customization:** Agent OS is a starting point, not a fixed contract. You are already working with a coding agent — use the same workflow to tailor skills, standards, `.cursorrules`, and project memory to your repository, stack, and preferences. Fork, trim, or extend the framework in your consumer project (or in this repo when self-hosting) as your process evolves; after substantive changes to shared scripts, re-run `bash scripts/framework-verify.sh` to confirm the baseline still holds.
+
 ```bash
 bash .ai/templates/bootstrap.sh    # 30-second setup, any repo
 ```
