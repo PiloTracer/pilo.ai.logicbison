@@ -33,8 +33,8 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 |-----------|-----------|------|
 | `@deploy-basic - /path/to/target` | outbound (invoked from source) | thin bootstrap no-overwrite |
 | `@deploy-basic` (from target, post-bootstrap) | in-place | re-runs no-overwrite bootstrap + source-pointer sync |
-| `@deploy-basic update` (from target) | in-place | no-overwrite + re-sync source pointer + agent rules-aware merge of differing local-surface files |
-| `@deploy-basic status` | report | read-only: shows `.cursorrules` presence, `AGENT_OS_SOURCE` value + reachability, `.work/` presence, whether local `.ai/skills` exists (fat-client leak check) |
+| `@deploy-basic status` | report | read-only: `.cursorrules`, `AGENT_OS_SOURCE` reachability, `.work/`, fat-client leak, **`opencode.json` path drift** |
+| `@deploy-basic update` (from target) | in-place | no-overwrite + re-sync `AGENT_OS_SOURCE` + **`opencode.json --sync-paths`** + merge candidate list |
 
 **Default:** `status` if no verb matches. **Aliases:** `bootstrap-thin`, `thin` → bare `@deploy-basic`.
 
@@ -50,6 +50,7 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 | `.work/README.md`, `context/HANDOFF.md`, `plans/NEXT.md`, `plans/ASSUMPTIONS.md`, `plans/RISK_REGISTRY.md`, `plans/UNKNOWNS.md`, `decisions/README.md`, `prompts/README.md`, `features/README.md`, `docs/README.md`, `docs/features/README.md` | `templates/work/*.template` (suffix stripped) | skip (preserve) |
 | `.work/plans/{foundation,full,operations,proposals,archives}/.gitkeep`, `.work/{analysis,scripts}/.gitkeep`, `.work/docs/{guides,tutorials,reference}/.gitkeep` | created empty | skip (preserve) |
 | `DOCS_TECH_STACK.md` | `templates/DOCS_TECH_STACK.md.template` | skip (preserve) |
+| `opencode.json` | `opencode.json.template` via `install-opencode-config.sh` | **Bootstrap:** create if missing. **Update:** `--sync-paths` only (framework paths); never `--force` unless operator requests. **`.opencode/` MCP dir:** never touched — use `@project-query-setup`. |
 
 **Explicitly NOT copied (stay in source, loaded at runtime):** `skills/**`, `standards/**`, `concepts/**`, `docs/guides/**` (workflow guides), `scripts/**`, `templates/**`, `SKILL_DEPENDENCIES.md`, root `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `.github/`, `.gitignore`, `.gitattributes`.
 
@@ -83,11 +84,13 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 After I1 (no-overwrite) the script:
 
 1. **Re-syncs the source pointer** if the target `.cursorrules` carries a stale `AGENT_OS_SOURCE` value (e.g. source moved). Performed in-place on the assignment line only — preserves all other target edits.
-2. **Lists merge candidates** among the local surface: existing-but-differing files vs the current source templates (substituted). Candidates:
+2. **Syncs `opencode.json` framework paths** via `install-opencode-config.sh --sync-paths` (updates `instructions`, `references`, `skills.paths` when they point at the old source; **preserves** `mcp` blocks and operator-added entries). If paths remain stale → listed as merge candidate.
+3. **Lists merge candidates** among the local surface: existing-but-differing files vs the current source templates (substituted). Candidates:
    - `.cursorrules` (differs from current `template-with-source`)
    - `.work/<file>` (target has user content; templates are skeletons)
    - `DOCS_TECH_STACK.md` (preserve target stack pins)
-3. The **agent** then performs a rules-aware merge per candidate (this is agent work, not script work).
+   - `opencode.json` (paths still stale after `--sync-paths`)
+4. The **agent** then performs a rules-aware merge per candidate (this is agent work, not script work).
 
 ### Merge rules per file class
 
@@ -97,6 +100,7 @@ After I1 (no-overwrite) the script:
 | `.work/<file>` skeletons | Append new template sections absent in target; **preserve all user content** (HANDOFF rows, NEXT iteration blocks, UNKNOWNS entries). Skeletons are minimal — most merges add no new sections. Never drop target rows. |
 | `.work/<dir>/.gitkeep` + new scaffold dirs | Create any NEW scaffold dir that didn't exist (e.g. a new framework sub-dir added since last bootstrap); do not touch existing. |
 | `DOCS_TECH_STACK.md` | Preserve target stack pins; append new template-only sections if any. Never replace user values. |
+| `opencode.json` | **Script `--sync-paths`** updates framework path fields when `AGENT_OS_SOURCE` moved. **Agent merge** if still stale: align `skills.paths` / `instructions` with current source; preserve custom `mcp`, extra `instructions`, operator-added `references`. Never `--force` unless operator explicitly requests full regenerate. |
 
 ### Preserve invariants (never drop)
 - Target's filled `REPLACE:` tokens (the merge keeps target values, not source `REPLACE:*` placeholders).
@@ -108,6 +112,8 @@ After I1 (no-overwrite) the script:
 
 ## I3 — status (read-only)
 
+Shell: `bash <source>/scripts/deploy-basic.sh --status [target-path]`
+
 Reports:
 
 | Check | Output |
@@ -118,6 +124,8 @@ Reports:
 | `.work/` present | pass / missing (list present skeleton files) |
 | Local `.ai/skills/` exists (fat-client leak) | no (good, thin) / yes (warn — mixed) |
 | `REPLACE:` tokens remaining in `.cursorrules` | count (excludes `AGENT_OS_SOURCE` which is filled) |
+| **`opencode.json` present** | pass / missing |
+| **`opencode.json` path drift** | `skills.paths[0]` vs expected `$AGENT_OS_SOURCE/skills` → **ok** or **STALE** |
 
 ---
 
@@ -130,7 +138,7 @@ Reports:
 | 3 | Source-resolution section present in target `.cursorrules` | |
 | 4 | `.work/` skeleton present (HANDOFF, NEXT, UNKNOWNS at minimum) | |
 | 5 | No-overwrite honored (existing target files preserved; `--force` only when explicitly requested) | |
-| 6 | `update`: source pointer re-synced if stale; merge candidate list produced; no wholesale replaces | |
+| 6 | `update`: source pointer re-synced if stale; **opencode `--sync-paths`** run; merge candidate list produced; no wholesale replaces | |
 | 7 | Fat-client leak checked (no unexpected local `.ai/skills/`) | |
 | 8 | User informed that skills load from `$AGENT_OS_SOURCE` at runtime + next steps | |
 
@@ -149,6 +157,29 @@ test -d "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | head -1 | cut -d= -f2
 
 ---
 
+## Coding-agent config (tool-agnostic)
+
+Thin-client always writes `.cursorrules` with `AGENT_OS_SOURCE`. **opencode** users also need `opencode.json` at the repo root (skill paths point at `$AGENT_OS_SOURCE`, not a local `.ai/`):
+
+```bash
+# After deploy-basic (from target repo root) — create if missing:
+REPO_ROOT="$(pwd)" bash "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | cut -d= -f2-)/scripts/install-opencode-config.sh"
+
+# After source moved — surgical path sync (preserves mcp + custom entries):
+REPO_ROOT="$(pwd)" AI_SOURCE="$(grep AGENT_OS_SOURCE= .cursorrules | cut -d= -f2-)" \
+  OLD_SOURCE=/old/path/.ai bash "$AI_SOURCE/scripts/install-opencode-config.sh" --sync-paths
+
+# Full regenerate (destructive — drops custom mcp/instructions):
+REPO_ROOT="$(pwd)" AI_SOURCE=... bash "$AI_SOURCE/scripts/install-opencode-config.sh" --force
+
+# Check path drift:
+bash "$AI_SOURCE/scripts/deploy-basic.sh" --status .
+```
+
+Cursor / Claude Code / Codex: `.cursorrules` is sufficient for skills; use `@project-query-setup register-mcp` for MCP. See `deploy-files` skill § Coding-agent config for the full matrix.
+
+---
+
 ## Critical interactions
 
 | When | Ask / do |
@@ -156,7 +187,7 @@ test -d "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | head -1 | cut -d= -f2
 | Invoked from target with no source pointer yet (greenfield, no `.cursorrules`) | The skill itself can't be loaded in thin-client mode before bootstrap. Tell the user to run the shell directly: `bash /abs/path/to/source/scripts/deploy-basic.sh .` — chicken-and-egg escape (see `.cursorrules` § Source resolution). |
 | Bootstrap target already has `.ai/skills/` (fat-client) | Warn; ask: convert to thin (delete local `.ai/`)?, keep mixed (skills resolve local-first per fat-client rule — unexpected)?, or abort? Do not silently leave a mixed state. |
 | `update` finds `.cursorrules` with no `AGENT_OS_SOURCE` line | Fat-client template detected → flag as merge candidate; agent appends the Source-resolution section with current source value. |
-| Source moved since last bootstrap | `update` re-syncs the pointer in-place; report old→new. If source unreachable, report `agent-os source unreachable` and stop. |
+| Source moved since last bootstrap | `update` re-syncs `AGENT_OS_SOURCE` in `.cursorrules` **and** runs `install-opencode-config.sh --sync-paths`. Run `@deploy-basic status` to confirm opencode paths match. If still stale → merge candidate or `--force` (operator opt-in). |
 
 ---
 
@@ -169,3 +200,4 @@ test -d "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | head -1 | cut -d= -f2
 - Failing to verify `$AGENT_OS_SOURCE` is readable before claiming bootstrap complete.
 - Invoking `@deploy-basic -` from the source dir **without** a target path — the shell aborts; the agent must prompt for the target rather than guessing or defaulting to the source's own cwd.
 - Using `deploy-basic` to "upgrade" a fat-client repo without first removing the local `.ai/` (creates a mixed state; skills resolve fat-client first).
+- Running `install-opencode-config.sh --force` when `--sync-paths` would suffice (destroys custom MCP / instructions).

@@ -24,13 +24,96 @@
 #
 # Usage:
 #   bash scripts/deploy-basic.sh <target-path>              # no-overwrite (skip existing)
+#   bash scripts/deploy-basic.sh --status [target-path]   # read-only report
 #   bash scripts/deploy-basic.sh <target-path> --update    # no-overwrite + merge candidate list
 #   bash scripts/deploy-basic.sh <target-path> --force     # overwrite local scaffold (legacy)
 #   AI_SOURCE=/path/.ai bash scripts/deploy-basic.sh <target-path>
 #
 set -euo pipefail
 
-RAW_TARGET="${1:?Usage: $0 <target-path> [--force|--update]}"
+# ── Status mode (read-only) ───────────────────────────────────────────
+if [[ "${1:-}" == "--status" ]]; then
+  shift
+  RAW_TARGET="${1:-.}"
+  if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
+    DEST_ROOT="$(pwd)"
+  else
+    DEST_ROOT="$(cd "$RAW_TARGET" && pwd)"
+  fi
+  CURS_DEST="${DEST_ROOT}/.cursorrules"
+  OC_DEST="${DEST_ROOT}/opencode.json"
+
+  echo "=== deploy-basic status → $DEST_ROOT ==="
+
+  if [[ -f "$CURS_DEST" ]]; then
+    echo "  .cursorrules: present"
+    src="$(grep -E '^AGENT_OS_SOURCE=' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || true)"
+    if [[ -z "$src" ]]; then
+      src="$(grep -oE 'AGENT_OS_SOURCE=[^[:space:]`]+' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || true)"
+    fi
+    if [[ -n "$src" && "$src" != "REPLACE_BASICSOURCE" ]]; then
+      if [[ -d "$src" ]]; then
+        echo "  AGENT_OS_SOURCE: $src (reachable)"
+      else
+        echo "  AGENT_OS_SOURCE: $src (UNREACHABLE)"
+      fi
+    elif grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
+      echo "  AGENT_OS_SOURCE: <unset token>"
+    else
+      echo "  AGENT_OS_SOURCE: missing (fat-client template?)"
+    fi
+    replace_count="$(grep -c 'REPLACE:' "$CURS_DEST" 2>/dev/null || true)"
+    replace_count="${replace_count:-0}"
+    echo "  REPLACE: tokens in .cursorrules: $replace_count (excludes filled AGENT_OS_SOURCE)"
+  else
+    echo "  .cursorrules: MISSING"
+    src=""
+  fi
+
+  if [[ -d "${DEST_ROOT}/.work/context" ]]; then
+    echo "  .work/: present"
+  else
+    echo "  .work/: missing"
+  fi
+
+  if [[ -d "${DEST_ROOT}/.ai/skills" ]]; then
+    echo "  local .ai/skills/: present (WARN — fat-client leak / mixed state)"
+  else
+    echo "  local .ai/skills/: absent (thin-client ok)"
+  fi
+
+  if [[ -f "$OC_DEST" ]]; then
+    echo "  opencode.json: present"
+    if [[ -n "${src:-}" && "$src" != "REPLACE_BASICSOURCE" && -d "$src" ]]; then
+      export REPO_ROOT="$DEST_ROOT" AI_SOURCE="$src"
+      python3 << 'PYEOF' || echo "  opencode.json: could not validate paths"
+import json, os
+repo = os.environ["REPO_ROOT"]
+src = os.environ["AI_SOURCE"].rstrip("/")
+with open(os.path.join(repo, "opencode.json")) as f:
+    cfg = json.load(f)
+paths = (cfg.get("skills") or {}).get("paths") or []
+first = (paths[0] if paths else "").rstrip("/")
+expected = src + "/skills"
+if first.startswith("./") or first == ".ai/skills":
+    ok = first in (".ai/skills", "./.ai/skills")
+else:
+    ok = first == expected
+if ok:
+    print(f"  opencode skills.paths[0]: {first!r}  ok")
+else:
+    print(f"  opencode skills.paths[0]: {first!r}  STALE (expected {expected!r})")
+PYEOF
+    else
+      echo "  opencode.json: present (AGENT_OS_SOURCE unavailable — cannot check path drift)"
+    fi
+  else
+    echo "  opencode.json: missing (run install-opencode-config.sh to create)"
+  fi
+  exit 0
+fi
+
+RAW_TARGET="${1:?Usage: $0 [--status] <target-path> [--force|--update]}"
 shift || true
 MODE="skip"
 while [[ $# -gt 0 ]]; do
@@ -154,7 +237,7 @@ write_cursorules() {
 # report can flag a stale source path (e.g. source moved) for --update.
 existing_source=""
 if [[ -f "$CURS_DEST" ]]; then
-  existing_source="$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' "$CURS_DEST" | head -1 | cut -d= -f2- || true)"
+  existing_source="$(grep -E '^AGENT_OS_SOURCE=' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || true)"
 fi
 
 # Step 1: .cursorrules (no-overwrite by default; --force overwrites).
@@ -198,6 +281,19 @@ grep -E '^(created:|skip )' /tmp/deploy-basic-bootstrap.$$.log | sed 's/^/  work
 rm -f /tmp/deploy-basic-bootstrap.$$.log
 
 REPO_ROOT="$DEST_ROOT" bash "$AI_ROOT/scripts/install-git-hooks.sh" 2>/dev/null || true
+REPO_ROOT="$DEST_ROOT" AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/install-opencode-config.sh" 2>/dev/null || true
+
+# --update: surgical opencode path sync when AGENT_OS_SOURCE moved (preserves mcp + custom entries).
+if [[ "$MODE" == "update" ]]; then
+  sync_rc=0
+  REPO_ROOT="$DEST_ROOT" AI_SOURCE="$AI_ROOT" OLD_SOURCE="${existing_source}" \
+    bash "$AI_ROOT/scripts/install-opencode-config.sh" --sync-paths 2>/dev/null || sync_rc=$?
+  if [[ "$sync_rc" -eq 0 ]]; then
+    :
+  elif [[ "$sync_rc" -eq 2 ]]; then
+    echo "  opencode.json: paths still stale after --sync-paths (listed under merge candidates)"
+  fi
+fi
 
 # Step 3: --update — list existing-but-differing local-surface files as merge candidates.
 if [[ "$MODE" == "update" ]]; then
@@ -227,6 +323,25 @@ if [[ "$MODE" == "update" ]]; then
      ! cmp -s "${AI_ROOT}/templates/DOCS_TECH_STACK.md.template" "$STACK_DEST"; then
     echo "  merge: DOCS_TECH_STACK.md  (preserve target stack pins)"
   fi
+  # opencode.json — stale framework paths vs current AGENT_OS_SOURCE
+  if [[ -f "${DEST_ROOT}/opencode.json" && -f "$CURS_DEST" ]]; then
+    export REPO_ROOT="$DEST_ROOT" AI_SOURCE="$AI_ROOT"
+    if ! python3 << 'PYEOF' 2>/dev/null; then
+import json, os, sys
+repo = os.environ["REPO_ROOT"]
+src = os.environ["AI_SOURCE"].rstrip("/")
+with open(os.path.join(repo, "opencode.json")) as f:
+    cfg = json.load(f)
+paths = (cfg.get("skills") or {}).get("paths") or []
+first = (paths[0] if paths else "").rstrip("/")
+expected = src + "/skills"
+if first.startswith("./") or first == ".ai/skills":
+    sys.exit(0 if first in (".ai/skills", "./.ai/skills") else 1)
+sys.exit(0 if first == expected else 1)
+PYEOF
+      echo "  merge: opencode.json  (skills.paths stale vs AGENT_OS_SOURCE — run install-opencode-config.sh --sync-paths or edit manually)"
+    fi
+  fi
   echo "  (agent performs rules-aware merge — append new sections, preserve target"
   echo "   customizations + REPLACE tokens + AGENT_OS_SOURCE. See skill deploy-basic § update-merge.)"
 fi
@@ -243,3 +358,4 @@ echo "  1. Edit ${DEST_ROOT}/.cursorrules — fill every REPLACE: token EXCEPT A
 echo "  2. Verify source is reachable:  test -d \"\$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' $CURS_DEST | cut -d= -f2-)\""
 echo "  3. Run @session-control start  (skill loads from \$AGENT_OS_SOURCE/skills/session-control/skill.md)"
 echo "  4. First skill besides session-control? Just invoke it — e.g. @plan-foundation status"
+echo "  5. Using opencode? Review opencode.json (created from template if missing) — paths must match thin-client (\$AGENT_OS_SOURCE) layout"

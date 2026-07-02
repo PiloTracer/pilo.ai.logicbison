@@ -8,6 +8,8 @@
 
 **Works with:** Cursor, Claude Code, Codex, opencode, and any agent that reads project files.
 
+**Platform:** Developed and verified on **Linux** (bash, git, rsync, Docker Compose). Shell scripts and docs assume a POSIX environment. macOS, Windows (WSL2), and other OSes work when you adapt paths, line endings, and local tooling in your consumer repo — run `bash scripts/framework-verify.sh` to confirm the baseline toolchain on your host.
+
 ```bash
 bash .ai/templates/bootstrap.sh    # 30-second setup, any repo
 ```
@@ -190,7 +192,7 @@ All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
 | **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |
 | **deploy-files** | Fat-client deploy: full `.ai/` copy or in-place bootstrap | `copy - <path>` · `update` · `status` |
-| **deploy-basic** | Thin-client deploy: `.cursorrules` + `.work/` + stack doc only | `update` · `status` |
+| **deploy-basic** | Thin-client deploy: `.cursorrules` + `.work/` + stack doc; opencode sync on `update` | `update` · `status` · `- <path>` |
 | **deploy-repo** | Full repo deploy via git clone or archive | `clone` · `archive` · `status` |
 | **project-query-setup** | Optional tools-project API key + MCP registration | `install` · `status` · `test` |
 | **tauri-development** | Domain guidance for Tauri desktop apps | *(read skill for IPC, shell, Rust conventions)* |

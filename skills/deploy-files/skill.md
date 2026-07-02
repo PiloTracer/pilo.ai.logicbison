@@ -35,7 +35,7 @@ Two-direction deploy of the `.ai` framework into a target project so the project
 | User says | Direction | Mode |
 |-----------|-----------|------|
 | `@deploy-files` | in-place (cwd is target) | copy no-overwrite + scaffold no-overwrite |
-| `@deploy-files update` | in-place (cwd is target) | copy no-overwrite + scaffold no-overwrite + **rules-aware merge** of differing existing files |
+| `@deploy-files update` | in-place (cwd is target) | copy no-overwrite + scaffold no-overwrite + **rules-aware merge** + **`opencode.json --sync-paths`** |
 | `@deploy-files copy - /path/to/repo` | outbound (source = this repo) | copy no-overwrite to `/path/to/repo/.ai` |
 | `@deploy-files copy - /path/to/repo --force` | outbound | copy with idempotent overwrite of existing files (legacy) |
 | `@deploy-files status` | report | report whether `.ai/` exists at known deploy locations |
@@ -98,12 +98,17 @@ Scaffold honor table (no-overwrite):
 | `.work/**` skeleton files | skip (preserve) |
 | `.cursorrules` | skip (preserve) |
 | `DOCS_TECH_STACK.md` | skip (preserve) |
+| `opencode.json` | create if missing via `install-opencode-config.sh`; on `--update` run `--sync-paths` only (`.opencode/` MCP dir never touched) |
 
 ---
 
 ## I3 — update-merge protocol (`@deploy-files update` only)
 
-After I1 (no-overwrite copy) the script prints a **merge candidate list**: every file present in both source and target whose content differs. The agent then performs a **rules-aware merge** for each candidate. This is agent work, not script work.
+After I1 (no-overwrite copy) the script:
+
+1. Prints a **merge candidate list** for differing files under `.ai/`.
+2. Runs **`install-opencode-config.sh --sync-paths`** on the consumer repo root (fat-client `.ai/skills` paths; preserves custom `mcp` entries).
+3. The **agent** performs rules-aware merge for each `.ai/` merge candidate (agent work, not script work).
 
 **Framework-owned file classes** (merge applies; preserve target customizations):
 
@@ -155,3 +160,28 @@ After I1 (no-overwrite copy) the script prints a **merge candidate list**: every
 ```
 
 (In-place `@deploy-files` already scaffolded `.work/` + `.cursorrules`; `@project-bootstrap init` is only needed for the outbound `copy - <path>` direction.)
+
+---
+
+## Coding-agent config (tool-agnostic)
+
+Agent OS skills and standards are **tool-agnostic** — they are plain markdown invoked by name (`@session-control`, `@deploy-files`, …). Each coding agent still needs a **host config** so it loads the right instructions and skill paths:
+
+| Agent | Config file | What Agent OS uses it for |
+|-------|-------------|---------------------------|
+| **opencode** | `opencode.json` (repo root) | `instructions`, `skills.paths`, optional `mcp` |
+| **Cursor** | `.cursorrules` (repo root) | Agent rules; optional `.cursor/mcp.json` for MCP |
+| **Claude Code** | `.claude/settings.json` or `.claude/mcp.json` | MCP registration |
+| **Codex / other** | per tool docs | Provide skill paths + rules equivalent to `.cursorrules` |
+
+**After deploy (operator checklist):**
+
+1. **All agents:** ensure `.cursorrules` exists (scaffold creates it in-place; outbound needs `@project-bootstrap init`).
+2. **opencode users:** if `opencode.json` is missing, run:
+   ```bash
+   REPO_ROOT="$(pwd)" bash .ai/scripts/install-opencode-config.sh
+   # thin-client (no local .ai/): bash "$AGENT_OS_SOURCE/scripts/install-opencode-config.sh"
+   ```
+   Review paths: **fat-client** → `.ai/skills`, `.ai/START_HERE.md`; **thin-client** → absolute `$AGENT_OS_SOURCE/skills`.
+3. **MCP (optional):** `@project-query-setup install` detects `opencode.json`, `.cursor/mcp.json`, etc. and registers `tools-project` after operator confirmation.
+4. **Verify:** invoke `@session-control start` from your agent — it should load `.ai/skills/session-control/skill.md` (fat) or `$AGENT_OS_SOURCE/skills/session-control/skill.md` (thin).

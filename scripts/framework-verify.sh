@@ -138,6 +138,102 @@ rsync -a \
   fi
 )
 
+# --- 2b. deploy-files in-place must create .cursorrules ---
+note "deploy-files in-place scaffold"
+DF_SMOKE="$(mktemp -d)"
+mkdir -p "${DF_SMOKE}"
+(
+  cd "${DF_SMOKE}"
+  bash "${REPO_ROOT}/scripts/deploy-files.sh" . >/dev/null
+  if [[ ! -f .cursorrules ]]; then
+    die "deploy-files in-place did not create .cursorrules (BOOTSTRAP_SKIP_CURSERRULES leak?)"
+  fi
+  if [[ ! -f .work/context/HANDOFF.md ]]; then
+    die "deploy-files in-place did not create .work/context/HANDOFF.md"
+  fi
+)
+ok "deploy-files in-place creates .cursorrules + .work/"
+
+# --- 2c. install-opencode-config via deploy-basic (thin-client) ---
+note "install-opencode-config (thin-client via deploy-basic)"
+OC_SMOKE="$(mktemp -d)"
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${OC_SMOKE}" >/dev/null
+if [[ ! -f "${OC_SMOKE}/opencode.json" ]]; then
+  die "deploy-basic did not create opencode.json"
+fi
+python3 -c "
+import json
+c=json.load(open('${OC_SMOKE}/opencode.json'))
+paths=c.get('skills',{}).get('paths',[])
+assert any('${REPO_ROOT}' in p for p in paths), paths
+"
+ok "deploy-basic creates thin-client opencode.json with AGENT_OS_SOURCE paths"
+rm -rf "${OC_SMOKE}"
+
+# --- 2d. install-opencode-config --sync-paths (source moved) ---
+note "install-opencode-config --sync-paths"
+FW_ROOT="${REPO_ROOT}"
+SYNC_SMOKE="$(mktemp -d)"
+bash "${FW_ROOT}/scripts/deploy-basic.sh" "${SYNC_SMOKE}" >/dev/null
+OLD_SRC="/tmp/old-agent-os-path"
+python3 << PY
+import json
+p = "${SYNC_SMOKE}/opencode.json"
+with open(p) as f:
+    c = json.load(f)
+for i, path in enumerate(c["skills"]["paths"]):
+    if "${FW_ROOT}" in path:
+        c["skills"]["paths"][i] = path.replace("${FW_ROOT}", "${OLD_SRC}")
+with open(p, "w") as f:
+    json.dump(c, f, indent=2)
+    f.write("\n")
+PY
+REPO_ROOT="${SYNC_SMOKE}" AI_SOURCE="${FW_ROOT}" OLD_SOURCE="${OLD_SRC}" \
+  bash "${FW_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
+python3 -c "
+import json
+c=json.load(open('${SYNC_SMOKE}/opencode.json'))
+assert any('${FW_ROOT}' in p for p in c['skills']['paths']), c['skills']['paths']
+assert 'tools-project' in c.get('mcp', {}), 'mcp block must be preserved'
+"
+bash "${FW_ROOT}/scripts/deploy-basic.sh" --status "${SYNC_SMOKE}" 2>&1 | grep -q "skills.paths\[0\].*ok"
+ok "install-opencode-config --sync-paths realigns stale paths and preserves mcp"
+rm -rf "${SYNC_SMOKE}"
+
+# --- 2e. install-opencode-config --sync-paths (fat-client) ---
+note "install-opencode-config --sync-paths (fat-client)"
+FC_SMOKE="$(mktemp -d)"
+(
+  cd "${FC_SMOKE}"
+  bash "${REPO_ROOT}/scripts/deploy-files.sh" . >/dev/null
+  python3 << PY
+import json
+p = "opencode.json"
+bad = f".ai\n${REPO_ROOT}"
+with open(p, "w") as f:
+    json.dump({
+        "\$schema": "https://opencode.ai/config.json",
+        "instructions": [f"{bad}/START_HERE.md", ".cursorrules"],
+        "references": {"ai": {"path": bad, "description": "Agent OS"}},
+        "skills": {"paths": [f"{bad}/skills"]},
+        "mcp": {"custom-block": {"enabled": True}},
+    }, f, indent=2)
+    f.write("\n")
+PY
+  REPO_ROOT="$(pwd)" bash "${REPO_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
+  python3 -c "
+import json
+c=json.load(open('opencode.json'))
+p0=c['skills']['paths'][0]
+assert p0 == '.ai/skills', p0
+assert all(chr(10) not in x for x in c['instructions']), c['instructions']
+assert c['references']['ai']['path'] == '.ai'
+assert 'custom-block' in c.get('mcp', {}), 'mcp must be preserved'
+"
+)
+ok "install-opencode-config --sync-paths repairs fat-client paths"
+rm -rf "${FC_SMOKE}" "${DF_SMOKE}"
+
 # --- 3. Removed vendor integration paths ---
 note "No stale vendor integration paths"
 if grep -rqE 'docs/integration/(hacienda|oidc|xades)' --include='*.md' . 2>/dev/null; then

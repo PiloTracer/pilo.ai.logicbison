@@ -156,13 +156,24 @@ if [[ "$MODE" == "update" ]] && [[ -s "$MERGE_CANDS" ]]; then
   echo "   wholesale-replace. See skill deploy-files § update-merge protocol.)"
 fi
 
+# --update: refresh opencode.json framework paths for fat-client (.ai/ layout).
+if [[ "$MODE" == "update" ]]; then
+  CONSUMER_ROOT="$(dirname "$DEST_DIR")"
+  sync_rc=0
+  REPO_ROOT="$CONSUMER_ROOT" AI_SOURCE="$AI_ROOT" \
+    bash "$AI_ROOT/scripts/install-opencode-config.sh" --sync-paths 2>/dev/null || sync_rc=$?
+  if [[ "$sync_rc" -eq 2 ]]; then
+    echo "  opencode.json: paths still stale after --sync-paths (review manually or merge)"
+  fi
+fi
+
 # ── In-place scaffold (when target is the current directory) ──────────
 # Chain bootstrap.sh so the target gets .work/ + .cursorrules + DOCS_TECH_STACK.md
 # in the same invocation (per skill.md § I2). Outbound mode (different target)
 # leaves next-step instructions.
 if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
   REPO_ROOT="$(cd "$PARENT" && pwd)"
-  BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT="$REPO_ROOT" bash "$AI_ROOT/templates/bootstrap.sh" \
+  REPO_ROOT="$REPO_ROOT" bash "$AI_ROOT/templates/bootstrap.sh" \
     > /tmp/deploy-files-bootstrap.$$.log 2>&1 || { cat /tmp/deploy-files-bootstrap.$$.log; rm -f /tmp/deploy-files-bootstrap.$$.log; exit 1; }
   grep -E '^(created:|skip )' /tmp/deploy-files-bootstrap.$$.log | sed 's/^/  scaffold: /'
   rm -f /tmp/deploy-files-bootstrap.$$.log
@@ -181,3 +192,4 @@ else
   echo "  2. Edit .cursorrules — fill every REPLACE: token"
 fi
 echo "  3. Run @session-control start"
+echo "  4. Using opencode? Review opencode.json (created from template if missing) — paths must match fat (.ai/) or thin (\$AGENT_OS_SOURCE) layout"

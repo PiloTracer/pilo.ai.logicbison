@@ -6,18 +6,24 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ### Added
 - **`opencode.json.template`** — portable opencode config with `REPLACE:AGENT_OS_ROOT` tokens (copy and customize per host).
+- **`scripts/install-opencode-config.sh`** — create/sync `opencode.json` (`--sync-paths`, `--force`).
 - **`.github/task-registry.json`** — example registry so `@session-control start` can resolve task refs in this framework repo.
 - **`.work/context/MCP_REGISTRY.md`** — records approved MCP registration for tools-project.
 
 ### Changed
+- **`install-opencode-config.sh`** — `--sync-paths` updates framework paths only (preserves custom MCP/instructions); wired into `deploy-basic --update`.
+- **`deploy-basic.sh`** — `--status` reports opencode path drift; `--update` syncs opencode paths when `AGENT_OS_SOURCE` moves.
+- **`opencode.json.template`** — MCP command uses repo-root `.opencode/` (not under source tree).
 - **`opencode.json`** — absolute `/mnt/work/Projects/...` paths replaced with repo-relative and sibling `../.ai.*` paths.
-- **`README.md`** — skill count and “Skills at a glance” table updated to all 22 registered skills.
+- **`README.md`** — Linux-first platform note; skill count and “Skills at a glance” table (22 skills).
 - **`skills/project-query-setup/skill.md`** — standard YAML frontmatter (`name:` matches folder).
 - **`skills/session-control/skill.md`** — commit task-ref rule aligned with M4/C4 (ask once; warn if using `type:` without ref).
 - **`CONTRIBUTING.md`** — verification is local-only; GitHub Actions CI disabled.
 
 ### Fixed
-- **`scripts/framework-verify.sh`** — `set -e` no longer exits early when prose-count or intake guards fail (all checks now run).
+- **`scripts/install-opencode-config.sh`** — fat-client `--sync-paths` uses framework-section merge (avoids prefix-replace corruption in `.ai.ui` paths); `compute_os_prefix` now returns after `.ai` / `.` (fixes embedded-newline path corruption).
+- **`scripts/deploy-files.sh`** — in-place scaffold no longer skips `.cursorrules`; `--update` runs opencode `--sync-paths` for fat-client consumers.
+- **`scripts/framework-verify.sh`** — deploy smoke tests include fat-client `--sync-paths` repair.
 - **`skills/README.md`** — removed stale “18-skill registry” wording.
 
 ### Removed

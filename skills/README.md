@@ -29,8 +29,8 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 
 | Skill id | Folder | Role |
 |----------|--------|------|
-| deploy-files | `deploy-files/` | **Files-only deploy (fat-client):** in-place no-overwrite bootstrap from a target dir, or outbound `copy - <path>`; `update` performs rules-aware merge (append/Update, preserve target customizations); excludes VCS artifacts |
-| deploy-basic | `deploy-basic/` | **Thin-client deploy:** copies only `.cursorrules` + `.work/` + `DOCS_TECH_STACK.md`; skills/standards/concepts/docs/scripts stay in source, loaded at runtime via `AGENT_OS_SOURCE` pointer in `.cursorrules`; `update` re-syncs pointer + merges local surface |
+| deploy-files | `deploy-files/` | **Fat-client deploy:** in-place or outbound `copy - <path>`; `update` = rules-aware merge under `.ai/` + opencode `--sync-paths`; excludes VCS artifacts |
+| deploy-basic | `deploy-basic/` | **Thin-client deploy:** `.cursorrules` + `.work/` + stack doc; skills load from `AGENT_OS_SOURCE`; `update` re-syncs pointer + opencode `--sync-paths`; `status` checks opencode drift |
 | deploy-repo | `deploy-repo/` | **Full repo deploy:** git clone (mirror) or archive (snapshot with `.github`) |
 | plan-foundation | `plan-foundation/` | **Orchestrator:** P0–P6 foundation gates, ADRs, SPECs, registries; **probe** (adaptive understanding loop); certifies **plan-master-ready** |
 | plan-master | `plan-master/` | Master implementation plan, **probe** (plan-completeness loop), integrity, traceability; certifies **implementation-ready** |

@@ -96,8 +96,11 @@ echo "  1. Edit ${REPO_ROOT}/.cursorrules — replace every REPLACE: token"
 echo "  2. Customize ${AI_ROOT}/standards/20260517-*.md (or copy/rename)"
 echo "  3. Run @plan-foundation greenfield (creates foundation docs 01–04)"
 echo "  4. Run @session-control start"
+echo "  5. Using opencode? opencode.json is created from template when missing (see scripts/install-opencode-config.sh)"
 echo ""
 
 bash "${AI_ROOT}/scripts/install-git-hooks.sh" 2>/dev/null || true
+
+REPO_ROOT="${REPO_ROOT}" AI_SOURCE="${AI_ROOT}" bash "${AI_ROOT}/scripts/install-opencode-config.sh" 2>/dev/null || true
 
 echo "Templates for foundation/full/SPEC/ADR: ${AI_ROOT}/templates/work/"

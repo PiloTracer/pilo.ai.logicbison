@@ -4,11 +4,11 @@
 
 ## Session status
 
-**Open:** 2026-07-02 — goal: Resume from clean baseline (v0.4.2); no queued work — awaiting direction
+**Open:** 2026-07-02 — goal: Deploy/opencode verification; live consumer + clone smoke (no commit)
 
 **Updated:** 2026-07-02
 
-**Repository state:** Agent OS framework repo (self-hosted). Deploy-basic skill added (thin-client bootstrap with AGENT_OS_SOURCE pointer). Deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge. Session-control gained `context` mode (read-only full context load + uncommitted dirty-tree diff summary). Registries, templates, and quick-ref docs updated for the new skill. Tagged v0.4.2.
+**Repository state:** Agent OS framework repo (self-hosted). Deploy/opencode work complete in working tree (uncommitted). Live smoke: **tools-project** fat-client `deploy-files --update` (184 files → `.ai/`); **test-test** `deploy-repo clone` pass. Root cause fixed: `compute_os_prefix` double-echo; tools-project `opencode.json` repaired (`.ai/skills`, MCP env + agent-api preserved).
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 

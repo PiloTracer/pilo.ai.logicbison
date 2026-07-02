@@ -106,6 +106,33 @@ If the path already includes `.ai`:
 test -d "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | head -1 | cut -d= -f2-)"
 ```
 
+## Coding-agent setup (after deploy)
+
+Agent OS is **tool-agnostic** — skills are markdown; each agent needs its own config surface:
+
+| Agent | File | Bootstrap action |
+|-------|------|------------------|
+| opencode | `opencode.json` | Auto-created from `opencode.json.template` when missing (`install-opencode-config.sh` runs from bootstrap / deploy). **Review paths** after fat vs thin deploy. |
+| Cursor | `.cursorrules` | Created by scaffold. Optional MCP: `.cursor/mcp.json` via `@project-query-setup`. |
+| Claude Code | `.claude/mcp.json` | MCP via `@project-query-setup`. Skills follow `.cursorrules` or manual skill path config. |
+| Codex / other | per tool | Mirror `.cursorrules` content + skill directory paths in the tool's config format. |
+
+**opencode path cheat sheet:**
+
+| Deploy mode | `skills.paths` should include | `instructions` entry points |
+|-------------|------------------------------|----------------------------|
+| Fat-client (`deploy-files`) | `.ai/skills` | `.ai/START_HERE.md`, `.ai/PROCESS_ROUTER.md` |
+| Thin-client (`deploy-basic`) | `$AGENT_OS_SOURCE/skills` (absolute) | same prefix for START_HERE / PROCESS_ROUTER |
+| Self-hosted (this repo) | `./skills` | `./START_HERE.md` |
+
+Sister frameworks (`.ai.ui`, `.ai.biz`, `.ai.soc`) are added to `opencode.json` automatically when present as siblings on disk.
+
+**After source moves (`@deploy-basic update`):**
+
+- `.cursorrules` `AGENT_OS_SOURCE` is re-synced automatically.
+- `opencode.json` framework paths are updated via `--sync-paths` (custom MCP preserved).
+- Run `@deploy-basic status` to confirm `opencode skills.paths[0]` shows **ok** not **STALE**.
+
 ## Examples
 
 ```text
