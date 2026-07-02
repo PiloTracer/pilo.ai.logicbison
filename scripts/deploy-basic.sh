@@ -197,6 +197,8 @@ BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT="$DEST_ROOT" bash "$AI_ROOT/templates/boo
 grep -E '^(created:|skip )' /tmp/deploy-basic-bootstrap.$$.log | sed 's/^/  work: /'
 rm -f /tmp/deploy-basic-bootstrap.$$.log
 
+REPO_ROOT="$DEST_ROOT" bash "$AI_ROOT/scripts/install-git-hooks.sh" 2>/dev/null || true
+
 # Step 3: --update — list existing-but-differing local-surface files as merge candidates.
 if [[ "$MODE" == "update" ]]; then
   echo ""

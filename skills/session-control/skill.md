@@ -453,6 +453,8 @@ Same as [C4b](#c4b--git-actions-modifiers-only) — default scope, commit via HE
 
 **Hard rule - agents MUST execute git:** Typing `@session-control commit` does not commit by itself. The agent **MUST** run shell commands. Checklist item 9 is **fail** if the tree still has unstaged safe changes and no commit SHA was produced.
 
+**Hard rule - no Co-authored-by:** Never add `Co-authored-by:` trailers or `git commit --trailer "Co-authored-by:..."`. Hooks strip/reject them; if a commit still contains a trailer, amend with a clean message before push.
+
 **Clean tree + `commit` modifier:** skip commit; report `Commit message (used): none - working tree clean`.
 
 ### M6 - Commit report (mandatory output)
@@ -750,6 +752,7 @@ If the repo uses plan-foundation conventions, run **status** (read-only) and att
 - Claiming task ref extraction when HANDOFF / branch / last commit has no match
 - Using `commit` when tree is already clean **without** explicitly reporting "none - working tree clean"
 - Committing non-`REF:` format when a valid task ref is detectable (missed association opportunity)
+- Adding `Co-authored-by:` trailers or using `git commit --trailer "Co-authored-by:..."`
 
 ---
 

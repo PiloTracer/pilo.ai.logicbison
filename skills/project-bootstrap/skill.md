@@ -78,10 +78,11 @@ The repository is already partially bootstrapped. Choose how to proceed:
    bash .ai/templates/bootstrap.sh
    ```
    Or copy manually from `.ai/templates/work/*.template` → `.work/` (strip `.template` suffix). Honor the B0 choice - `overwrite-missing` skips existing paths; `overwrite-all` replaces them.
-3. **`.cursorrules`** - if created from template, list every line containing `REPLACE:` and stop until user fills them (or use `status` output).
-4. **Standards** - remind user to customize `.ai/standards/20260517-*.md` and point `.cursorrules` `REPLACE:*_FILE` tokens at dated filenames.
-5. **Integration** - if external APIs: add `.ai/docs/integration/MANIFEST.txt` from `MANIFEST.template.txt`.
-6. **Next commands** (report in output):
+3. **Git hooks** - `bootstrap.sh` runs `bash .ai/scripts/install-git-hooks.sh` when `.git/` exists (strips/rejects forbidden `Co-authored-by:` trailers). Re-run manually after cloning if hooks are missing.
+4. **`.cursorrules`** - if created from template, list every line containing `REPLACE:` and stop until user fills them (or use `status` output).
+5. **Standards** - remind user to customize `.ai/standards/20260517-*.md` and point `.cursorrules` `REPLACE:*_FILE` tokens at dated filenames.
+6. **Integration** - if external APIs: add `.ai/docs/integration/MANIFEST.txt` from `MANIFEST.template.txt`.
+7. **Next commands** (report in output):
    ```
    @plan-foundation greenfield
    @plan-foundation certify plan-master-ready

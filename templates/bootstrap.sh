@@ -97,4 +97,7 @@ echo "  2. Customize ${AI_ROOT}/standards/20260517-*.md (or copy/rename)"
 echo "  3. Run @plan-foundation greenfield (creates foundation docs 01–04)"
 echo "  4. Run @session-control start"
 echo ""
+
+bash "${AI_ROOT}/scripts/install-git-hooks.sh" 2>/dev/null || true
+
 echo "Templates for foundation/full/SPEC/ADR: ${AI_ROOT}/templates/work/"

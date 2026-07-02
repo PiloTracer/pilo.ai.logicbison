@@ -1,40 +1,33 @@
 #!/bin/sh
 #
-# commit-msg — warn when commit message lacks a task ref.
-#
-# This hook runs after the commit message is finalized. If the message
-# doesn't contain a ref matching [A-Z]+-[0-9]+ or [A-Z]+-T-[0-9]+,
-# it prints a non-blocking warning.  The warning is stronger when the
-# branch name itself contains a ref pattern — that means a ref was
-# almost certainly intended.
+# commit-msg — reject Co-authored-by trailers; warn when task ref missing.
 #
 # Installation:
-#   cp .ai/hooks/commit-msg .git/hooks/commit-msg
-#   chmod +x .git/hooks/commit-msg
+#   bash .ai/scripts/install-git-hooks.sh
 #
-# To suppress the warning (e.g. docs-only commits):
-#   git commit --no-verify
-#
-# See also: .cursorrules § Commit Message Format
+# See .cursorrules § No Co-authored-by · § Commit Message Format
 
 COMMIT_MSG_FILE="$1"
+
+if grep -qiE '^[[:space:]]*Co-authored-by:[[:space:]]*' "$COMMIT_MSG_FILE" 2>/dev/null; then
+    printf '\033[31mERROR:\033[0m Co-authored-by trailers are forbidden (.cursorrules § No Co-authored-by).\n' >&2
+    printf 'Remove the trailer and retry. Agents must not use git commit --trailer "Co-authored-by:...".\n' >&2
+    exit 1
+fi
+
 SUBJECT=$(head -1 "$COMMIT_MSG_FILE" 2>/dev/null || echo "")
 
-# Check if the subject already contains a ref pattern
 case "$SUBJECT" in
     *[A-Z][A-Z0-9_]*-[0-9]*:*|*[A-Z][A-Z0-9_]*T-[0-9]*:*)
         exit 0 ;;
 esac
 
-# Also check the full message body for a ref
 FULL_MSG=$(cat "$COMMIT_MSG_FILE" 2>/dev/null || echo "")
 case "$FULL_MSG" in
     *[A-Z][A-Z0-9_]*-[0-9]*|*[A-Z][A-Z0-9_]*T-[0-9]*)
         exit 0 ;;
 esac
 
-# Check branch name for ref pattern — if branch has a ref but message doesn't,
-# it's almost certainly a mistake
 BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
 BRANCH_REF=$(echo "$BRANCH" | grep -oE '[A-Z][A-Z0-9_]*-(T-)?[0-9]+' | head -1)
 

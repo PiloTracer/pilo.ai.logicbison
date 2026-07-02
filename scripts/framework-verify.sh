@@ -257,6 +257,24 @@ else
 fi
 rm -rf "${GV_ROOT}"
 
+# --- 9. prepare-commit-msg co-authored strip self-test ---
+note "prepare-commit-msg co-authored strip"
+PCM="${REPO_ROOT}/hooks/prepare-commit-msg"
+pcm_before="${failures}"
+if [[ ! -x "${PCM}" ]]; then
+  die "missing or non-executable ${PCM}"
+else
+  PCM_TMP="$(mktemp)"
+  printf 'feat: test subject\n\nCo-authored-by: Cursor <cursoragent@cursor.com>\n' > "${PCM_TMP}"
+  sh "${PCM}" "${PCM_TMP}" message
+  if grep -qiE '^[[:space:]]*Co-authored-by:' "${PCM_TMP}"; then
+    die "prepare-commit-msg failed to strip Co-authored-by trailer"
+  else
+    ok "prepare-commit-msg strips Co-authored-by trailers"
+  fi
+  rm -f "${PCM_TMP}"
+fi
+
 if [[ "${failures}" -gt 0 ]]; then
   echo ""
   echo "framework-verify: ${failures} check(s) failed" >&2

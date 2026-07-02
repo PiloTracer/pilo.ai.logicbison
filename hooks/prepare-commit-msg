@@ -1,40 +1,37 @@
 #!/bin/sh
 #
-# prepare-commit-msg — auto-prepend task ref from branch name.
+# prepare-commit-msg — strip Co-authored-by trailers; auto-prepend task ref.
 #
-# If the current branch name contains a ref matching [A-Z]+-[0-9]+ or
-# [A-Z]+-T-[0-9]+, prepend "REF: " to the commit subject so that
-# commit_ref_linker can auto-associate the commit with the task/ticket
-# when it syncs from GitHub.
+# Installation:
+#   bash .ai/scripts/install-git-hooks.sh
+#   (or @project-bootstrap init / deploy-basic / bootstrap.sh)
 #
-# Installation (run from repo root):
-#   cp .ai/hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
-#   chmod +x .git/hooks/prepare-commit-msg
-#
-# To skip (e.g. for non-task commits):
-#   git commit --no-verify
-#   # or set GIT_EDITOR and remove the ref line manually
-#
-# See also: .cursorrules § Commit Message Format
+# See .cursorrules § No Co-authored-by · § Task Refs
 
 COMMIT_MSG_FILE="$1"
 COMMIT_SOURCE="$2"
 SHA1="$3"
 
-# Only prepend on new commits (not template, merge, squash, etc.)
-# NOTE: "message" (git commit -m) is NOT skipped so AI-driven commits
-# also get the ref prefix.  If the message already carries the ref the
-# case check below exits early — no double-prefix risk.
+strip_co_authored_trailers() {
+  _f="$1"
+  [ -f "$_f" ] || return 0
+  _tmp="$(mktemp)"
+  grep -viE '^[[:space:]]*Co-authored-by:[[:space:]]*' "$_f" > "$_tmp" 2>/dev/null || : > "$_tmp"
+  mv "$_tmp" "$_f"
+}
+
+# Always strip agent/IDE Co-authored-by lines (including git commit --trailer).
+strip_co_authored_trailers "$COMMIT_MSG_FILE"
+
+# Only prepend ref on new commits (not template, merge, squash, etc.)
 if [ "$COMMIT_SOURCE" = "template" ] || [ "$COMMIT_SOURCE" = "merge" ] || [ "$COMMIT_SOURCE" = "squash" ]; then
-    exit 0
+  exit 0
 fi
 
 BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
 
-# Priority 1: extract ref from branch name: feature/PROJ-456-something or PROJ-456/something
 REF=$(echo "$BRANCH" | grep -oE '[A-Z][A-Z0-9_]*-(T-)?[0-9]+' | head -1)
 
-# Priority 2: fallback to .work/active-ref (written by session-control at start)
 if [ -z "$REF" ]; then
     TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
     if [ -n "$TOPLEVEL" ] && [ -f "${TOPLEVEL}/.work/active-ref" ]; then
@@ -42,17 +39,18 @@ if [ -z "$REF" ]; then
     fi
 fi
 
-if [ -z "$REF" ]; then
-    exit 0
+if [ -n "$REF" ]; then
+    SUBJECT=$(head -1 "$COMMIT_MSG_FILE" 2>/dev/null || echo "")
+    case "$SUBJECT" in
+        "$REF:"*|"$REF: "*) ;;
+        *)
+            sed -i "1s/^/${REF}: /" "$COMMIT_MSG_FILE" 2>/dev/null || {
+                _body="$(tail -n +2 "$COMMIT_MSG_FILE" 2>/dev/null || true)"
+                printf '%s: %s\n' "$REF" "$SUBJECT" > "$COMMIT_MSG_FILE"
+                [ -n "$_body" ] && printf '%s\n' "$_body" >> "$COMMIT_MSG_FILE"
+            }
+            ;;
+    esac
 fi
 
-# Read the current subject line
-SUBJECT=$(head -1 "$COMMIT_MSG_FILE" 2>/dev/null || echo "")
-
-# Skip if ref already present
-case "$SUBJECT" in
-    "$REF:"*|"$REF: "*) exit 0 ;;
-esac
-
-# Prepend ref
-printf '%s: %s\n' "$REF" "$SUBJECT" > "$COMMIT_MSG_FILE"
+strip_co_authored_trailers "$COMMIT_MSG_FILE"
