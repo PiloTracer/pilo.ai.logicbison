@@ -26,7 +26,7 @@ Then in chat:
 
 ## What you get
 
-- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (20 skills in total).
+- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (22 skills in total).
 - **Standards** - binding contracts (CONVENTIONS, FEATURE_STANDARD, observability, security) keep agent output honest.
 - **`.work/`** - the project's memory: plans, SPECs, ADRs, `HANDOFF.md`, `NEXT.md`. Survives session boundaries.
 - **Gates** - `plan-master-ready`, `implementation-ready`, milestone verify; skip a step and the agent **stops** with a redirect.
@@ -170,7 +170,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
 ### Skills at a glance
 
-All **20** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
+All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
 
 | Skill | One line | Typical invoke |
 |-------|----------|----------------|
@@ -179,7 +179,7 @@ All **20** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **plan-master** | Master plan with milestones; certifies **implementation-ready** | `greenfield` · `continue` · `probe` · `status` · `revise` |
 | **plan-verify** | Plan audits; **brownfield** align without formal plan-foundation/master | `brownfield` · `foundation` · `master` · `alignment` |
 | **plan-repair** | Fix gaps; synthesize `.work/` from code/README/ROADMAP | `brownfield` · `foundation - <goal>` · `master - <goal>` |
-| **session-control** | Session bookends; updates HANDOFF + NEXT | `start` · `close` · `status` |
+| **session-control** | Session bookends; HANDOFF + NEXT; read-only `context` | `start` · `close` · `context` · `status` |
 | **code-implementation** | Run one milestone from `NEXT.md`; per-task gates | `plan - M{N}` · `start` · `continue` · `continue - N` · `complete` |
 | **code-verify** | Audits (not implementation): milestone, dirty tree, last commit/push | `milestone` · `uncommitted` · `last` |
 | **code-repair** | Fix verifier/migration/SPEC findings; re-verify before pass | `repair - from uncommitted` · `repair - custom - …` · `status` |
@@ -188,6 +188,12 @@ All **20** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **db-migration** | Idempotent numbered SQL scripts (no Alembic chain) | `init` · `create - <description>` · `run` · `status` · `verify` |
 | **dev-stack** | Generate or update isolated Docker `bin/start.sh` | `init` · `status` |
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
+| **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |
+| **deploy-files** | Fat-client deploy: full `.ai/` copy or in-place bootstrap | `copy - <path>` · `update` · `status` |
+| **deploy-basic** | Thin-client deploy: `.cursorrules` + `.work/` + stack doc only | `update` · `status` |
+| **deploy-repo** | Full repo deploy via git clone or archive | `clone` · `archive` · `status` |
+| **project-query-setup** | Optional tools-project API key + MCP registration | `install` · `status` · `test` |
+| **tauri-development** | Domain guidance for Tauri desktop apps | *(read skill for IPC, shell, Rust conventions)* |
 | **ai-director** | Free-text orchestrator: routes to correct `.ai` skill chain | `- <free-text>` · `- <free-text> -y` (skip confirm) · `- <free-text> --dry-run` · `status` · `review-routing` · `help` |
 | **x-director** | Cross-framework director: orchestrates `.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`; auto-resolves sibling frameworks via `.cursorrules` § Frameworks registry and preflight-checks each before routing | `- <free-text>` · `- <free-text> -y` · `- <free-text> --dry-run` · `status` · `help` |
 

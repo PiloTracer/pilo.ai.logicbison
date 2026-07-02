@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "ref": "AIOS-1",
+      "title": "Agent OS framework maintenance",
+      "description": "skills/, standards/, scripts/, templates/, docs/guides/",
+      "status": "in_progress"
+    }
+  ],
+  "tickets": []
+}

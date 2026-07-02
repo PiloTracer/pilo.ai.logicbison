@@ -11,6 +11,28 @@ note() { echo "==> $*"; }
 ok() { echo "    OK: $*"; }
 die() { echo "    FAIL: $*" >&2; failures=$((failures + 1)); }
 
+# Skill context budget (bytes) - the file an agent loads first must stay cheap.
+# SOFT = reported as tech debt (non-failing); HARD = ratchet ceiling (fails).
+# HARD sits just above today's largest skill so the ceiling can only move DOWN.
+SKILL_SOFT_BUDGET=24576   # 24 KB
+SKILL_HARD_CEILING=42000  # ~41 KB
+
+# --- 0. Portability preflight (the verifiers assume a POSIX+GNU toolchain) ---
+# Fail fast with an actionable message instead of a confusing mid-run error on a
+# host (e.g. bare Windows/PowerShell or a minimal container) that lacks a tool.
+note "Toolchain preflight"
+missing_tools=()
+for t in git rsync awk sed grep find; do
+  command -v "${t}" >/dev/null 2>&1 || missing_tools+=("${t}")
+done
+if [[ ${#missing_tools[@]} -gt 0 ]]; then
+  echo "    FAIL: missing required tool(s): ${missing_tools[*]}" >&2
+  echo "          Agent OS shell verifiers need: bash, git, rsync, awk, sed, grep, find (all POSIX/common)." >&2
+  echo "          Install them, or run verification from a POSIX shell with these on PATH." >&2
+  exit 3
+fi
+ok "required tools present (git, rsync, awk, sed, grep, find)"
+
 note "Agent OS framework-verify (root=${REPO_ROOT})"
 
 # --- 1. Self-hosted layout (this repo IS the .ai tree) ---
@@ -49,7 +71,9 @@ for doc in README.md START_HERE.md skills/README.md; do
     fi
   done < <(sed 's/[*`]//g' "${doc}" | grep -oE '[0-9]+ skills?' | grep -oE '^[0-9]+' || true)
 done
-[[ "${failures}" -eq "${prose_before}" ]] && ok "skill-count prose matches derived count in landing docs"
+if [[ "${failures}" -eq "${prose_before}" ]]; then
+  ok "skill-count prose matches derived count in landing docs"
+fi
 
 # Intake contract guard: classification is agent-judged (no executable classifier),
 # so we structurally assert the feature-spec intake table keeps all 4 classes + the
@@ -60,7 +84,28 @@ for cls in local cross-cutting brownfield underspecified; do
   grep -qE "\*\*${cls}\*\*" "${intake_md}" || die "feature-spec intake table missing class '${cls}'"
 done
 grep -qE 'force=<class>' "${intake_md}" || die "feature-spec intake missing 'force=<class>' override"
-[[ "${failures}" -eq "${intake_before}" ]] && ok "feature-spec intake contract: 4 classes + force override present"
+if [[ "${failures}" -eq "${intake_before}" ]]; then
+  ok "feature-spec intake contract: 4 classes + force override present"
+fi
+
+# --- 1b. Skill context budget (dogfood the framework's own context discipline) ---
+# A skill.md is the first thing an agent loads to act; an oversized one burns the
+# very context budget Agent OS exists to protect. HARD ceiling fails (ratchet);
+# SOFT budget is reported as tracked debt without failing the build.
+note "Skill context budget (soft ${SKILL_SOFT_BUDGET}B / hard ${SKILL_HARD_CEILING}B)"
+over_soft=0
+for n in "${skill_dirs[@]}"; do
+  s="skills/${n}/skill.md"
+  [[ -f "${s}" ]] || continue
+  bytes="$(wc -c < "${s}" | tr -d ' ')"
+  if [[ "${bytes}" -gt "${SKILL_HARD_CEILING}" ]]; then
+    die "${s} is ${bytes}B > hard ceiling ${SKILL_HARD_CEILING}B - move examples/edge cases to skills/${n}/reference.md"
+  elif [[ "${bytes}" -gt "${SKILL_SOFT_BUDGET}" ]]; then
+    echo "    DEBT: ${s} is ${bytes}B > soft budget ${SKILL_SOFT_BUDGET}B (trim toward reference.md)"
+    over_soft=$((over_soft + 1))
+  fi
+done
+ok "no skill.md over hard ceiling ${SKILL_HARD_CEILING}B (${over_soft} over soft budget, tracked as debt)"
 
 # --- 2. Consumer bootstrap smoke ---
 note "Consumer bootstrap smoke"
@@ -125,11 +170,14 @@ while IFS= read -r -d '' md; do
     target="${link%%#*}"
     target="${target%%\?*}"
     [[ -z "${target}" ]] && continue
+    # A real relative link target has no whitespace or backticks; anything that
+    # does is prose containing a literal "](" (e.g. inside inline code), not a link.
+    [[ "${target}" =~ [[:space:]\`] ]] && continue
     resolved="${dir}/${target}"
     if [[ ! -e "${resolved}" ]]; then
       die "broken link in ${md}: (${link}) -> ${resolved}"
     fi
-  done < <(rg -o '\]\([^)]+\)' "${md}" 2>/dev/null | sed 's/^(//' | sed 's/)$//' | grep -v '^https\?://' | grep -v '^#' || true)
+  done < <(grep -oE '\]\([^)]+\)' "${md}" 2>/dev/null | sed -E 's/^\]\(//; s/\)$//' | grep -v '^https\?://' | grep -v '^#' || true)
 done < <(find . -name '*.md' ! -path './.git/*' ! -path './.work/*' -print0 2>/dev/null)
 
 ok "markdown link scan complete"
@@ -187,6 +235,27 @@ else
   die "traceability-verify rejected a fully-mapped plan"
 fi
 rm -rf "${TV_ROOT}"
+
+# --- 8. gate-verify self-test (exercise the completion-gate evidence linter) ---
+note "gate-verify self-test"
+GV_ROOT="$(mktemp -d)"
+GV_NEXT="${GV_ROOT}/NEXT.md"
+hdr='## Current iteration\n\n### Tasks\n| ID | Description | Files | Status | Notes |\n|----|-------------|-------|--------|-------|\n'
+# Dishonest: a done task with empty Notes -> must fail.
+printf "${hdr}| M1-T1 | do | a.py | done | |\n" > "${GV_NEXT}"
+if bash "${REPO_ROOT}/scripts/gate-verify.sh" "${GV_NEXT}" >/dev/null 2>&1; then
+  die "gate-verify accepted a done task with no recorded gate evidence"
+else
+  ok "gate-verify rejects a done task with empty Notes"
+fi
+# Honest: done task records gate evidence -> must pass.
+printf "${hdr}| M1-T1 | do | a.py | done | tests pass; lint ok; exit 0 |\n" > "${GV_NEXT}"
+if bash "${REPO_ROOT}/scripts/gate-verify.sh" "${GV_NEXT}" >/dev/null 2>&1; then
+  ok "gate-verify accepts a done task that cites evidence"
+else
+  die "gate-verify rejected a done task that cites gate evidence"
+fi
+rm -rf "${GV_ROOT}"
 
 if [[ "${failures}" -gt 0 ]]; then
   echo ""

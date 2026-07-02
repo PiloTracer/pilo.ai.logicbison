@@ -729,7 +729,7 @@ If the repo uses plan-foundation conventions, run **status** (read-only) and att
 | **Close** | `push` without network → report failure; do not claim pushed |
 | **Commit** | User says `@session-control commit` or `commit push` | Run [Commit protocol](#commit-protocol); **do not** update HANDOFF or NEXT; session stays open |
 | **Commit** | Task ref found in HANDOFF goal or branch | Prepend `{REF}: ` to commit subject automatically |
-| **Commit** | No task ref found | Use conventional `type: description` format; no error — ref is optional |
+| **Commit** | No task ref found | Ask user once for ref (M4/C4 priority 6); only if genuinely untracked work and user declines → `type: description` with warning in report |
 
 ---
 

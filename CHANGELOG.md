@@ -2,6 +2,38 @@
 
 All notable changes to Agent OS are documented here. Format inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once tagged.
 
+## [Unreleased]
+
+### Added
+- **`opencode.json.template`** — portable opencode config with `REPLACE:AGENT_OS_ROOT` tokens (copy and customize per host).
+- **`.github/task-registry.json`** — example registry so `@session-control start` can resolve task refs in this framework repo.
+- **`.work/context/MCP_REGISTRY.md`** — records approved MCP registration for tools-project.
+
+### Changed
+- **`opencode.json`** — absolute `/mnt/work/Projects/...` paths replaced with repo-relative and sibling `../.ai.*` paths.
+- **`README.md`** — skill count and “Skills at a glance” table updated to all 22 registered skills.
+- **`skills/project-query-setup/skill.md`** — standard YAML frontmatter (`name:` matches folder).
+- **`skills/session-control/skill.md`** — commit task-ref rule aligned with M4/C4 (ask once; warn if using `type:` without ref).
+- **`CONTRIBUTING.md`** — verification is local-only; GitHub Actions CI disabled.
+
+### Fixed
+- **`scripts/framework-verify.sh`** — `set -e` no longer exits early when prose-count or intake guards fail (all checks now run).
+- **`skills/README.md`** — removed stale “18-skill registry” wording.
+
+### Removed
+- **GitHub Actions CI** — deleted `.github/workflows/framework-verify.yml` (run `bash scripts/framework-verify.sh` locally instead).
+
+## [0.4.2] - 2026-07-01
+
+### Added
+- **`deploy-basic` skill** — thin-client bootstrap (`.cursorrules` + `.work/` + `DOCS_TECH_STACK.md` only; skills loaded via `AGENT_OS_SOURCE`).
+- **`session-control` `context` mode** — read-only full context load with uncommitted-aware dirty-tree summary.
+- **`deploy-files` in-place bootstrap** — no-overwrite merge for fat-client deploys.
+
+### Changed
+- **`deploy-files`** — rules-aware merge on `update` (preserve target customizations).
+- Registries, templates, `.quick/` refs, and `PROCESS_ROUTER.md` updated for deploy-basic and context mode.
+
 ## [0.3.2] - 2026-06-29
 
 ### Added
@@ -22,10 +54,6 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 - **Markdown link scan was a silent no-op** — `framework-verify.sh` extracted links with `rg` (ripgrep) guarded by `|| true`, so on any host without `rg` it checked nothing while reporting `OK`, and its `sed` stripping never removed the `](` prefix. Rewritten with portable `grep -oE` + correct stripping (no `ripgrep` dependency). The now-functional scan exposed and fixed **4 broken relative links** (`plan-foundation/skill.md` → `plan-master`, `process-router/reference.md` → `PROCESS_ROUTER.md`, and two workflow guides → `skills/README.md`).
 - **`README.md`** stale prose count — "(11 in total)" corrected to "(14 skills in total)" and now covered by the prose guard above.
 
-## [Unreleased]
-
-### Added
-- *(none yet)*
 
 ## [0.4.0] - 2026-06-29
 

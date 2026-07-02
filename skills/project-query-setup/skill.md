@@ -1,4 +1,11 @@
-# SKILL: project-query-setup
+---
+name: project-query-setup
+description: >-
+  Optional integration: guide through tools-project API key creation, MCP server
+  registration, and connectivity test. OS-aware (tailors guidance per framework).
+---
+
+# project-query-setup
 
 **Purpose:** Guide user through connecting their coding agent to tools-project, and teach it to query tasks, tickets, projects, and clients for context-aware work.
 

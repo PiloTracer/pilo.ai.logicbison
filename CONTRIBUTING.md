@@ -24,7 +24,7 @@ bash scripts/gate-verify.sh          # completion gate: a done task in NEXT.md m
 bash scripts/smoke-consumer.sh        # optional: verbose consumer artifact listing
 ```
 
-CI runs all of these on push/PR (`.github/workflows/framework-verify.yml`).
+Run these locally before merging or tagging. GitHub Actions CI is **disabled** for this repo (no workflow files under `.github/workflows/`).
 
 ### Skill context budget
 

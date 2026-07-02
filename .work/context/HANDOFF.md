@@ -4,10 +4,9 @@
 
 ## Session status
 
-**Open:** *(no open session)*
-**Closed:** 2026-07-01 — Added deploy-basic thin-client bootstrap skill, enhanced deploy-files with in-place no-overwrite merge, added session-control context mode with uncommitted-aware dirty-tree summary.
+**Open:** 2026-07-02 — goal: Resume from clean baseline (v0.4.2); no queued work — awaiting direction
 
-**Updated:** 2026-07-01
+**Updated:** 2026-07-02
 
 **Repository state:** Agent OS framework repo (self-hosted). Deploy-basic skill added (thin-client bootstrap with AGENT_OS_SOURCE pointer). Deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge. Session-control gained `context` mode (read-only full context load + uncommitted dirty-tree diff summary). Registries, templates, and quick-ref docs updated for the new skill. Tagged v0.4.2.
 
