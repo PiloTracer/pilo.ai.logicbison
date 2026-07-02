@@ -109,6 +109,7 @@ trap 'rm -f "$TMP_LIST" "$MERGE_CANDS"' EXIT
 ( cd "$AI_ROOT" \
   && git ls-files --cached --others --exclude-standard \
   | grep -vE "$SKILL_EXCLUDE_REGEX" \
+  | while IFS= read -r f; do test -f "$AI_ROOT/$f" && echo "$f"; done \
 ) > "$TMP_LIST"
 
 COUNT="$(wc -l < "$TMP_LIST" | tr -d ' ')"

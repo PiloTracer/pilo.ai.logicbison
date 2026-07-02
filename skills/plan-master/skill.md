@@ -179,97 +179,10 @@ Execute in order. At **each phase gate**, run [Continuous integrity rules](#cont
 
 ---
 
-### Phase 0 - Foundation discovery
+Execute P0→P6 in order; at each gate run [Continuous integrity rules](#continuous-integrity-rules).
 
-**Objective:** Understand the project before proposing architecture.
+**Per-phase objectives, must-include lists, grill prompts, and gate criteria:** [`reference.md` § Planning workflow phases 0–6 (detailed)](reference.md#planning-workflow-phases-0-6-detailed).
 
-**Mandatory reads (when present):** `{HANDOFF}`, `{ITERATION_CARRIER}`, foundation docs 01 + 04, `REPLACE:TECH_STACK_DOC`, ADR index + relevant ADRs, `.ai/standards/*CONVENTIONS*` + `*FEATURE_STANDARD*`, risk-critical SPECs. Skip absent files; do **not** read `{PROMPTS_ROOT}/initial.md` unless user names it.
-
-**Actions:** summarize product intent (one paragraph); extract existing decisions (flag conflicts, do not re-decide); detect hidden assumptions, regulatory surface; build initial risk + clarification questionnaire.
-
-**Outputs:** project understanding summary, key assumptions (registry seeded), critical uncertainties, initial risk assessment, blocker questions for owner.
-
-**Grill when vague:** scale/traffic, budget, ops model, security, compliance, deployment, offline/real-time, integrations, maintainability.
-
-**Gate P0:** User confirms understanding summary OR explicit waiver to proceed with listed unknowns.
-
----
-
-### Phase 1 - High-level strategic plan
-
-**Objective:** Macro direction aligned with business goals.
-
-**Must include** (maps to MASTER_PLAN_STANDARD §2 rows 1–8): product vision + measurable success criteria, FR1…, NFR1… (performance, availability, security, privacy, i18n, accessibility, cost), personas (link existing), UX principles (high level), technical constraints (from ADRs + stack), security model summary, scalability/deployment/reliability/ops expectations, AI usage boundaries.
-
-**Must define:** architecture style, primary technologies, service/bounded-context boundaries, data flow, integration strategy, infrastructure strategy.
-
-**Each major choice:** rationale, alternatives, rejection reasoning → Decision log appendix.
-
-**Gate P1:** No FR1… without traceability stub; NFRs cover regulated/compliance path if applicable.
-
----
-
-### Phase 2 - Architecture design
-
-**Objective:** Professional-grade architecture consistent with foundation architecture doc and ADRs.
-
-**Must include** (gap-fill only, reference existing specs; maps to STANDARD §2 rows 9–16): system diagram (mermaid/ASCII), service/context decomposition, domain boundaries + allowed dependencies, database/API/authZ-N strategies, observability/logging/errors, failure recovery + rate limiting + jobs + events, deployment/CI-CD/env/secrets/config, multi-tenancy/extensibility/versioning.
-
-**Must identify:** bottlenecks, SPOFs, scaling risks, maintenance risks, operational complexity.
-
-**Gate P2:** Architecture fitness check - aligned with directory map; no forbidden cross-context imports.
-
----
-
-### Phase 3 - UX/UI planning
-
-**Objective:** Implementation-oriented UX guidance (maps to STANDARD §2 row 10).
-
-**Must include:** UX philosophy, navigation/IA, layout/responsive/accessibility standards, consistency rules + empty/error/loading states, onboarding + power-user efficiency (link interaction ADR + personas).
-
-**Avoid:** unnecessary complexity, hidden critical paths.
-
-**Gate P3:** Critical user journeys mapped to FR ids; regulated flows show locale/legal field rules where required.
-
----
-
-### Phase 4 - Incremental execution planning
-
-**Objective:** Convert architecture into executable milestones with task tables conforming to [MASTER_PLAN_STANDARD § 3](../../standards/20260519-MASTER_PLAN_STANDARD.md).
-
-**Per milestone:** apply the 11-field milestone schema from the standard and the `M{N}-T{N}` task table.
-
-**Optimize:** parallelization, minimal coupling, progressive validation.
-
-**Sync:** Update `{ITERATION_CARRIER}` **Recommended next** to `M1-T1` (first task of M1) when plan is **Approved**.
-
-**Gate P4:** Every FR1… maps to ≥1 task (`M{N}-T{N}`); every high-risk task has validation in Phase 5 table. Machine-check with `bash .ai/scripts/traceability-verify.sh` (FR→task coverage; orphan FR → gate fail).
-
----
-
-### Phase 5 - Verification and integrity validation
-
-**Objective:** Detect flaws before implementation at scale.
-
-**Run:** contradiction analysis (plan vs ADRs vs SPECs); dependency consistency; scope alignment with P0 initial scope + foundation scope doc; architecture fitness, scalability, security, ops readiness, maintainability; AI hallucination risk review (unverified claims, invented APIs).
-
-**Outputs:** risk registry updated, mitigations, unresolved concerns, integrity score = **pass** | **pass with waivers** | **fail**.
-
-**Gate P5:** **fail** blocks `Status: Approved`; waivers need owner line in Decision log (per STANDARD §4 approval gate).
-
----
-
-### Phase 6 - AI-agent execution optimization
-
-**Objective:** Make the plan safe for autonomous/semi-autonomous agents (maps to STANDARD §2 row 24).
-
-**Must:** decompose into agent-friendly tasks with explicit file paths + constraints; state architectural invariants (cite CONVENTIONS + SPECs); define per-task validation; flag dangerous assumptions.
-
-**Should:** tag tasks `model:tier` (light | standard | strong); recommend cross-model review for regulated / signing / KMS paths.
-
-**Gate P6:** Agent execution appendix present; session-control **start** checklist referenced for implementers.
-
----
 
 ## Mandatory sections (artifact contract)
 
@@ -423,57 +336,16 @@ The **interactive front-end to `integrity`**: where `integrity` *detects* contra
 |-----------|-------|
 | **Coverage map** | [Master coverage map](reference.md#master-coverage-map) (M-D1…M-D7) in `reference.md` |
 | **Exit gate** | [Implementation-ready](#implementation-ready) (+ Phase 5 integrity **pass**) |
-| **Ledger path** | `{PLANS_ROOT}/full/PROBE_LEDGER.md` |
-| **Target** | Coverage ≥ 85%; no gate-blocking dimension below **partial** |
+Answer **implementation-ready: yes** only when all ten conditions hold (plan-master-ready, Approved plan, integrity, acceptance gates, no broad blockers). Full list: [reference.md § Status report format (detailed)](reference.md#status-report-format) (Implementation-ready).
 
-**Sub-modes:** `probe` (one iteration) · `probe - until ready` (loop to target, ≤5 questions/batch) · `probe - status` (read-only).
+If master plan **missing** → **no** - run **greenfield**. If **Draft** → **no** until Approved.
 
-**Protocol:**
+**Not the same as:** M1 skeleton when foundation certified plan-master-ready.
 
-0. Run [Prerequisite gate](#prerequisite-gate-mutating-modes) **PG1** (and **PG2** probe row - a Draft/partial `*-full-plan.md` must exist; else run **greenfield** first).
-1. **ASSESS:** read the plan body (Execution Roadmap, Traceability matrix, NFRs), the three registries, and `PROBE_LEDGER.md`. Score M-D1…M-D7.
-2. Run the engine loop ([probe-protocol.md § The loop](../probe-protocol.md#the-loop)).
-3. **RECORD** answers into the **plan body** (quantified NFRs, added tasks, acceptance criteria) and the canonical registries (`ASSUMPTIONS`, `UNKNOWNS`, `RISK_REGISTRY`) - never fork lists.
-4. Update `PROBE_LEDGER.md`; emit the [probe report](../probe-protocol.md#output-report-every-probe-run).
-5. **On target reached:** recommend `@plan-master integrity` (automated sweep) → then `@plan-master status` for **implementation-ready**. probe does **not** set `Approved`.
+### Status report format
 
-**Anti-patterns:** see [probe-protocol.md § Anti-patterns](../probe-protocol.md#anti-patterns). In master specifically: do **not** mark the plan **Approved** or skip `integrity` because probe reached target - probe gathers input; integrity + the § 4 approval gate still decide Approved.
+Mandatory status report template and phase progress table: [reference.md § Status report format (detailed)](reference.md#status-report-format).
 
----
-
-## Revise protocol
-
-0. Run [Prerequisite gate](#prerequisite-gate-mutating-modes) **PG1** (and **PG2** revise row).
-1. Read latest `{PLANS_ROOT}/full/YYYYMMDD-full-plan.md` and the user's stated reason (after `-`).
-2. Apply delta; bump version note in plan header; re-run Phase 5 integrity subset.
-3. Do not set **Approved** until P5 **pass** (or documented waivers).
-4. Output completion checklist.
-
----
-
-## Completion checklist (all modes)
-
-| # | Check | Result | Evidence |
-|---|-------|--------|----------|
-| 1 | Mode detected correctly | pass/fail | |
-| 2 | Foundation artifacts read (or YAML input) | pass/skip | paths |
-| 3 | Registries maintained | pass/fail | |
-| 4 | Traceability chain present | pass/fail | matrix |
-| 5 | 25 mandatory sections present (final) | pass/fail/skip | status only |
-| 6 | Phase gate satisfied | pass/fail/skip | |
-| 7 | No secrets/PII in output | pass/fail | |
-| 8 | No application code written | pass | |
-| 9 | Integrity (P5) if completing plan | pass/fail/skip | |
-| 10 | NEXT.md synced (if Approved) | pass/skip | |
-
----
-
-## Anti-patterns
-
-- Replacing feature SPECs with a monolithic plan paragraph
-- Skipping Phase 5 to save time
-- Tasks without file paths or acceptance criteria
-- Duplicate ADR decisions with different conclusions
 - Marking Approved with open unknowns blocking high-risk work (without waiver)
 - Running **greenfield** / **continue** / **revise** when **plan-master-ready: no** (see § Prerequisite gate)
 - Editing archived decision prompts during plan cleanup

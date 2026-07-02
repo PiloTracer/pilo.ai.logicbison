@@ -4,30 +4,35 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-07-02
+
 ### Added
-- **`opencode.json.template`** — portable opencode config with `REPLACE:AGENT_OS_ROOT` tokens (copy and customize per host).
+- **`scripts/skill-functional-verify.py`** — post-trim integrity check (reference anchors + required protocol sections); wired into `framework-verify.sh`.
 - **`scripts/install-opencode-config.sh`** — create/sync `opencode.json` (`--sync-paths`, `--force`).
-- **`.github/task-registry.json`** — example registry so `@session-control start` can resolve task refs in this framework repo.
+- **`opencode.json.template`** — portable opencode config with `REPLACE:AGENT_OS_ROOT` tokens.
+- **`.github/task-registry.json`** — example registry for `@session-control start` task-ref resolution.
 - **`.work/context/MCP_REGISTRY.md`** — records approved MCP registration for tools-project.
+- **`.github/workflows/framework-verify.yml`** — CI runs `framework-verify.sh` on push/PR to main.
+- **`deploy-repo.sh --status`** — read-only report of source origin/HEAD and optional target deploy state.
 
 ### Changed
-- **`install-opencode-config.sh`** — `--sync-paths` updates framework paths only (preserves custom MCP/instructions); wired into `deploy-basic --update`.
-- **`deploy-basic.sh`** — `--status` reports opencode path drift; `--update` syncs opencode paths when `AGENT_OS_SOURCE` moves.
-- **`opencode.json.template`** — MCP command uses repo-root `.opencode/` (not under source tree).
-- **`opencode.json`** — absolute `/mnt/work/Projects/...` paths replaced with repo-relative and sibling `../.ai.*` paths.
-- **`README.md`** — Linux-first platform note; skill count and “Skills at a glance” table (22 skills).
-- **`skills/project-query-setup/skill.md`** — standard YAML frontmatter (`name:` matches folder).
-- **`skills/session-control/skill.md`** — commit task-ref rule aligned with M4/C4 (ask once; warn if using `type:` without ref).
-- **`CONTRIBUTING.md`** — verification is local-only; GitHub Actions CI disabled.
+- **Six core skills trimmed** — `session-control`, `plan-foundation`, `code-implementation`, `plan-master`, `plan-repair`, `plan-verify` now under 24 KB soft budget; verbose protocols moved to each skill's `reference.md`.
+- **`install-opencode-config.sh`** — `--sync-paths` updates framework paths only (preserves custom MCP); wired into `deploy-basic --update` and `deploy-files --update`.
+- **`deploy-basic.sh`** — `--status` reports opencode path drift; `--update` syncs paths when `AGENT_OS_SOURCE` moves.
+- **`deploy-files.sh`** — skips git-listed paths missing on disk (fixes rsync failure on deleted `.work/active-ref`); in-place scaffold chains bootstrap; `--update` runs opencode `--sync-paths`.
+- **`framework-verify.sh`** — deploy smoke tests (thin + fat opencode `--sync-paths`), `deploy-repo --status`, skill-functional-verify gate.
+- **`README.md`** — Linux-first platform note; customization paragraph; skill count table (22 skills).
+- **`skills/project-query-setup/skill.md`** — standard YAML frontmatter.
+- **`skills/session-control/skill.md`** — commit task-ref rule aligned with M4/C4.
+- **`skills/deploy-repo/skill.md`** — documents shell `--status` mode.
+- **`CONTRIBUTING.md`** — documents skill context budget and CI workflow.
 
 ### Fixed
-- **`scripts/install-opencode-config.sh`** — fat-client `--sync-paths` uses framework-section merge (avoids prefix-replace corruption in `.ai.ui` paths); `compute_os_prefix` now returns after `.ai` / `.` (fixes embedded-newline path corruption).
-- **`scripts/deploy-files.sh`** — in-place scaffold no longer skips `.cursorrules`; `--update` runs opencode `--sync-paths` for fat-client consumers.
-- **`scripts/framework-verify.sh`** — deploy smoke tests include fat-client `--sync-paths` repair.
+- **`scripts/install-opencode-config.sh`** — `compute_os_prefix` returns after `.ai`/`.` (fixes embedded-newline path corruption); fat-client `--sync-paths` uses framework-section merge.
+- **Trimmed skill reference links** — corrected GitHub-style anchors in `plan-foundation`, `plan-master`, `plan-repair`, `plan-verify`, `session-control`.
+- **`session-control`** — removed duplicate Context protocol block orphaned after trim; restored Critical interactions / Anti-patterns / Project layout in `reference.md`.
 - **`skills/README.md`** — removed stale “18-skill registry” wording.
-
-### Removed
-- **GitHub Actions CI** — deleted `.github/workflows/framework-verify.yml` (run `bash scripts/framework-verify.sh` locally instead).
+- **Git hooks** — `prepare-commit-msg` strips and `commit-msg` rejects `Co-authored-by:` trailers.
 
 ## [0.4.2] - 2026-07-01
 

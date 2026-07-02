@@ -75,6 +75,14 @@ if [[ "${failures}" -eq "${prose_before}" ]]; then
   ok "skill-count prose matches derived count in landing docs"
 fi
 
+# --- 1c. Trimmed skill integrity (reference links + moved content) ---
+note "skill-functional-verify (trim integrity)"
+if python3 "${REPO_ROOT}/scripts/skill-functional-verify.py" >/dev/null; then
+  ok "trimmed skills: reference anchors + required protocol sections"
+else
+  die "skill-functional-verify failed - run: python3 scripts/skill-functional-verify.py"
+fi
+
 # Intake contract guard: classification is agent-judged (no executable classifier),
 # so we structurally assert the feature-spec intake table keeps all 4 classes + the
 # force override - preventing the routing contract from being silently gutted.
@@ -153,6 +161,12 @@ mkdir -p "${DF_SMOKE}"
   fi
 )
 ok "deploy-files in-place creates .cursorrules + .work/"
+
+# --- 2b2. deploy-repo --status (read-only) ---
+note "deploy-repo --status"
+bash "${REPO_ROOT}/scripts/deploy-repo.sh" --status >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-repo.sh" --status "${DF_SMOKE}" >/dev/null
+ok "deploy-repo --status reports source + optional target"
 
 # --- 2c. install-opencode-config via deploy-basic (thin-client) ---
 note "install-opencode-config (thin-client via deploy-basic)"

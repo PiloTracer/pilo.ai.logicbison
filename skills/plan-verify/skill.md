@@ -97,119 +97,9 @@ When mode is explicit (e.g. `@plan-verify foundation`, `@plan-verify master`), s
 
 ---
 
-## Brownfield detection (BF0)
+Run at start of **every** mode. Record **brownfield: yes | no** in report header.
 
-Run at the start of **every** mode. Record **brownfield: yes | no** in the report header.
-
-**brownfield: yes** when **any** of:
-
-| Signal | Evidence |
-|--------|----------|
-| No formal foundation run | `{HANDOFF}` lacks `Plan-master-ready:` **and** foundation doc 01–04 missing or stub-only |
-| No formal master plan | No `{PLANS_ROOT}/full/*-full-plan.md` **or** plan is clearly pre-framework (no `M{N}-T{N}` ids, wrong layout) |
-| Code-first repo | Application source tree exists (`REPLACE:APP_ROOT` or obvious `src/`, `apis/`, `backend/`) |
-| User invoked brownfield | Message contains `brownfield`, `legacy`, `existing repo`, `never ran plan-foundation`, `align framework` |
-| Legacy planning only | `ROADMAP.md`, `docs/planning/`, GitHub milestones, or README-only scope **without** `.work/plans/foundation/` |
-
-**brownfield: no** when HANDOFF records `Plan-master-ready: <date>` **and** foundation 01–04 + registries exist per `plan-foundation` status.
-
-**When brownfield: yes** — still run the requested mode, but follow the **BF branch** in that protocol (or use dedicated **brownfield** mode for all layers at once).
-
----
-
-## Framework alignment map (brownfield)
-
-Score each **canonical slot** against what exists on disk. Do not require formal P0–P6 completion to run checks.
-
-| Slot | Canonical path (under repo root) | Acceptable brownfield substitutes (cite path) |
-|------|----------------------------------|-----------------------------------------------|
-| Agent rules | `.cursorrules` | Missing → gap (bootstrap) |
-| HANDOFF | `.work/context/HANDOFF.md` | Missing → gap |
-| P0 / scope capture | `.work/plans/foundation/*-01-*-initial-scope.md` | README § product, `docs/vision.md`, top of HANDOFF |
-| Scope doc 01 | `.work/plans/foundation/*-01-*-scope.md` | Same + issue labels / epic docs |
-| Architecture foundation 04 | `.work/plans/foundation/*-04-*` | ADR index, `docs/architecture.md`, DIRECTORY_MAP + code tree |
-| ADRs | `.work/decisions/` | `docs/adr/`, inline README decisions |
-| SPECs | `.work/features/*/…-SPEC.md` | Domain README, test names, module docstrings (infer **Inference**) |
-| Standards | `.ai/standards/*CONVENTIONS*`, `*FEATURE_STANDARD*`, `*DIRECTORY_MAP*` | Repo conventions doc; infer from linter config |
-| Registries | `.work/plans/ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` | TODO/FIXME scan, issue tracker, empty template = gap |
-| Master plan | `.work/plans/full/*-full-plan.md` | `ROADMAP.md`, milestone issues, dense NEXT only |
-| Iteration | `.work/plans/NEXT.md` | Kanban export, sprint doc (partial credit) |
-| Stack | `REPLACE:TECH_STACK_DOC` | `package.json`, `pyproject.toml`, `go.mod`, Dockerfile |
-
-**Coverage score:** `present` | `substitute` | `partial` | `missing` per slot. **Framework alignment %** = (present + substitute) / total slots (round down; label **Estimate**).
-
----
-
-## Brownfield verify protocol
-
-**Triggers:** `@plan-verify brownfield`, or **BF0 = yes** on any mode.
-
-**Objective:** Best-effort read-only assessment of how well the repo matches the `.ai` planning model **without** requiring prior `@plan-foundation greenfield` or `@plan-master greenfield`.
-
-### BF1 - Repo discovery (mandatory)
-
-1. Inventory per [Framework alignment map](#framework-alignment-map-brownfield).
-2. Read: `README.md`, `{HANDOFF}` (if any), app tree (2 levels), `{DECISIONS_ROOT}/`, `{FEATURE_SPEC_ROOT}/`, existing plans under `{PLANS_ROOT}/`.
-3. Build **assumption ledger**: label each inferred fact **Confirmed** (file cite) | **Inference** | **Unverified**.
-
-### BF2 - Layer assessments (run all that apply)
-
-| Layer | When | Action |
-|-------|------|--------|
-| Foundation | Always in brownfield | [Foundation verify](#foundation-verify-protocol) **BF branch** — matrix uses substitutes; skip F1 integrity **fail** on missing docs → record `integrity: skip - no foundation set to audit` |
-| Master | Master plan or substitute exists | [Master verify](#master-verify-protocol) **BF branch** — conformance vs `MASTER_PLAN_STANDARD` on substitute or partial plan |
-| Alignment | NEXT or sprint doc exists | [Alignment verify](#alignment-verify-protocol) **BF branch** — compare NEXT to best available roadmap (master plan **or** substitute) |
-
-### BF3 - Formal readiness (report only — do not certify)
-
-| Label | Meaning |
-|-------|---------|
-| **formal-foundation-complete** | Would be **yes** per `plan-foundation` gates (rare in brownfield) |
-| **formal-plan-master-ready** | HANDOFF certify date or equivalent |
-| **brownfield-aligned** | ≥70% framework slots `present` or `substitute`; no High-severity contradictions |
-| **brownfield-partial** | 40–69% coverage or major substitutes only |
-| **brownfield-gap** | <40% or blocking contradictions |
-
-### BF4 - Brownfield report (mandatory)
-
-```markdown
-## plan-verify brownfield - <Project>
-
-**Date:** <ISO> · **Brownfield:** yes
-**Framework alignment:** <N>% (Estimate) · **Tier:** brownfield-aligned | brownfield-partial | brownfield-gap
-
-### Request interpretation
-<when open language — insert interpretation block; otherwise: explicit brownfield mode>
-
-### Slot coverage
-| Slot | Status | Source path | Notes |
-|------|--------|-------------|-------|
-
-### Formal readiness (not certified here)
-- formal-foundation-complete: yes | no
-- formal-plan-master-ready: yes | no
-- brownfield-aligned: yes | no
-
-### Layer verdicts
-- Foundation: pass | pass with gaps | fail | skip
-- Master: …
-- Alignment: …
-
-### High-priority gaps
-<ordered>
-
-### Verdict
-**aligned-best-effort** | **pass with gaps** | **fail**
-
-### Next step
-@plan-repair brownfield | @plan-repair brownfield - foundation | @project-bootstrap init (overwrite-missing)
-```
-
-**Verdict rules (brownfield):**
-
-- **aligned-best-effort** — brownfield-aligned **yes**; safe to proceed with documented waivers; recommend `@plan-repair brownfield` to close gaps without full greenfield questionnaire.
-- **pass with gaps** — usable substitutes; formal certify still pending.
-- **fail** — contradictions, missing `.work/` skeleton, or no product truth (cannot infer scope).
+**BF0 signals, Framework alignment map slot table, brownfield verify BF1–BF4, report template, verdict rules:** [`reference.md` § Brownfield detection and verify (detailed)](reference.md#brownfield-detection-and-verify-detailed).
 
 ---
 
@@ -335,86 +225,10 @@ Follow `.ai/skills/plan-master/skill.md` § **Status protocol**. Record:
 - Plan artifact path
 - **Plan status:** Draft | Approved | …
 - **implementation-ready:** yes | no (from plan-master — cite, do not re-score differently)
-- Phase progress P0–P6 inside plan workflow
+Cross-check foundation layer: P0–P6 gates, registries, traceability, semantic integrity.
 
-### M2 - Integrity on master plan (mandatory)
+**BF branch, F0–F3 steps, check matrix, report template:** [`reference.md` § Foundation verify protocol (detailed)](reference.md#foundation-verify-protocol).
 
-Follow `.ai/skills/plan-master/skill.md` § **integrity** when `*-full-plan.md` exists; if missing → **fail** with **Run first:** `@plan-master greenfield` or `@plan-repair master - create master plan from foundation`.
-
-Record: **integrity:** pass | pass with waivers | fail
-
-### M3 - Standard conformance (when plan exists)
-
-Against `.ai/standards/20260519-MASTER_PLAN_STANDARD.md`:
-
-| Dimension | Question | Result |
-|-----------|----------|--------|
-| Header metadata | Status, version, dates present? | pass / fail |
-| §19 roadmap | Milestones M1… with task ids `M{N}-T{N}`? | pass / fail / gap |
-| §20–§21 | Global acceptance + validation gates? | pass / fail / gap |
-| Traceability | FR/NFR ids in tasks exist in plan body? Run `bash .ai/scripts/traceability-verify.sh` (every FR maps to a task M{N}-T{N})? | pass / fail / gap |
-| Registries | Links to ASSUMPTIONS/RISK/UNKNOWNS — no duplicate forks? | pass / fail |
-| Approved gate | Approved required for implementation-ready? | pass / fail / waived |
-| Probe coverage | If `{PLANS_ROOT}/full/PROBE_LEDGER.md` exists: `bash .ai/scripts/readiness-verify.sh` passes? Coverage % vs target; ★ gaps? | pass / gap / n/a |
-
-### M4 - Master verify report (mandatory)
-
-```markdown
-## plan-verify master - <Project>
-
-**Date:** <ISO> · **Mode:** master (read-only)
-
-### Request interpretation
-<when open language — insert interpretation block; otherwise: explicit master mode>
-
-### Upstream
-- **plan-master status:** cited above
-- **plan-master integrity:** pass | pass with waivers | fail
-
-### Check matrix
-| Dimension | Result | Evidence / gap |
-|-----------|--------|----------------|
-
-### Readiness (from plan-master — do not contradict)
-- **implementation-ready:** yes | no
-- **Probe coverage:** NN% (target 85%) · ledger honest: yes/fail | no ledger - if NFRs/FRs/risks are thin, run `@plan-master probe` → `@plan-master integrity`
-
-### Gaps
-<ordered>
-
-### Verdict
-**pass** | **pass with gaps** | **fail**
-
-### Next step
-- fail: `@plan-repair repair - from master` or `@plan-repair master - <goal>` or `@plan-master revise - <reason>`
-- pass + not Approved: `@plan-master continue` or owner approval workflow
-```
-
----
-
-## Alignment verify protocol
-
-Detect drift between **tactical** (`{ITERATION_CARRIER}`) and **strategic** (`{MASTER_PLAN}`) layers per `20260518-tutorial-fix-existing-plans.md`.
-
-### Alignment verify — brownfield branch (BF)
-
-When **BF0 = yes**:
-
-- If no `## Current iteration` but sprint doc / NEXT without block → **partial**; recommend `@plan-repair brownfield` or `@code-implementation plan - M{N}` after master substitute exists.
-- If no `{MASTER_PLAN}` but ROADMAP / milestones → compare NEXT tasks to substitute; flag id mismatches as **Med** gaps (not automatic **fail**).
-- Verdict **aligned-best-effort** allowed when NEXT is internally consistent with best available roadmap substitute.
-
-### A0 - Existence gate
-
-| Required | If missing (brownfield: no) | If missing (brownfield: yes) |
-|----------|----------------------------|------------------------------|
-| Valid `## Current iteration` in `{ITERATION_CARRIER}` | **fail** — `@code-implementation plan - M{N}` | **partial** — BF branch |
-| `{MASTER_PLAN}` (latest `*-full-plan.md`) | **fail** — `@plan-master greenfield` or `@plan-repair master - …` | Use substitute per [BF branch](#alignment-verify--brownfield-branch-bf) |
-
-### A1 - Alignment checks
-
-| Check | Pass if |
-|-------|---------|
 | Milestone ref | Iteration header `M{N}` exists in plan §19 (or HANDOFF-documented section id) |
 | Task ids | Iteration task ids match plan §19 exactly |
 | FR/NFR | Iteration traces cite ids that exist in plan FR/NFR tables |
@@ -494,87 +308,10 @@ For each surface, resolve **mapped slug** using this order:
 2. DIRECTORY_MAP bounded-context / path row — **Confirmed** or **Inference**
 3. SPEC Purpose / §6 APIs naming the surface — **Inference**
 4. No match → **unmapped**
+Cross-check master plan and implementation-ready prerequisites (report only).
 
-### C3 - Coverage matrix
+**BF branch, M0–M4 steps, conformance matrix, report template:** [`reference.md` § Master verify protocol (detailed)](reference.md#master-verify-protocol).
 
-| Surface | Mapped slug | Evidence | Status |
-|---------|-------------|----------|--------|
-| … | `<slug>` \| — | path + SPEC § | mapped \| unmapped \| waived |
-
-**Waivers:** Only when HANDOFF or same-message user documents intentional orphan (e.g. deprecated module pending removal). Cite waiver id.
-
-**Coverage %:** `mapped + waived` / total surfaces (round down; label **Estimate**).
-
-### C4 - Coverage report (mandatory)
-
-```markdown
-## plan-verify coverage - <Project>
-
-**Date:** <ISO> · **Mode:** coverage (read-only)
-**Surfaces inventoried:** <N> · **Coverage:** <N>% (Estimate)
-
-### Request interpretation
-<when open language — insert block; else: explicit coverage mode>
-
-### Unmapped surfaces
-| Surface | Suggested slug | Notes |
-|---------|----------------|-------|
-
-### Waivers
-<list or "none">
-
-### Registry snapshot
-| Slug | SPEC path | Has Implementation map? |
-|------|-----------|-------------------------|
-
-### Verdict
-**pass** | **pass with gaps** | **fail**
-
-### Next step
-- gaps: `@plan-repair repair - from coverage` (or `@plan-repair brownfield` when framework slots also missing)
-- pass: optional `bash scripts/framework-verify.sh` when validating Agent OS install
-```
-
-**Verdict rules:**
-
-- **pass** — 100% mapped or only documented waivers; DIRECTORY_MAP references every bounded context with a SPEC.
-- **pass with gaps** — ≤3 unmapped non-critical surfaces (shell fragments, dev-only) with repair plan obvious.
-- **fail** — any unmapped production route/API/page cluster, or >10% unmapped without waivers.
-
-### C5 - Optional persistence
-
-When user asks to **record** the audit in the same message, write `{WORK_ROOT}/reports/YYYYMMDD-code-registry-audit.md` (summary + unmapped table only). Otherwise report in chat only — verify stays read-only.
-
----
-
-## Status protocol
-
-Read-only. No artifact writes.
-
-1. Quick `foundation` matrix (abbreviated) if foundation paths exist.
-2. Quick `master` snapshot if `*-full-plan.md` exists.
-3. Note active iteration in `{ITERATION_CARRIER}`.
-
-```markdown
-## plan-verify status
-
-**Request interpretation:** <when open language — insert; otherwise: explicit status mode>
-
-**Brownfield:** yes | no
-**Framework alignment:** <N>% | unknown
-**Foundation-complete:** yes | no | unknown (formal)
-**Plan-master-ready:** yes | no | unknown (formal)
-**Brownfield-aligned:** yes | no | unknown
-**Master plan:** <path | substitute | none> · **Status:** Draft | Approved | …
-**Implementation-ready:** yes | no | unknown
-**Active iteration:** M{N} | none
-
-**Suggested verify:** @plan-verify brownfield | foundation | master | alignment | coverage
-```
-
----
-
-## Integration
 
 | Skill | Relationship |
 |-------|----------------|
@@ -616,3 +353,11 @@ Read-only. No artifact writes.
 - Running open-language verify without emitting a **Request interpretation** block (see [Open language interpretation](#open-language-interpretation-free-requests))
 - Claiming **100% cataloged** from framework slot alignment alone — run **coverage** when the question is code locate-ability
 - Introducing parallel registries (`feature.yml`, per-repo domain-registry files) instead of SPEC **Implementation map** + DIRECTORY_MAP
+Detect drift between `{ITERATION_CARRIER}` and `{MASTER_PLAN}`.
+
+**BF branch, A0 existence gate, A1 checks, A2 report template:** [`reference.md` § Alignment verify protocol (detailed)](reference.md#alignment-verify-protocol).
+
+Read-only inventory of deployable surfaces vs SPEC Implementation map + DIRECTORY_MAP.
+
+**C0–C5 steps, surface inventory, mapping order, coverage matrix, report template, verdict rules:** [`reference.md` § Coverage verify protocol (detailed)](reference.md#coverage-verify-protocol).
+

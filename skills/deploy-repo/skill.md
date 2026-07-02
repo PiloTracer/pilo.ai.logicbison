@@ -11,7 +11,7 @@ description: >-
 
 # deploy-repo
 
-**Shell:** `bash <source>/.ai/scripts/deploy-repo.sh <clone|archive> <target-path>`
+**Shell:** `bash <source>/.ai/scripts/deploy-repo.sh [--status [path] | <clone|archive> <target-path>]`
 
 Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.gitignore`, and root `.cursorrules`) into a target directory. Two modes cover both git-mirror and snapshot deployments.
 
@@ -27,7 +27,10 @@ Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.g
 |-----------|------|
 | `@deploy-repo` **clone - /path/to/repo** | Full `git clone` from origin remote to target path |
 | `@deploy-repo` **archive - /path/to/repo** | `git archive HEAD \| tar xf` — full tree, no `.git` |
-| `@deploy-repo` **status** | Report source remote, existing deploy locations |
+| `@deploy-repo` **status** | Report source remote, HEAD, optional target deploy state |
+| `@deploy-repo` **status** - /path | Same with target path inspection |
+
+**Shell (read-only):** `bash <source>/scripts/deploy-repo.sh --status [target-path]`
 
 **Default:** `status` if no verb matches.
 

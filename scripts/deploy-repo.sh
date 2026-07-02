@@ -11,19 +11,57 @@
 # target exists and needs a partial update.
 #
 # Usage:
+#   bash scripts/deploy-repo.sh --status [target-path]
 #   bash scripts/deploy-repo.sh clone    /absolute/path/to/target
 #   bash scripts/deploy-repo.sh archive  /absolute/path/to/target
 #   AI_SOURCE=/path/.ai bash scripts/deploy-repo.sh clone /absolute/path/to/target
 #
 set -euo pipefail
 
-MODE="${1:?Usage: $0 <clone|archive> <target-path>}"
-RAW_TARGET="${2:?Usage: $0 <clone|archive> <target-path>}"
 if [[ -n "${AI_SOURCE:-}" ]]; then
   AI_ROOT="$(cd "$AI_SOURCE" && pwd)"
 else
   AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
+
+# ── Status mode (read-only) ───────────────────────────────────────────
+if [[ "${1:-}" == "--status" || "${1:-}" == "status" ]]; then
+  shift || true
+  TARGET="${1:-}"
+  echo "=== deploy-repo status (Agent OS) ==="
+  echo "  source: $AI_ROOT"
+  REMOTE="$(cd "$AI_ROOT" && git remote get-url origin 2>/dev/null || true)"
+  if [[ -n "$REMOTE" ]]; then
+    echo "  origin: $REMOTE (clone available)"
+  else
+    echo "  origin: none (use archive mode)"
+  fi
+  echo "  branch: $(cd "$AI_ROOT" && git branch --show-current 2>/dev/null || echo '?')"
+  echo "  head: $(cd "$AI_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo '?')"
+  echo "  modes: clone | archive"
+  if [[ -n "$TARGET" ]]; then
+    if [[ "$TARGET" == "." || "$TARGET" == "$PWD" ]]; then
+      T="$(pwd)"
+    else
+      T="$(cd "$TARGET" 2>/dev/null && pwd || echo "$TARGET")"
+    fi
+    echo ""
+    echo "=== target: $T ==="
+    if [[ ! -e "$T" ]]; then
+      echo "  exists: no"
+    else
+      echo "  exists: yes"
+      [[ -d "$T/.git" ]] && echo "  .git/: present" || echo "  .git/: absent"
+      [[ -f "$T/.cursorrules" ]] && echo "  .cursorrules: present" || echo "  .cursorrules: missing"
+      [[ -d "$T/.github" ]] && echo "  .github/: present" || echo "  .github/: missing"
+      [[ -d "$T/skills" ]] && echo "  skills/: present" || echo "  skills/: missing"
+    fi
+  fi
+  exit 0
+fi
+
+MODE="${1:?Usage: $0 --status [path] | <clone|archive> <target-path>}"
+RAW_TARGET="${2:?Usage: $0 <clone|archive> <target-path>}"
 
 # ── Resolve target ──────────────────────────────────────────────────
 # Always use as-is (unlike deploy-files, this is a full repo deploy)

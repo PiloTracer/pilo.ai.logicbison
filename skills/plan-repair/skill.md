@@ -82,156 +82,32 @@ Normalize to **mode** + optional **source** or **goal text** (after `-`). ASCII 
 
 ### R0 - Findings intake (mandatory)
 
-| ID | Source | Severity | Finding | Affected paths | Fix strategy | Framework ref |
-|----|--------|----------|---------|----------------|--------------|---------------|
-| F1 | plan-verify foundation | fail | … | … | foundation continue / new doc | `—` (verify-sourced) |
-
-`Framework ref` is populated when findings come from **open language** (custom brief, goal text after `-`) or **brownfield** discovery. Sources from `@plan-verify` reports (foundation / master / alignment) may leave it `—` (verify-sourced) since the verify report already frames findings in framework terms. Must cite at least one: standard, concept MOD id, foundation doc id, SPEC path, master plan §, or registry.
-
-**Obtain findings by:**
-
-1. Chat verify report,
-2. **Run** `@plan-verify <mode>` now,
-3. User goal after `-` (decompose into F* rows),
-4. **Brownfield** discovery table (missing artifacts).
+Build F* table from verify report, chat, user goal, or brownfield discovery. Full table schema and sources: [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R0).
 
 ### R0-free - Framework alignment (free lang requests only)
 
-**When:** Findings source is **custom** brief, goal text after `-`, or implicit layer resolution (no verifying report in chat). **Skip** when all F* rows come from a `@plan-verify` or `@db-migration verify` report.
-
-Produce a **Framework alignment map** before the F* triage. This decomposes the free text into `.ai` framework components and ensures the repair stays within framework-consistent paths.
-
-```markdown
-### Free request → Framework alignment
-
-**Request:** <paraphrase one line>
-
-| Aspect | Framework component | Artifact path | Action |
-|--------|---------------------|---------------|--------|
-| <quote/phrase from request> | P0 scope | foundation/*-01-*-scope.md | Add/amend scope statement |
-| <…> | FEATURE_STANDARD | standards/*FEATURE_STANDARD* | SPEC needed / amend |
-| <…> | CONVENTIONS | standards/*CONVENTIONS* | Naming / layout check |
-| <…> | threat-model | standards/*threat-model* | Review surface |
-| <…> | MOD-06 | .ai/concepts/ai-amplification/ | Trigger if agent authors plan/docs |
-| <…> | P4 cross-cutting | standards/*observability-spec* | Observable from day 1? |
-| <…> | ADR | .work/decisions/ | Capture decision |
-| <…> | Master plan §19 | .work/plans/full/*-full-plan.md | FR / task delta |
-```
-
-**Rules:**
-- Minimum 1 component row per distinct framework aspect; omit rows with no plausible connection.
-- **Inference** rule: when mapping is probabilistic (e.g. "SSO might need a SPEC"), label the row **Inference** and propose it — do not assume it.
-- Cross-reference OPEN OWNER ACTIONS in `{HANDOFF}`; freeze the map before filing F* rows.
-- Update the map if triage surfaces new framework connections.
-
-**Triage:**
-
-| Disposition | Action |
-|-------------|--------|
-| **fix-now** | Agent edits plan docs via upstream skill protocols; must cite Framework ref column |
-| **owner** | `UNKNOWNS.md` or HANDOFF § Open owner actions; preserve Framework ref |
-| **waiver** | HANDOFF or same-message user approval; note Framework ref |
-| **redirect** | Code gap → `@code-repair`; session → `@session-control` |
-
-If **>50%** rows are **owner** without documentation-only request → stop and list owner actions.
+When findings are from custom brief (not verify report): produce Framework alignment map before F* triage. Template and triage table: [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R0-free).
 
 ### R1 - Context load (mandatory)
 
-| # | Path | When |
-|---|------|------|
-| 1 | `.cursorrules` | always |
-| 2 | `{HANDOFF}` | always |
-| 3 | `{ITERATION_CARRIER}` | alignment / master touches iteration |
-| 4 | `{PLANS_ROOT}/foundation/*` | foundation |
-| 5 | `{PLANS_ROOT}/full/*-full-plan.md` | master |
-| 6 | `{PLANS_ROOT}/ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` | always |
-| 7 | `.ai/standards/20260519-MASTER_PLAN_STANDARD.md` | master |
-| 8 | Relevant SPECs / ADRs | per F* paths |
-
-Short **assumption ledger** when behavior is inferred from code-only brownfield repos.
+Context read table by layer: [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R1).
 
 ### R2 - Repair plan (before edits)
 
-≤15 lines: F* order (sorted by Framework ref → priority), delegate commands (`@plan-foundation continue`, `@plan-master revise - …`), files to create, re-verify mode for R4.
-
-**Fix order:** blockers (bootstrap/HANDOFF) → foundation gates → master plan → alignment (NEXT) → registries.
-
-When an **[R0-free](#r0-free---framework-alignment-free-lang-requests-only)** alignment map was produced, cross-check each repair item against the map's **Framework component** column — a repair that touches a standard must cite that standard path; a repair that alters scope must trace to foundation doc 01.
+≤15-line plan; fix order; cross-check R0-free map: [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R2).
 
 ### R3 - Apply fixes (delegate)
 
-| Layer | Primary delegate | When |
-|-------|------------------|------|
-| Foundation gaps | `@plan-foundation continue` | Partial P0–P6 |
-| New product scope in foundation | Update doc 01 + registries; amend SPECs via `@feature-spec amend` | F* cites scope |
-| Certify unlock | `@plan-foundation certify plan-master-ready` | After foundation-complete |
-| Master delta | `@plan-master revise - <reason>` | Approved or Draft plan exists |
-| New master plan | `@plan-master greenfield` or `continue` | No plan / partial Draft |
-| Integrity fail | Fix cited contradictions → `@plan-master integrity` | Before certify/approve |
-| NEXT drift only | `@code-implementation plan - M{N}` | After master is truth |
-| Missing `.work/` skeleton | `@project-bootstrap init` | Brownfield |
-
-**User goal text** (e.g. `foundation - we will require …`) must appear in:
-
-- Foundation doc 01 scope / assumption ledger, **or**
-- New/amended SPEC + ADR as appropriate, **or**
-- Master plan FR row + §19 tasks after `@plan-master revise`
-
-Record **Correction YYYY-MM-DD:** notes when editing Approved plans (per fix-existing-plans tutorial).
+Delegate table (foundation, master, NEXT, bootstrap): [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R3).
 
 ### R4 - Re-verify (mandatory)
 
-| Repair source | Re-run after fixes |
-|---------------|-------------------|
-| **from foundation** / **foundation** | `@plan-verify foundation` |
-| **from master** / **master** | `@plan-verify master` |
-| **from alignment** | `@plan-verify alignment` |
-| **custom** | Modes named in brief; minimum one `@plan-verify` pass |
-| **brownfield** | `@plan-verify foundation` then `@plan-verify master` when applicable |
-
-**Verdict:**
-
-| Verdict | Meaning |
-|---------|---------|
-| **repaired** | Re-verify **pass** or **pass with gaps** (waivers documented) |
-| **partial** | Some F* fixed; re-verify still **fail** |
-| **failed** | Could not fix |
-| **nothing to repair** | No findings |
+Re-verify mode by repair source; verdict table: [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R4).
 
 ### R5 - Repair report (mandatory)
 
-```markdown
-## plan-repair - <foundation | master | alignment | brownfield> - <verdict>
+Report template and checklist: [reference.md § Repair protocol R0–R5 (detailed)](reference.md#repair-protocol-r0-r5-detailed) (R5).
 
-**Date:** <ISO>
-
-### Findings
-| ID | Disposition | Status | Evidence | Framework ref |
-|----|-------------|--------|----------|---------------|
-
-### Framework alignment (if R0-free ran)
-<insert R0-free map or link to it>
-
-### Delegated commands run
-- `@plan-foundation …` / `@plan-master …` / `@code-implementation plan - M{N}`
-
-### Completion checklist
-| # | Check | Result | Evidence |
-|---|-------|--------|----------|
-| 1 | R0 findings intake | pass/fail | |
-| 2 | R0-free alignment map (when free lang) | pass/skip | |
-| 3 | R1 context load | pass/fail | |
-| 4 | R2 repair plan (cross-checked vs alignment) | pass/fail | |
-| 5 | R3 fixes applied; goal text in target artifacts | pass/fail | |
-| 6 | R4 re-verify | pass/fail | |
-| 7 | No plan ↔ code layer confusion | pass | |
-
-### Remaining / owner
-<list or none>
-
-### Next
-@plan-verify <mode> | @plan-foundation certify | @plan-master status | @code-implementation plan - M{N}
-```
 
 ---
 
@@ -465,37 +341,35 @@ Read-only.
 **Suggested repair:** @plan-repair brownfield | foundation | master | brownfield - foundation
 ```
 
----
+### BR0 - Brownfield detection
 
-## Integration
+Same BF0 rules as `plan-verify` § Brownfield detection: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR0).
 
-| Skill | Relationship |
-|-------|----------------|
-| `plan-verify` | **Upstream detector** — fail → `@plan-repair repair - from <mode>` |
-| `plan-foundation` | **Executor** for foundation continue / certify |
-| `plan-master` | **Executor** for greenfield / continue / revise / integrity |
-| `code-repair` | **Wrong layer** for plan docs — redirect here |
-| `code-implementation` | Regenerates NEXT after master repair |
-| `project-bootstrap` | Brownfield `.work/` + `.cursorrules` scaffold |
-| `feature-spec` | SPEC amendments when repair touches behaviour contracts |
+### BR1 - Assess (mandatory, no writes)
 
----
+Run `@plan-verify brownfield` or BF1–BF3 inline; build F* rows; present R2 repair plan: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR1).
 
-## Blocked report shape
+### BR2 - Scaffold (minimal writes)
 
-Per [SKILL_DEPENDENCIES.md § Blocked report shape](../SKILL_DEPENDENCIES.md#blocked-report-shape) — header: `## @plan-repair <command> - blocked (prerequisite)`.
+Bootstrap + empty registries + HANDOFF brownfield line: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR2).
 
----
+### BR3 - Synthesize foundation (no greenfield questionnaire)
 
-## Anti-patterns
+Artifact synthesis table and execution style: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR3).
 
-- **repaired** without `@plan-verify` re-run output
-- Editing Approved master plan without `revise` protocol or correction note
-- Calling doc 04 "the full plan"
-- `@plan-master greenfield` when plan-master-ready is **no**
-- Implementation code changes during plan-repair
-- Mass backfills or destructive SQL (forbidden per `.cursorrules`)
-- Skipping master fix before rewriting NEXT (alignment thrash)
-- Requiring `@plan-foundation greenfield` before any brownfield synthesis
-- Claiming `Plan-master-ready` or **Approved** without formal certify/approve workflow
-- `overwrite-all` bootstrap without explicit user confirmation
+### BR4 - Synthesize master plan (no prior formal plan-master)
+
+Draft plan from evidence; PG1 brownfield waiver line: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR4).
+
+### BR5 - Synthesize alignment (NEXT)
+
+Regenerate or rewrite iteration block: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR5).
+
+### BR6 - Close brownfield pass
+
+HANDOFF update, registries, R4 `@plan-verify brownfield`: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR6).
+
+### BR7 - Brownfield repair report addendum
+
+Brownfield manifest + formal path remaining checklist: [reference.md § Brownfield repair protocol (detailed)](reference.md#brownfield-repair-protocol) (BR7).
+

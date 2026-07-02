@@ -24,7 +24,7 @@ bash scripts/gate-verify.sh          # completion gate: a done task in NEXT.md m
 bash scripts/smoke-consumer.sh        # optional: verbose consumer artifact listing
 ```
 
-Run these locally before merging or tagging. GitHub Actions CI is **disabled** for this repo (no workflow files under `.github/workflows/`).
+Run these locally before merging or tagging. GitHub Actions runs `bash scripts/framework-verify.sh` on push/PR to `main` (see `.github/workflows/framework-verify.yml`). Run the full verifier suite before tagging a release (`bash scripts/release.sh <version>`).
 
 ### Skill context budget
 
