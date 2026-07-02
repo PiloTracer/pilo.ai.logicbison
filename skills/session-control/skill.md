@@ -145,6 +145,28 @@ docker compose ps 2>/dev/null || podman-compose ps 2>/dev/null || true
 
 Record: branch, clean/dirty, last commit, services up/down if checked.
 
+### S3c - MCP availability (informational, non-blocking)
+
+Check whether MCP server files or project-query-setup integration is present:
+
+```bash
+test -d .opencode/mcp/ && echo "MCP_DIR: .opencode/mcp/" || true
+test -d .opencode/mcp/project-mcp/ && echo "MCP_PROJECT: .opencode/mcp/project-mcp/" || true
+test -f .opencode/mcp/project-mcp/mcp_server.py && echo "MCP_READY=yes" && echo "MCP_CMD=python3 .opencode/mcp/project-mcp/mcp_server.py" || true
+```
+
+If MCP server files are detected, check `.work/context/MCP_REGISTRY.md` for prior approvals.  
+If a registration exists for `tools-project` on the same MCP server path → no note needed (already approved).  
+If MCP server files are detected but no registration exists in the config, add an informational note to the start report:
+
+> ⓘ **MCP server detected** but no coding-agent MCP config found for `tools-project`.  
+> If not yet registered, ask your coding agent to register it — provide:
+> - Server name: `tools-project`
+> - Command: `python3 .opencode/mcp/project-mcp/mcp_server.py`
+> - Key file: `~/.tools-project-key` (chmod 600)
+
+This check is **read-only and non-blocking** — it does not gate the session start. If nothing is detected, skip silently.
+
 ### S4 - Session goal (interaction)
 
 Capture goal from (in order): text after `start -`, else HANDOFF **Recommended pick-up** / repository state, else ask **once**:
@@ -253,6 +275,9 @@ All mandatory checks (1–4, 6–8) are **pass**, and row **5** is **pass** (doc
 
 ### Principles reminder (3 bullets max)
 <from .cursorrules - not a full paste>
+
+### MCP availability
+<if MCP detected but not registered: include the ⓘ note from S3c. If registered or absent: omit this section.>
 ```
 
 ---

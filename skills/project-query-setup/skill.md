@@ -25,7 +25,7 @@
 | `@project-query-setup status` | Check if connected (key file exists? API reachable? MCP tools listed?) |
 | `@project-query-setup key` | Guide the user through web UI → key creation → `~/.tools-project-key` |
 | `@project-query-setup test` | Verify connectivity by listing projects |
-| `@project-query-setup register-mcp` | Register MCP server in consuming project's opencode.json |
+| `@project-query-setup register-mcp` | Register MCP server in consuming project's coding-agent config |
 | `@project-query-setup help` | Show available tools and usage patterns for this OS |
 | `@project-query-setup` (no verb) | Default to `status` mode |
 
@@ -114,27 +114,69 @@ If `Connection refused` — API is not running. Stop and tell user.
 
 ### Step 6 — Deploy MCP server
 
-**Detect if this project has an `opencode.json`:**
+**Detect which coding agent config files exist in this project:**
 
 ```bash
-if test -f opencode.json; then
-  echo "HAS_OPENCODE=yes"
-else
-  echo "HAS_OPENCODE=no"
-fi
+for cfg in opencode.json .cursor/mcp.json .claude/settings.json .claude/mcp.json codex.json; do
+  test -f "$cfg" && echo "FOUND: $cfg"
+done
+test -f .cursor/mcp.json && echo "CURSOR_MCP=yes" || true
+test -f .claude/settings.json && echo "CLAUDE_CONFIG=yes" || true
+test -f .claude/mcp.json && echo "CLAUDE_MCP=yes" || true
+test -f opencode.json && echo "OPENCODE=yes" || true
 ```
 
-**Branch A — `opencode.json` exists in this project** (e.g. `.ai.soc`):
-Copy the MCP server and register it in one reliable operation:
+**Copy the MCP server file (all branches):**
 
 ```bash
-# 1. Copy the MCP server file
 mkdir -p .opencode/mcp/project-mcp
 cp /mnt/work/Projects/tools-project/.opencode/mcp/project-mcp/mcp_server.py \
    .opencode/mcp/project-mcp/
+```
 
-# 2. Add the MCP block to opencode.json using Python
-#    (safe JSON manipulation — preserves all existing keys, validates input)
+**Check for previously approved registrations:**
+
+```bash
+test -f .work/context/MCP_REGISTRY.md && echo "REGISTRY_EXISTS=yes" || echo "REGISTRY_EXISTS=no"
+```
+
+If `REGISTRY_EXISTS=yes`, read `.work/context/MCP_REGISTRY.md` and check whether a registration matching this config file + server already exists. If it does **and** the MCP server path hasn't changed, skip the confirmation prompt — proceed directly to the matching branch.
+
+**Operator confirmation gate (mandatory before modifying any coding-agent config):**
+
+Before applying Branch A, B, or C, present this prompt to the operator:
+
+> **MCP registration is about to modify your coding-agent config.**
+>
+> - Config file to modify: `<detected config file>`
+> - Server to register: `tools-project`
+> - Command: `python3 .opencode/mcp/project-mcp/mcp_server.py`
+>
+> Proceed with registration? (yes/no)
+
+Wait for the operator's explicit `yes`. Do **not** proceed on silence, "maybe", or any non-affirmative response. If the operator says `no`, stop Step 6 and skip to the completion checklist (items 5 and 6 will be `skip`).
+
+**Record the approval (after successful registration):**
+
+After the MCP block is written and validated, append to `.work/context/MCP_REGISTRY.md`:
+
+```bash
+mkdir -p .work/context
+if ! test -f .work/context/MCP_REGISTRY.md; then
+  echo "# MCP Registry — approved registrations" > .work/context/MCP_REGISTRY.md
+  echo "" >> .work/context/MCP_REGISTRY.md
+  echo "| Config file | Server | Approved | MCP server path |" >> .work/context/MCP_REGISTRY.md
+  echo "|-------------|--------|----------|-----------------|" >> .work/context/MCP_REGISTRY.md
+fi
+echo "| <config-file> | tools-project | $(date +%Y-%m-%d) | .opencode/mcp/project-mcp/mcp_server.py |" >> .work/context/MCP_REGISTRY.md
+```
+
+This record prevents re-prompting on subsequent `install` or `register-mcp` runs — the skill reads the registry and skips confirmation for already-approved entries.
+
+**Branch A — `opencode.json` exists:**
+Register in opencode format (after confirmation):
+
+```bash
 python3 << 'PYEOF'
 import json
 with open('opencode.json') as f:
@@ -148,16 +190,74 @@ with open('opencode.json', 'w') as f:
     json.dump(cfg, f, indent=2)
     f.write('\n')
 PYEOF
-
-# 3. Validate the result
 python3 -c "import json; json.load(open('opencode.json')); print('opencode.json: valid')"
 ```
 
-**Branch B — No `opencode.json` in this project** (e.g. `.ai`, `.ai.ui`, `.ai.biz`):
-Explain:
-> The MCP server and its registration belong in the **consuming project's** `opencode.json` (e.g. `tools-project/opencode.json`, or any project you deploy this OS into). They do not go in the framework's own config. When you deploy this OS to a project:
-> 1. Copy `mcp_server.py` from tools-project to `.opencode/mcp/project-mcp/` in that project
-> 2. Add the `mcp` block to that project's `opencode.json` (use the Branch A commands above, run from that project's root)
+**Branch B — `.cursor/mcp.json` exists (Cursor agent):**
+Register in Cursor MCP format:
+
+```bash
+python3 << 'PYEOF'
+import json, os
+path = '.cursor/mcp.json'
+cfg = json.load(open(path)) if os.path.exists(path) else {}
+cfg.setdefault('mcpServers', {})['tools-project'] = {
+    "command": "python3",
+    "args": [".opencode/mcp/project-mcp/mcp_server.py"],
+    "transport": "stdio"
+}
+os.makedirs('.cursor', exist_ok=True)
+with open(path, 'w') as f:
+    json.dump(cfg, f, indent=2)
+    f.write('\n')
+PYEOF
+python3 -c "import json; json.load(open('.cursor/mcp.json')); print('.cursor/mcp.json: valid')"
+```
+
+**Branch C — `.claude/settings.json` or `.claude/mcp.json` exists (Claude Code):**
+Register in Claude Code MCP format:
+
+```bash
+python3 << 'PYEOF'
+import json, os
+path = '.claude/mcp.json' if os.path.exists('.claude/mcp.json') else '.claude/settings.json'
+os.makedirs('.claude', exist_ok=True)
+cfg = json.load(open(path)) if os.path.exists(path) else {}
+cfg.setdefault('mcpServers', {})['tools-project'] = {
+    "command": "python3",
+    "args": [".opencode/mcp/project-mcp/mcp_server.py"],
+    "type": "stdio"
+}
+with open(path, 'w') as f:
+    json.dump(cfg, f, indent=2)
+    f.write('\n')
+PYEOF
+python3 -c "import json; json.load(open('${path}')); print('${path}: valid')"
+```
+
+**Branch D — No known agent config detected (no confirmation needed — no files modified):**
+Output the MCP registration details so the operator's own coding agent can register itself:
+
+> ⓘ **MCP server ready — registration needed for your coding agent.**
+>
+> The MCP server file has been copied to `.opencode/mcp/project-mcp/mcp_server.py`.  
+> However, no known coding-agent config file was detected in this project.
+>
+> **Provide the following details to your coding agent and ask it to register the MCP server in its config:**
+>
+> ```
+> Server name:   tools-project
+> Type:          local (stdio transport)
+> Command:       python3 .opencode/mcp/project-mcp/mcp_server.py
+> Key file:      ~/.tools-project-key (chmod 600)
+> ```
+>
+> Your agent knows its own config format — it will register the server correctly.  
+> Common agent config locations:
+> - **opencode:** `opencode.json` → `"mcp"` block
+> - **Cursor:** `.cursor/mcp.json` → `"mcpServers"` block
+> - **Claude Code:** `.claude/mcp.json` or `.claude/settings.json` → `"mcpServers"` block
+> - **Other:** check your tool's MCP integration docs
 
 ### Step 7 — Verify with completion checklist
 
@@ -170,7 +270,7 @@ Run each check and report the result:
 | 3 | API reachable | `curl -s <url>/healthz` returns 200 | pass / fail |
 | 4 | Auth works | `curl -s <url>/v1/agent/projects -H "X-Api-Key: $(tail -n1 ~/.tools-project-key)"` returns projects | pass / fail |
 | 5 | MCP server file present | `test -f .opencode/mcp/project-mcp/mcp_server.py` (or consuming project) | pass / skip |
-| 6 | MCP registered in opencode.json | `python3 -c "import json; c=json.load(open('opencode.json')); print('yes' if 'tools-project' in c.get('mcp',{}) else 'no')"` (or consuming project's config) | pass / skip |
+| 6 | MCP registered in coding agent config | Check the detected agent config for `tools-project` entry (opencode: `mcp.tools-project`, Cursor/Claude: `mcpServers.tools-project`) | pass / skip |
 | 7 | python3 available | `which python3` | pass / fail |
 
 ### Step 8 — Show OS-specific usage patterns
@@ -253,4 +353,4 @@ Show the 5 MCP tools available and their descriptions. Then show one domain-spec
 - Asking the user to paste their API key into chat
 - Storing the key in `/tmp` or any non-`~/.tools-project-key` location
 - Logging the key value in any output
-- Registering MCP in the framework's own config (it belongs in the consuming project's opencode.json)
+- Registering MCP in the framework's own config (it belongs in the consuming project's coding-agent config)
