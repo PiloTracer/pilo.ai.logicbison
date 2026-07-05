@@ -44,6 +44,14 @@
 @session-control status
 ```
 
+## Change safety — scope + blast radius
+
+```text
+@code-verify touch-scope
+@code-verify touch-scope --strict
+@code-verify blast-radius
+```
+
 ## Concept / architecture check
 
 ```text

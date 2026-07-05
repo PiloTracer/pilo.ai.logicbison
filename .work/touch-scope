@@ -1,0 +1,20 @@
+{
+  "ref": "AIOS-1",
+  "updated": "2026-07-04",
+  "goal": "AI change safety: mechanical scope, blast-radius, golden deploy, doc sync",
+  "allowed_paths": [],
+  "allowed_patterns": [
+    "scripts/**",
+    "standards/**",
+    "skills/**",
+    "templates/**",
+    "hooks/**",
+    ".quick/**",
+    ".work/**",
+    ".cursorrules",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "DOCS_TECH_STACK.md",
+    "START_HERE.md"
+  ]
+}

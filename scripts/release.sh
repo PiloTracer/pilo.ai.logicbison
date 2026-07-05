@@ -33,6 +33,15 @@ for v in framework-verify smoke-consumer readiness-verify traceability-verify ga
   fi
 done
 
+# 1b. Change-safety self-tests (non-blocking warn).
+for v in touch-scope-verify blast-radius-check mod06-output-check; do
+  if bash "scripts/${v}.sh" --self-test 2>/dev/null; then
+    echo "    OK: ${v} self-test"
+  else
+    echo "    WARN: ${v} self-test failed (non-blocking)"
+  fi
+done
+
 # 2. CHANGELOG must document this version (not still under [Unreleased]).
 if grep -qE "^## \[${version}\]" CHANGELOG.md; then
   echo "    OK: CHANGELOG has [${version}] section"

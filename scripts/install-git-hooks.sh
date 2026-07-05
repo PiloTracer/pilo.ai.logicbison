@@ -68,7 +68,7 @@ fi
 mkdir -p "${GIT_HOOKS}"
 
 installed=0
-for name in prepare-commit-msg commit-msg post-commit; do
+for name in prepare-commit-msg commit-msg pre-commit post-commit; do
   src="${HOOK_SRC}/${name}"
   dest="${GIT_HOOKS}/${name}"
   if [[ ! -f "$src" ]]; then

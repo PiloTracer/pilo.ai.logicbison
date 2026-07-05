@@ -5,7 +5,7 @@
 #
 # It parses the `### Tasks` table inside `## Current iteration` of a NEXT.md:
 #   | ID | Description | Files | Status | Notes |
-# A row whose ID looks like M{N}-T{N} and whose Status is done/complete MUST carry
+# A row whose ID looks like *-T{N} (e.g. M1-T1, AIOS-1-T3) and whose Status is done/complete MUST carry
 # an evidence token in Notes (exit <code>, pass(ed), tests, lint, type, gate,
 # green, ok, evidence, or a check mark). An empty / dash Notes cell is a violation
 # - that is exactly the "claimed PASS without proof" failure the framework forbids.
@@ -55,9 +55,8 @@ for carrier in "${carriers[@]}"; do
     BEGIN{ FS="|"; done=0; rows=0 }
     {
       id=trim($2); gsub(/`/, "", id)
-      # Task rows: ID is M{N}-T{N} and the row is the full 5-column Tasks table
-      # (| ID | Desc | Files | Status | Notes | -> NF==7 with empty edge fields).
-      if (id !~ /^M[0-9]+-T[0-9]+/ || NF < 7) next
+      # Task rows: ID matches *-T{N} (M1-T1, AIOS-1-T3, PROJ-T2, …)
+      if (id !~ /^[A-Za-z0-9][A-Za-z0-9-]*-T[0-9]+$/ || NF < 7) next
       rows++
       status=trim($5); gsub(/`/, "", status); status=tolower(status)
       notes=trim($6)

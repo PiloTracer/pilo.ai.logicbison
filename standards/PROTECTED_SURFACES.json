@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "description": "Machine-readable high-blast paths. code-verify and blast-radius-check.sh read this file. Extend per consumer repo; framework defaults below.",
+  "rule": "fail_verify_without_owner_approval",
+  "paths": [
+    "templates/cursorrules.template",
+    "templates/bootstrap.sh",
+    "skills/SKILL_DEPENDENCIES.md",
+    "scripts/deploy-files.sh",
+    "scripts/deploy-basic.sh",
+    "scripts/deploy-repo.sh",
+    "scripts/install-opencode-config.sh",
+    "scripts/framework-verify.sh",
+    "scripts/install-git-hooks.sh",
+    "hooks/prepare-commit-msg",
+    "hooks/commit-msg"
+  ],
+  "patterns": [
+    "scripts/deploy-*.sh",
+    "templates/work/**",
+    ".github/workflows/*.yml"
+  ],
+  "consumer_examples": [
+    "package.json",
+    "docker-compose*.yml",
+    "Dockerfile.*",
+    ".env*"
+  ],
+  "thresholds": {
+    "max_lines_warn": 150,
+    "max_lines_fail": 400,
+    "max_areas_warn": 2,
+    "max_areas_fail": 3
+  }
+}

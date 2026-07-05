@@ -33,6 +33,7 @@ Update this table when registering a new skill or guide. Keep **Run next** comma
 | **observability** | "Metrics/traces for feature" | SPEC §9 + standard | `{OBSERVABILITY_SPEC}` · `20260518-guide-observability-traceability-in-workflow.md` |
 | **integration** | External API, vendor contract, signing | Read domain SPEC + integration mirror on demand | `{FEATURE_SPEC_ROOT}/<slug>/*-SPEC.md` · `.ai/docs/integration/MANIFEST.txt` |
 | **project-query** | "Connect my agent to tools-project", "Setup project query", "Is my agent connected to tools-project?" | `@project-query-setup install` · `@project-query-setup status` | `.ai/skills/project-query-setup/skill.md` |
+| **change-safety** | "Safe to commit?", "Is my scope declared?", "How wide is my diff?", "Check blast radius", "MOD-06 valid?" | `@code-verify uncommitted` (runs touch-scope + blast-radius + MOD-06 + secrets); `bash scripts/touch-scope-verify.sh --strict` (undeclared scope check); `bash scripts/blast-radius-check.sh` (blast radius); `bash scripts/mod06-output-check.sh <file>` (MOD-06) | `.ai/skills/code-verify/skill.md` · `.ai/skills/code-repair/reference.md` § Change-safety · `START_HERE.md` §6b |
 | **learn** | "Understand the system", "Reading order" | `.ai/START_HERE.md` §7 | `.ai/README.md` · `20260518-guide-workflows-index.md` |
 
 ---

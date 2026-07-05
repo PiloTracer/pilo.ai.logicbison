@@ -4,6 +4,31 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-07-04
+
+### Added
+- **`scripts/blast-radius-check.sh`** — mechanical diff risk (areas crossed, line budget, `PROTECTED_SURFACES` hits).
+- **`scripts/touch-scope-verify.sh`** — fail on files outside `.work/touch-scope` or iteration **Files**; `--strict` / `--strict-fail` for undeclared scope.
+- **`scripts/mod06-output-check.sh`** — mechanical MOD-06 output validation (blast radius, recommendation, conditions).
+- **`scripts/golden-deploy-verify.sh`** — golden manifests for deploy-files / deploy-basic smoke outputs.
+- **`standards/PROTECTED_SURFACES.json`** — machine-readable high-blast paths for verify scripts.
+- **`templates/work/PROTECTED_SURFACES.template`** and **`templates/work/touch-scope.template`** — consumer scaffolds copied on bootstrap.
+- **`hooks/pre-commit`** — change-safety gate (warn-only by default); installed via `install-git-hooks.sh`.
+- **gate-verify** — recognizes `*-T{N}` task ids (e.g. `AIOS-1-T1`, `M1-T1`).
+- **`.cursorrules` / `templates/cursorrules.template` § Change safety (mechanical)** — gates table (scope, blast radius, protected surfaces, tests).
+- **`START_HERE.md` §6b** and **process-router change-safety bucket** — "safe to commit?" routing.
+
+### Changed
+- **`skills/code-verify`** — uncommitted mode runs `touch-scope-verify` + `blast-radius-check` + MOD-06 check; reads `PROTECTED_SURFACES.json`.
+- **`skills/code-implementation`** — pre-write scope gate blocks `continue` when scope undeclared.
+- **`skills/code-repair/reference.md`** — change-safety quick-fix map.
+- **`scripts/framework-verify.sh`** — golden deploy checks, change-safety self-tests, AIOS-1-T gate-verify pattern.
+- **`scripts/release.sh`** — change-safety self-test warn gate.
+- **`DOCS_TECH_STACK.md`** (self-hosted) — filled verification commands for framework dogfooding.
+- **`CONTRIBUTING.md`** — contributor change-safety gate docs.
+- **`templates/cursorrules.template`** — consolidated Scope Discipline into Change safety section.
+- **`templates/bootstrap.sh`** — seeds `.work/touch-scope` and `.work/PROTECTED_SURFACES.json`.
+
 ## [0.4.3] - 2026-07-02
 
 ### Added

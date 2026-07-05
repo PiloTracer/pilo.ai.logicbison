@@ -1,0 +1,5 @@
+# Required paths after deploy-basic thin-client bootstrap
+.cursorrules
+.work/context/HANDOFF.md
+.work/plans/NEXT.md
+opencode.json

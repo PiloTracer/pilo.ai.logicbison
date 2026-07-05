@@ -61,6 +61,25 @@ These principles override all other instructions. They are non-negotiable.
 
 ---
 
+## Change safety (mechanical)
+
+AI sessions default to **minimal diffs**. Run these before commit or `@code-implementation complete` — not optional.
+
+| Gate | Command | Fail when |
+|------|---------|-----------|
+| Touch scope | `bash scripts/touch-scope-verify.sh` | File outside `.work/touch-scope` or iteration **Files** |
+| Blast radius | `bash scripts/blast-radius-check.sh` | `risk: high` (cross-area or oversized diff) |
+| Protected surfaces | `standards/PROTECTED_SURFACES.json` + §Protected Files | High-blast path without owner approval |
+| Tests | `bash scripts/framework-verify.sh` (see `DOCS_TECH_STACK.md`) | Non-zero exit |
+
+**Declare scope before editing:** copy `templates/work/touch-scope.template` → `.work/touch-scope`, **or** `@code-implementation plan` with **Files** per task.
+
+**MOD-06:** required for agent-authored code (`concepts/README.md` § Trigger table). **`human-only`** opt-out only when the human declares it in the same message.
+
+**No collateral edits** — no drive-by refactors, dependency bumps, or "while I'm here" changes outside declared scope.
+
+---
+
 ## Required Context Files
 
 **Lost or unsure what to do? Read [`START_HERE.md`](START_HERE.md) first** — operator decision tree and recovery guide.
@@ -94,7 +113,7 @@ Read these at the start of every conversation and when relevant:
 |------|---------|
 | **`START_HERE.md`** | What to invoke right now; forgetfulness checklist |
 | **`PROCESS_ROUTER.md`** | Process Q&A; `@process-router` vs `@session-control status`; director fallbacks |
-| **`REPLACE:TECH_STACK_DOC`** | Technology stack (e.g. `DOCS_TECH_STACK.md` at repo root) |
+| **`DOCS_TECH_STACK.md`** | Technology stack and verification commands |
 | **`standards/REPLACE:CONVENTIONS_FILE`** | Code layout, naming, maintainability |
 | **`standards/REPLACE:FEATURE_STANDARD_FILE`** | Feature SPEC lifecycle |
 | **`standards/REPLACE:DIRECTORY_MAP_FILE`** | Repository layout and boundaries |
@@ -120,6 +139,7 @@ Portable process docs: **`docs/guides/workflows/README.md`** (artifact matrix). 
 | `{ITERATION_CARRIER}` | `.work/plans/NEXT.md` |
 | `{MASTER_PLAN}` | `.work/plans/full/*-full-plan.md` (latest **Approved**) |
 | `{HANDOFF}` | `.work/context/HANDOFF.md` |
+| `{TOUCH_SCOPE}` | `.work/touch-scope` |
 | `{CONCEPTS_ROOT}` | `concepts/` |
 | `{SKILLS_ROOT}` | `skills/` |
 | `{OBSERVABILITY_SPEC}` | REPLACE:OBSERVABILITY_SPEC_PATH (e.g. `standards/YYYYMMDD-observability-spec.md`) |
@@ -131,9 +151,9 @@ Portable process docs: **`docs/guides/workflows/README.md`** (artifact matrix). 
 | `REPLACE:MIGRATION_RUNNER_PATH` | Migration runner module path |
 | `REPLACE:MIGRATION_RUN_CMD` | Command to run migrations in container (e.g. `python -m platform.migration_runner`) |
 | `REPLACE:PLATFORM_PACKAGE` | Shared platform/import package name |
-| `REPLACE:TEST_COMMAND` | Full test invocation (e.g. `pytest tests/ -q`) |
-| `REPLACE:LINT_COMMAND` | Lint invocation (e.g. `ruff check .`) |
-| `REPLACE:TYPECHECK_COMMAND` | Type-check invocation (e.g. `pyright .` or `tsc --noEmit`) |
+| `REPLACE:TEST_COMMAND` | `bash scripts/framework-verify.sh` |
+| `REPLACE:LINT_COMMAND` | `python3 scripts/skill-functional-verify.py` |
+| `REPLACE:TYPECHECK_COMMAND` | *(n/a — framework repo)* |
 | `REPLACE:DEV_STACK_SCRIPT` | Host script for compose control (e.g. `bin/start.sh`) |
 | `REPLACE:SERVICE_FRONTEND` | Optional compose service for UI (e.g. `dashboard`, `web`) |
 | `REPLACE:FRONTEND_WORKDIR` | In-container path to frontend app (e.g. `/app`) |
@@ -203,7 +223,9 @@ Prefer reading **cached copies** during implementation; refresh when vendor vers
 
 ### Do NOT Modify Unless Explicitly Asked
 
-Customize this list for your stack (examples below):
+Machine-checked: **`standards/PROTECTED_SURFACES.json`** (deploy scripts, templates, CI workflows).
+
+Customize for your stack (examples):
 
 - `package.json` (dependencies, devDependencies, engines)
 - `docker-compose*.yml`
@@ -349,6 +371,10 @@ If the project does **not** use Docker, replace this section with the canonical 
 ### Deletion
 - NEVER delete files without explicit user permission.
 
+### Task Refs
+
+Task refs (e.g. `AIOS-1`, `PROJ-456`) link commits to work items. Prepend `REF:` to commit subjects when known. Ask once if missing; use `type:` only for exploratory work. See `templates/cursorrules.template` § Commit Message Format for full rules.
+
 ### Git
 - NEVER execute `git commit` or `git push` unless the user explicitly requests it in the same message (or a user rule overrides this).
 - **`@session-control close commit` / `close commit push` (mandatory):** When the user invokes session-control **close** with **`commit`** (and optional **`push`**), you **MUST** run shell `git add` + `git commit` per `.ai/skills/session-control/skill.md` § C4b **before** finishing your reply — stage all **safe** dirty paths (default scope), not HANDOFF/NEXT only. If **`push`** was requested, run `git push` after a successful commit. Show `git log -1 --oneline` and `git status -sb`; do not claim close commit succeeded without a commit SHA when the tree was dirty.
@@ -384,9 +410,8 @@ If the project does **not** use Docker, replace this section with the canonical 
 - Re-run verification.
 
 ### Scope Discipline
-- Only modify files directly related to the task.
-- Do not refactor unrelated code "while you're at it."
-- Do not add dependencies without asking.
+
+See **§ Change safety (mechanical)** — declare scope first; `touch-scope-verify` and `blast-radius-check` enforce it.
 
 ### Communication
 - Be concise. Surface blockers early.

@@ -42,6 +42,8 @@ See `.ai/standards/*-DIRECTORY_MAP.md` after customization.
 | Compose file | `docker-compose.yml` (if used) |
 | Test command | `REPLACE:TEST_COMMAND` |
 | Lint | `REPLACE:LINT_COMMAND` |
+| Scope check | `bash .ai/scripts/touch-scope-verify.sh` (when Agent OS scripts present) |
+| Blast radius | `bash .ai/scripts/blast-radius-check.sh` (when Agent OS scripts present) |
 | Type check | `REPLACE:TYPECHECK_COMMAND` |
 
 ---

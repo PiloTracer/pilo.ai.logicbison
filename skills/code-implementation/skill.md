@@ -201,12 +201,30 @@ Resolve the batch **before** the task loop. Default when `-` is omitted: **`coun
 2. Parse [Continue target](#continue-target-parse--argument); emit planned queue.
 3. **Unblock check** on `blocked` tasks (UNKNOWNS + Owner blockers).
 4. Empty queue → recommend **complete** or **status**.
-5. **Per-task loop:** read → implement → [Task gate](#task-gate) → progress line on pass; **stop batch** on fail/blocker/schema/protected-file.
-6. **Batch-end sweep** (mandatory when files changed).
-7. Emit batch summary with sweep verdict.
-8. All tasks `done` → recommend **complete** (do not auto-finalize).
+5. **Pre-write scope gate (mandatory — block if undeclared).** Before ANY file write:
+   - Check whether `.work/touch-scope` exists with non-empty `allowed_paths` or `allowed_patterns`.
+   - Check whether the active `## Current iteration` has at least one task with a populated `Files` column (not empty, not `…`).
+   - If **neither** scope declaration exists → **stop the batch** immediately; emit a [scope-undeclared blocked report](#scope-undeclared-blocked-report).
+   - If scope IS declared → proceed to the per-task loop.
+6. **Per-task loop:** read → implement → [Task gate](#task-gate) → progress line on pass; **stop batch** on fail/blocker/schema/protected-file.
+7. **Batch-end sweep** (mandatory when files changed).
+8. Emit batch summary with sweep verdict.
+9. All tasks `done` → recommend **complete** (do not auto-finalize).
 
 **Batch progress lines, batch summary template, batch-end sweep steps, stop conditions:** [`reference.md` § Continue protocol (detailed)](reference.md#continue-protocol-detailed).
+
+### Scope-undeclared blocked report
+
+```markdown
+## @code-implementation continue — blocked (scope undeclared)
+
+**Required:** scope declaration before file writes
+**Detected:** no `.work/touch-scope` and no iteration task `Files` column populated
+**Run first:** declare scope via one of:
+- `.work/touch-scope` JSON: `{"allowed_paths":["path/to/file.md"],"allowed_patterns":[]}`
+- Populate the `Files` column in `## Current iteration` task table
+Then re-run `@code-implementation continue`.
+```
 
 
 ---

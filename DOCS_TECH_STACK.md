@@ -1,8 +1,8 @@
-# Technology stack — REPLACE:PROJECT_NAME
+# Technology stack — Agent OS (framework)
 
-**Status:** Draft — fill before implementation. Linked from `.cursorrules` as `REPLACE:TECH_STACK_DOC`.
+**Status:** Active — self-hosted framework repo. Linked from `.cursorrules` as `DOCS_TECH_STACK.md`.
 
-**Updated:** YYYY-MM-DD
+**Updated:** 2026-07-04
 
 ---
 
@@ -10,13 +10,10 @@
 
 | Layer | Choice | Version (pin) | Notes |
 |-------|--------|---------------|-------|
-| Language (primary) | REPLACE:PRIMARY_LANGUAGE | | |
-| HTTP API | REPLACE:HTTP_FRAMEWORK | | |
-| Database | REPLACE:DATABASE | | |
-| Cache / queue | REPLACE:CACHE_OR_QUEUE | | optional |
-| Frontend | REPLACE:FRONTEND | | optional |
-| Auth | REPLACE:AUTH | | |
-| Hosting | REPLACE:HOSTING | | |
+| Language (primary) | Bash, Python 3 | 3.x | Shell verifiers + skill-functional-verify |
+| Framework | Agent OS | self-hosted | Skills, standards, scripts at repo root |
+| CI | GitHub Actions | ubuntu-latest | `framework-verify.yml` |
+| Hosting | Git mirror / archive | — | `deploy-repo` |
 
 ---
 
@@ -24,13 +21,14 @@
 
 | Path | Purpose |
 |------|---------|
-| `REPLACE:APP_ROOT/` | Application source |
-| `REPLACE:MIGRATIONS_DIR/` | Idempotent SQL migrations |
-| `REPLACE:FRONTEND_ROOT/` | UI (if any) |
-| `.ai/` | Agent OS (skills, standards, guides) |
-| `.work/` | Plans, SPECs, ADRs, HANDOFF |
+| `skills/` | Agent skills (`skill.md` per folder) |
+| `standards/` | Engineering standards + `PROTECTED_SURFACES.json` |
+| `scripts/` | Deploy, verify, hooks |
+| `templates/` | Bootstrap artifacts for consumer repos |
+| `concepts/` | MOD-01…MOD-07 architecture prompts |
+| `.work/` | Plans, HANDOFF, `touch-scope` |
 
-See `.ai/standards/*-DIRECTORY_MAP.md` after customization.
+See `standards/20260517-DIRECTORY_MAP.md`.
 
 ---
 
@@ -38,11 +36,14 @@ See `.ai/standards/*-DIRECTORY_MAP.md` after customization.
 
 | Item | Value |
 |------|-------|
-| Dev stack script | `REPLACE:DEV_STACK_SCRIPT` |
-| Compose file | `docker-compose.yml` (if used) |
-| Test command | `REPLACE:TEST_COMMAND` |
-| Lint | `REPLACE:LINT_COMMAND` |
-| Type check | `REPLACE:TYPECHECK_COMMAND` |
+| Dev stack script | *(none — host POSIX shell)* |
+| Test command | `bash scripts/framework-verify.sh` |
+| Lint | `python3 scripts/skill-functional-verify.py` |
+| Scope check | `bash scripts/touch-scope-verify.sh` |
+| Blast radius | `bash scripts/blast-radius-check.sh` |
+| Type check | *(n/a)* |
+
+**Before commit (AI-assisted sessions):** run test + scope + blast-radius on dirty tree; attach MOD-06 output when application/framework code changed.
 
 ---
 
@@ -50,8 +51,9 @@ See `.ai/standards/*-DIRECTORY_MAP.md` after customization.
 
 | Item | Status |
 |------|--------|
-| Platform | REPLACE:CI_PLATFORM (e.g. GitHub Actions) |
-| Deploy targets | staging / production |
+| Platform | GitHub Actions |
+| Workflow | `.github/workflows/framework-verify.yml` |
+| Release gate | `bash scripts/release.sh <version>` |
 
 ---
 
@@ -59,7 +61,7 @@ See `.ai/standards/*-DIRECTORY_MAP.md` after customization.
 
 | ID | Topic | Owner |
 |----|-------|-------|
-| U1 | | |
+| — | *(none)* | |
 
 ---
 

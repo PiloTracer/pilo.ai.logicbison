@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# pre-commit — change-safety gate (warn-only by default; never blocks commit).
+#
+# Runs touch-scope-verify and blast-radius-check on staged + unstaged changes.
+# Set WARN_ONLY=0 to block commits when checks fail.
+#
+# Installation: bash scripts/install-git-hooks.sh  (self-hosted)
+#                 bash .ai/scripts/install-git-hooks.sh  (fat-client)
+
+WARN_ONLY=1
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
+
+# Resolve scripts dir: self-hosted (repo root) vs fat-client (.ai/)
+SCRIPTS=""
+if [ -x "${REPO_ROOT}/scripts/touch-scope-verify.sh" ]; then
+  SCRIPTS="${REPO_ROOT}/scripts"
+elif [ -x "${REPO_ROOT}/.ai/scripts/touch-scope-verify.sh" ]; then
+  SCRIPTS="${REPO_ROOT}/.ai/scripts"
+fi
+
+if [ -z "${SCRIPTS}" ]; then
+  exit 0
+fi
+
+failures=0
+
+if [ -x "${SCRIPTS}/touch-scope-verify.sh" ]; then
+  OUT=$(bash "${SCRIPTS}/touch-scope-verify.sh" --strict 2>&1) || failures=$((failures + 1))
+  echo "${OUT}" | grep -qE "FAIL|undeclared" && printf '\033[33m⚠  pre-commit:\033[0m %s\n' "$(echo "${OUT}" | grep -E 'FAIL|undeclared' | head -1)"
+fi
+
+if [ -x "${SCRIPTS}/blast-radius-check.sh" ]; then
+  OUT=$(bash "${SCRIPTS}/blast-radius-check.sh" --warn-exit-0 2>&1) || true
+  echo "${OUT}" | grep -qE "risk: (high|medium)" && printf '\033[33m⚠  pre-commit:\033[0m %s\n' "$(echo "${OUT}" | grep 'risk:' | head -1)"
+fi
+
+if [ "${WARN_ONLY}" -eq 1 ]; then
+  exit 0
+fi
+
+if [ "${failures}" -gt 0 ]; then
+  printf '\033[31mERROR:\033[0m Change-safety checks failed. Fix or use --no-verify.\n' >&2
+  exit 1
+fi
+exit 0

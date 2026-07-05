@@ -170,6 +170,17 @@ The skill will refuse to close cleanly if **secrets are in the diff**, **tests w
 4. If you cannot fix in this session: mark task `blocked` in `NEXT.md ## Current iteration` and add a row to `.work/plans/UNKNOWNS.md` with owner + what's blocked.
 5. Never silence a check (`# noqa`, `--no-verify`, baseline files) without an explicit comment citing the reason.
 
+### 6b. "Safe to commit?" — change-safety checks
+
+| Question | Run |
+|----------|-----|
+| Is my diff within declared scope? | `@code-verify uncommitted` (runs `touch-scope-verify` + `blast-radius-check`) |
+| Undeclared scope with dirty tree? | `bash scripts/touch-scope-verify.sh --strict` |
+| How wide is my blast radius? | `bash scripts/blast-radius-check.sh` |
+| MOD-06 output valid? | `bash scripts/mod06-output-check.sh <file>` |
+
+Fix failures with `@code-repair repair - from uncommitted` (§6 above).
+
 ---
 
 ## 7. Reading order (when you actually need to learn the system)

@@ -159,6 +159,7 @@ mkdir -p "${DF_SMOKE}"
   if [[ ! -f .work/context/HANDOFF.md ]]; then
     die "deploy-files in-place did not create .work/context/HANDOFF.md"
   fi
+  bash "${REPO_ROOT}/scripts/golden-deploy-verify.sh" "${DF_SMOKE}" deploy-files-inplace
 )
 ok "deploy-files in-place creates .cursorrules + .work/"
 
@@ -172,6 +173,7 @@ ok "deploy-repo --status reports source + optional target"
 note "install-opencode-config (thin-client via deploy-basic)"
 OC_SMOKE="$(mktemp -d)"
 bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${OC_SMOKE}" >/dev/null
+bash "${REPO_ROOT}/scripts/golden-deploy-verify.sh" "${OC_SMOKE}" deploy-basic-thin
 if [[ ! -f "${OC_SMOKE}/opencode.json" ]]; then
   die "deploy-basic did not create opencode.json"
 fi
@@ -365,9 +367,26 @@ if bash "${REPO_ROOT}/scripts/gate-verify.sh" "${GV_NEXT}" >/dev/null 2>&1; then
 else
   die "gate-verify rejected a done task that cites gate evidence"
 fi
+# AIOS-1-T pattern (framework maintenance iterations).
+printf "${hdr}| AIOS-1-T1 | change safety | scripts/x.sh | done | framework-verify exit 0 |\n" > "${GV_NEXT}"
+if bash "${REPO_ROOT}/scripts/gate-verify.sh" "${GV_NEXT}" >/dev/null 2>&1; then
+  ok "gate-verify accepts AIOS-1-T{N} task ids"
+else
+  die "gate-verify rejected AIOS-1-T{N} task id with evidence"
+fi
 rm -rf "${GV_ROOT}"
 
-# --- 9. prepare-commit-msg co-authored strip self-test ---
+# --- 9. change-safety script self-tests ---
+note "change-safety self-tests"
+chmod +x "${REPO_ROOT}/scripts/blast-radius-check.sh" \
+  "${REPO_ROOT}/scripts/touch-scope-verify.sh" \
+  "${REPO_ROOT}/scripts/golden-deploy-verify.sh" 2>/dev/null || true
+bash "${REPO_ROOT}/scripts/blast-radius-check.sh" --self-test
+bash "${REPO_ROOT}/scripts/touch-scope-verify.sh" --self-test
+bash "${REPO_ROOT}/scripts/mod06-output-check.sh" --self-test
+ok "blast-radius-check + touch-scope-verify + mod06-output-check self-tests"
+
+# --- 10. prepare-commit-msg co-authored strip self-test ---
 note "prepare-commit-msg co-authored strip"
 PCM="${REPO_ROOT}/hooks/prepare-commit-msg"
 pcm_before="${failures}"

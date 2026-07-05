@@ -140,11 +140,15 @@ When `NEXT.md` has a valid `## Current iteration` block:
 - Flag any changed path not in that union: `out-of-scope - <reason>`
 - Infra fixes (e.g. `docker-compose.yml`) outside iteration → flag **Med**; do not auto-pass
 
+**Mechanical scope (always when tree dirty):** run `bash scripts/touch-scope-verify.sh` (or `$AGENT_OS_SOURCE/scripts/touch-scope-verify.sh` thin-client). Reads `.work/touch-scope` JSON **and** iteration **Files** column. **Fail** on out-of-scope paths when scope is declared.
+
+**Mechanical blast radius (always when tree dirty):** run `bash scripts/blast-radius-check.sh`. Exit codes: **0** = ok; **2** = warn (`risk: medium` or scoped `risk: high` when touch-scope passes) — verdict **pass with conditions**; **1** = fail (unscoped high risk or oversized diff). Reads `standards/PROTECTED_SURFACES.json` and `.work/PROTECTED_SURFACES.json` when present.
+
 ---
 
-## Shared: protected files (S5)
+## Shared: protected surfaces (S5)
 
-Per `{AGENT_RULES_FILE}` §Protected Files - **fail** if the diff touches any listed path without documented owner permission in HANDOFF or explicit user approval in the session.
+Per `{AGENT_RULES_FILE}` §Protected Files **and** `standards/PROTECTED_SURFACES.json` or `.work/PROTECTED_SURFACES.json` when present — **fail** if the diff touches any listed path/pattern without documented owner permission in HANDOFF or explicit user approval in the session.
 
 Infra paths changed for iteration work still require explicit owner approval - flag **High** in milestone verify; **fail** in **uncommitted** / **last** before commit.
 
@@ -195,7 +199,7 @@ Per [SKILL_DEPENDENCIES.md § Blocked report shape](../SKILL_DEPENDENCIES.md#blo
 | Observability | SPEC §9 + observability spec on touched paths? | pass / fail / gap / skip |
 | Concept / NFR registry | `Applies=yes` not left `pending`? | pass / fail / gap |
 | Coupling / blast | Cross-boundary edits per concept pack rules? | pass / fail / gap / skip |
-| AI-assisted safety | MOD-06 output attached when iteration touched application source/tests? | pass / fail / gap - **`skip` forbidden** when code changed; **`human-only`** opt-out requires explicit human declaration |
+| AI-assisted safety | MOD-06 output attached + validated via `bash scripts/mod06-output-check.sh <output-file>` (check § required sections: blast radius, recommendation, conditions)? | pass / fail / gap - **`skip` forbidden** when code changed; **`human-only`** opt-out requires explicit human declaration |
 | Docs alignment | Matches plan-master task text? | pass / drift |
 
 ### M3 - Cross-LLM
@@ -255,11 +259,33 @@ git diff --cached --name-only
 
 If clean → report `clean` and **stop** (verdict: pass - nothing to audit).
 
-### U2 - S1 secrets, S2 scope, S5 protected files
+### U2 - S1 secrets, S2 scope, S5 protected surfaces, mechanical change-safety
 
-### U3 - Shared verification gates (if application source/tests touched)
+Run in order:
 
-### U4 - Report
+1. **S1** secrets scan on diff.
+2. **S2** iteration Files column scope (when iteration block valid).
+3. **`touch-scope-verify.sh`** — `bash scripts/touch-scope-verify.sh` (resolve via `$AGENT_OS_SOURCE/scripts/` thin-client). Record pass/fail/skip (no scope declared).
+4. **`blast-radius-check.sh`** — `bash scripts/blast-radius-check.sh`. Record pass/warn/fail with quoted output lines (`risk:`, `protected_hits:`). **warn** = exit 2 (including scoped high risk when touch-scope passed).
+5. **S5** protected files + `PROTECTED_SURFACES.json` hits.
+
+**Fail** uncommitted when: touch-scope exit 1, blast-radius exit 1, protected surface without approval, or MOD-06 check fail (U3).
+
+**Pass with conditions** when: blast-radius exit 2 only — cite MOD-06 output path or note residual blast-radius warn in report.
+
+### U3 - AI-assisted safety (MOD-06 mechanical validation)
+
+When the diff touches application source or tests and the session is AI-assisted (default unless `human-only` declared):
+
+1. Locate the MOD-06 output file (task `Notes`, PR description, or iteration registry).
+2. Run `bash scripts/mod06-output-check.sh <output-file>` (resolve via `$AGENT_OS_SOURCE/scripts/` thin-client).
+3. Record pass/fail with evidence. **Fail** when: no output file found, or missing required sections (blast radius, recommendation, conditions for merge_with_conditions).
+
+**`skip` is forbidden** when code changed in an AI-assisted session. Only `human-only` (explicitly declared by the human in the same message) allows skip.
+
+### U4 - Shared verification gates (if application source/tests touched)
+
+### U5 - Report
 
 ```markdown
 ## code-verify uncommitted
@@ -272,12 +298,20 @@ If clean → report `clean` and **stop** (verdict: pass - nothing to audit).
 
 ### Checks
 | Check | Result | Evidence |
+|-------|--------|----------|
+| Secrets | | |
+| Scope (iteration Files) | | |
+| touch-scope-verify | | |
+| blast-radius | | |
+| MOD-06 output | | |
+| Protected surfaces | | |
 
 ### Verdict
-**pass** | **fail**
+**pass** | **pass with conditions** | **fail**
 
 ### Next step
 - pass: safe to commit (`@session-control close commit`)
+- pass with conditions: safe to commit after MOD-06 attached or blast-radius warn acknowledged
 - fail: `@code-repair repair - from uncommitted` (or fix manually), then re-run `@code-verify uncommitted`
 ```
 
@@ -427,7 +461,7 @@ Registry: `SKILL_DEPENDENCIES.md` § Self-verify auto-invoke.
 - Claiming tests validated an old commit while tree has extra uncommitted changes (without saying so)
 - Skipping secrets scan on **last** because "it was already pushed"
 - Full milestone matrix on every task (too heavy - use **uncommitted**)
-- Marking MOD-06 **skip** on agent-authored diffs - use **fail** or attach output
+- Marking MOD-06 **skip** on agent-authored diffs - use **fail** or attach output validated by `scripts/mod06-output-check.sh`
 - Accepting `Confirmed` assumptions in implementation reports without file or test cite
 - Running open-language verify without a **Request interpretation** block
 - Claiming milestone **pass** with no `## Current iteration` block (use uncommitted + gap note)

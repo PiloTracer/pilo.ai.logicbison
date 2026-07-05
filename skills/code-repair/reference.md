@@ -87,6 +87,18 @@ Free requests run **R0-free** (Implementation alignment map) before F* rows — 
 | feature-spec - \<path\> | `@feature-spec review - <path>` | `@feature-spec review - <path>` |
 | custom | (user brief) | `@code-verify uncommitted` + brief-specific checks |
 
+## Change-safety failures — quick fix map
+
+| Failure | From | Fix |
+|---------|------|-----|
+| Undeclared scope (touch-scope --strict) | `@code-verify uncommitted` | Create `.work/touch-scope` JSON or populate iteration `Files` column |
+| Out-of-scope files (touch-scope) | `@code-verify uncommitted` | Narrow diff OR expand `.work/touch-scope` / iteration `Files` |
+| Blast radius: high | `@code-verify uncommitted` | Split into smaller diffs; get owner approval if unavoidable |
+| Blast radius: medium | `@code-verify uncommitted` | Review areas crossed; run `@concept-run - MOD-06` |
+| MOD-06: missing sections | `@code-verify` U3 | Populate blast-radius paragraph, recommendation, conditions in output |
+| MOD-06: no output file | `@code-verify` U3 | Run `@concept-run - MOD-06` and attach output |
+| Protected surface hit | `@code-verify uncommitted` | Get owner approval in HANDOFF or explicit user confirmation |
+
 ---
 
 ## When to use code-repair vs code-implementation continue
