@@ -4,6 +4,16 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-05
+
+### Changed
+- **`.cursorrules`** — token-optimized for per-turn cost (28,954 → 16,879 B, −42%; 478 → 262 lines): deduplicated git / commit / `Co-authored-by` / scope-discipline rules to a single authoritative statement, and trimmed rationale prose and redundant examples. All 7 Core Principles, hard prohibitions, safety gates, and reference tables preserved (31/31 enforcement rules verified present; `framework-verify` + `skill-functional-verify` exit 0).
+- **`templates/cursorrules.template`** — same compression (33,050 → 19,344 B, −41%; 508 → 284 lines); fat/thin **Source resolution** and GitHub task-registry sections preserved intact for adopters.
+
+### Fixed
+- **`templates/cursorrules.template`** — concept range corrected `MOD-01–MOD-06` → `MOD-01–MOD-07` (adds `prompt-architecture`), aligning the adopter template with the 7 shipped concepts.
+- **`concept-run` skill reference** in both rules files — description updated `MOD-01…MOD-06` → `MOD-01…MOD-07`.
+
 ## [0.4.4] - 2026-07-04
 
 ### Added

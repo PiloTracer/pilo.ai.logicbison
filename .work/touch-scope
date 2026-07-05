@@ -1,20 +1,14 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-07-04",
-  "goal": "AI change safety: mechanical scope, blast-radius, golden deploy, doc sync",
-  "allowed_paths": [],
-  "allowed_patterns": [
-    "scripts/**",
-    "standards/**",
-    "skills/**",
-    "templates/**",
-    "hooks/**",
-    ".quick/**",
-    ".work/**",
+  "updated": "2026-07-05",
+  "goal": "Token-optimize .cursorrules + template; fix MOD-07 drift; trim verbose prose",
+  "allowed_paths": [
     ".cursorrules",
-    "CHANGELOG.md",
-    "CONTRIBUTING.md",
-    "DOCS_TECH_STACK.md",
-    "START_HERE.md"
-  ]
+    "templates/cursorrules.template",
+    ".work/context/HANDOFF.md",
+    ".work/plans/NEXT.md",
+    ".work/active-ref",
+    ".work/touch-scope"
+  ],
+  "allowed_patterns": []
 }

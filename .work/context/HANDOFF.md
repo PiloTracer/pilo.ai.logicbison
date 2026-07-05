@@ -4,11 +4,13 @@
 
 ## Session status
 
-**Closed:** 2026-07-04 — AIOS-1 change-safety layer committed and pushed (scope, blast-radius, MOD-06 gates).
+**Closed:** 2026-07-05 — v0.5.0 released: token-optimized `.cursorrules` + template (−42% / −41%), MOD-07 drift fixed; committed, tagged, pushed, GitHub release published.
 
-**Updated:** 2026-07-04
+**Updated:** 2026-07-05
 
-**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`. Latest: v0.4.4 — mechanical scope, blast-radius, MOD-06 gates; golden deploy regression checks.
+Treat the next chat as a **new session**: do not assume unwritten goals from prior threads unless they appear here or in linked artifacts.
+
+**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`. Latest: v0.5.0 — token-optimized always-applied rules + adopter template; all normative rules preserved (31/31 verified); `framework-verify` + `skill-functional-verify` exit 0.
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
@@ -54,6 +56,7 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | Date | Session | Artifacts |
 |------|---------|-----------|
+| 2026-07-05 | AIOS-1 v0.5.0 rules token-optimization | `.cursorrules` (−42%), `templates/cursorrules.template` (−41%); MOD-06→MOD-07 template fix; `concept-run` desc fix (both files); `CHANGELOG.md` [0.5.0]; tag `v0.5.0`; GitHub release published; framework-verify + skill-functional-verify exit 0 |
 | 2026-07-04 | AIOS-1 change-safety layer | `blast-radius-check.sh`, `touch-scope-verify.sh`, `mod06-output-check.sh`, `golden-deploy-verify.sh`, `PROTECTED_SURFACES.json`, `hooks/pre-commit`, skills (code-verify, code-implementation, code-repair), `.cursorrules` §Change safety, `DOCS_TECH_STACK.md` dogfood, `CONTRIBUTING.md`, `CHANGELOG.md`, consumer templates (`touch-scope`, `PROTECTED_SURFACES`); framework-verify exit 0 |
 | 2026-07-02 | deploy + opencode verification + README customization | `install-opencode-config.sh`, `deploy-basic.sh`, `deploy-files.sh`, `framework-verify.sh`, deploy/opencode skills, `CHANGELOG.md`, `.quick/deploy-to-project.md`; live smoke tools-project + test-test clone; commit `17658f4`; README Customization section |
 | 2026-07-01 | deploy-basic + session-control context + deploy-files merge | `skills/deploy-basic/skill.md`, `scripts/deploy-basic.sh`, `skills/deploy-files/skill.md`, `skills/session-control/skill.md`, `skills/session-control/reference.md`, `.cursorrules`, `templates/cursorrules.template`, `templates/bootstrap.sh`, `skills/README.md`, `SKILL_DEPENDENCIES.md`, `.quick/deploy-to-project.md`, `.quick/session-lifecycle.md`, `PROCESS_ROUTER.md`, `START_HERE.md` — new deploy-basic thin-client bootstrap skill; deploy-files enhanced with in-place no-overwrite bootstrap + rules-aware merge; session-control context mode (read-only full context + uncommitted-aware dirty-tree); all registries and templates updated |

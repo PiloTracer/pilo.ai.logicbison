@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-07-04
+**Updated:** 2026-07-05
 
 ---
 
@@ -21,6 +21,7 @@
 | deploy + opencode verification (2026-07-02) | `install-opencode-config.sh`, deploy-basic `--status`/`--sync-paths`, deploy-files opencode on `--update`, `framework-verify` deploy smoke (thin + fat-client), README platform note, `.quick/deploy-to-project.md`; tools-project opencode repaired live; commit `17658f4` |
 | README customization note (2026-07-02) | README §Customization — adopters may adapt skills, rules, and project memory via their coding agent |
 | AIOS-1 change-safety layer (2026-07-04) | `blast-radius-check.sh`, `touch-scope-verify.sh`, `mod06-output-check.sh`, `golden-deploy-verify.sh`, `PROTECTED_SURFACES.json`, pre-commit hook, skills/docs/CI wiring; tag `v0.4.4` |
+| v0.5.0 rules token-optimization (2026-07-05) | `.cursorrules` −42%, `templates/cursorrules.template` −41% (all rules preserved, 31/31 verified); MOD-06→MOD-07 template fix; `CHANGELOG.md` [0.5.0]; tag `v0.5.0` + GitHub release |
 
 ---
 
@@ -36,7 +37,7 @@
 
 | Priority | Item | Notes |
 |----------|------|-------|
-| **P1** | Deploy v0.4.4 to tools-project | `@deploy-files copy - /path` or `@deploy-basic update` on thin-client adopters |
+| **P1** | Deploy v0.5.0 to tools-project | `@deploy-files copy - /path` or `@deploy-basic update` — propagates token-optimized rules to adopters |
 
 ---
 
