@@ -102,6 +102,7 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 | `{FEATURE_SPEC_ROOT}` | `.work/features/` |
 | `{PROMPTS_ROOT}` | `.work/prompts/` |
 | `{DECISIONS_ROOT}` | `.work/decisions/` |
+| `{DOCS_ROOT}` | `.work/docs/` |
 | `{ITERATION_CARRIER}` | `.work/plans/NEXT.md` |
 | `{MASTER_PLAN}` | `.work/plans/full/*-full-plan.md` (latest **Approved**) |
 | `{HANDOFF}` | `.work/context/HANDOFF.md` |

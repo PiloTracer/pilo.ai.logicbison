@@ -315,5 +315,4 @@ If the user request cannot be fulfilled by any existing skill across all framewo
 - `.ai/skills/SKILL_DEPENDENCIES.md` — Agent OS gate/dependency matrix
 - `.ai.ui/skills/SKILL_DEPENDENCIES.md` — UI gate/dependency matrix
 - `.ai.biz/skills/SKILL_DEPENDENCIES.md` — Business gate/dependency matrix
-- `.ai.soc/skills/SKILL_DEPENDENCIES.md` — Social gate/dependency matrix
 - `.ai.ui/COHABITATION.md` — Agent OS + UI Design OS coexistence rules

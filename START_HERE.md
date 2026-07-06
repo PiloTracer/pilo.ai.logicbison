@@ -10,7 +10,7 @@
 
 ---
 
-## 0. Two things to know about this project
+## 0. Four things to know about this project
 
 1. **Truth before speed.** The agent rules in `.cursorrules` (Core Principles 1–7) are non-negotiable. Never claim "tests pass" without running them and reading the output. If you're not sure, label your statement **Unverified**.
 2. **Skills do the orchestration. Standards bind the code. Concepts gate the architecture.** You almost never need to read all three at once - pick what your task needs.

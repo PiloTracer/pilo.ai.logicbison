@@ -10,6 +10,7 @@
 
 | Item | Artifact |
 |------|----------|
+| Full framework audit + gap remediation (2026-07-06) | `.work/reports/full-audit-report.md`, `.work/analysis/20260706-mod06-full-audit.md`; `framework-verify` + `skill-functional-verify` + `touch-scope-verify` pass |
 | Agent OS bootstrap | `.work/` skeleton, `.cursorrules` from template |
 | Standalone commit verb + task-ref extraction + hook | `@session-control commit`/`commit push`; auto ref from HANDOFF/branch/prior commit; GitHub task registry discovery; `API_BASE_URL`; `prepare-commit-msg` hook; cursorrules Task Refs + readability rules; deployed to tools-project |
 | Code-to-registry coverage | `@plan-verify coverage`, `@plan-repair repair - from coverage`, FEATURE_STANDARD §14, reports template |

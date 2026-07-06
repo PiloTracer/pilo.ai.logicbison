@@ -313,7 +313,16 @@ while IFS= read -r -d '' md; do
       die "broken link in ${md}: (${link}) -> ${resolved}"
     fi
   done < <(grep -oE '\]\([^)]+\)' "${md}" 2>/dev/null | sed -E 's/^\]\(//; s/\)$//' | grep -v '^https\?://' | grep -v '^#' || true)
-done < <(find . -name '*.md' ! -path './.git/*' ! -path './.work/*' -print0 2>/dev/null)
+done < <(find . -name '*.md' \
+  ! -path './.git/*' \
+  ! -path './.work/*' \
+  ! -path '*/node_modules/*' \
+  ! -path './.opencode/*' \
+  ! -path './.credentials/*' \
+  ! -path './.private/*' \
+  ! -path './tmp/*' \
+  ! -path './.venv/*' \
+  -print0 2>/dev/null)
 
 ok "markdown link scan complete"
 

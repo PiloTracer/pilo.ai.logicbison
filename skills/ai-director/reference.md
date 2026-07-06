@@ -181,7 +181,7 @@ When a user request spans multiple domains or belongs to another framework (e.g.
 |----------|----------|---------|
 | Probe protocol | `skills/probe-protocol.md` | Shared adaptive interrogation loop |
 | Standards | `.work/standards/*.md` (binding); framework templates at `standards/*.md` in source | Binding engineering standards |
-| Concepts | `concepts/*/` (MOD-01..06) | Architecture/NFR quality prompts |
+| Concepts | `concepts/*/` (MOD-01..07) | Architecture/NFR quality prompts |
 | Guides | `docs/guides/workflows/` | Tutorials + artifact matrix |
 | Templates | `templates/` | cursorrules.template, bootstrap scripts |
 | Decision tree | `START_HERE.md` | Operator entry point |

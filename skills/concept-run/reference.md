@@ -125,6 +125,6 @@ When `@feature-spec create` or `review` needs §15 populated:
 | Prompt | Problem | Use instead |
 |--------|---------|-------------|
 | `@concept-run run` (no MOD id) | No target | `@concept-run list` first, then pick |
-| `@concept-run run - MOD-07` | No such concept | `@concept-run list` for valid ids |
+| `@concept-run run - MOD-08` | No such concept | `@concept-run list` for valid ids |
 | `@concept-run` with no concept pack | Nothing to run | Report and skip; do not fabricate |
 | Skipping MOD-06 on agent/Cursor diffs | Violates Required trigger | Run before `@code-implementation complete`; default AI-assisted |

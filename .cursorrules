@@ -101,7 +101,14 @@ Sister frameworks are siblings on disk; `.ai/` is self (self-hosted). Paths reso
 | `REPLACE:TYPECHECK_COMMAND` | *(n/a — framework repo)* |
 | `REPLACE:DEV_STACK_SCRIPT` | Host compose-control script |
 | `REPLACE:SERVICE_FRONTEND` | Optional compose UI service |
+| `REPLACE:SERVICE_API` | Compose service name for backend (e.g. `api`, `backend`) |
+| `REPLACE:SERVICE_DB` | Compose service name for database (e.g. `db`, `postgres`) |
 | `REPLACE:FRONTEND_WORKDIR` | In-container frontend path |
+| `REPLACE:FRONTEND_ROOT` | Frontend source tree root (e.g. `frontend/`, `ui/`) |
+| `REPLACE:FRONTEND_CONFIG_PATHS` | Additional frontend config paths to protect (e.g. `vite.config.ts`, `next.config.js`) |
+| `REPLACE:STACK_SUFFIX_VAR` | Env var used for compose project isolation (e.g. `STACK_SUFFIX`) |
+| `REPLACE:SCRIPTS_DIR` | Directory for one-off operational scripts under the app tree (e.g. `scripts/`) |
+| `REPLACE:APP_ENTRYPOINT` | Application startup entrypoint file (e.g. `src/main.py`, `cmd/api/main.go`) |
 
 **P0 product intent (canonical):** `{PLANS_ROOT}/foundation/*-01-*-initial-scope.md` (from `@plan-foundation greenfield`). `{PROMPTS_ROOT}/initial.md` is user scratch — never read/create unless the user names that path.
 

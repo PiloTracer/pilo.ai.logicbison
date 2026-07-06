@@ -2,7 +2,9 @@
 
 Supplement to `skill.md`. **How to invoke**, **verify**, and **certify plan-master-ready**.
 
-**Anti-drift reminder:** `{PLANS_ROOT}/foundation/` (docs 01–04) = **foundation inputs**. `*-full-plan.md` = **master plan** (plan-master skill only). Never call doc 04 "the full plan" - say **architecture foundation** or **foundation doc 04**. Doc 01 heading: `Architecture directions (non-prescriptive - architecture foundation in doc 04)`. See [Terminology](skill.md#terminology-required--prevents-confusion-with-plan-master).
+<a id="terminology-required--prevents-confusion-with-plan-master"></a>
+
+**Anti-drift reminder:** `{PLANS_ROOT}/foundation/` (docs 01–04) = **foundation inputs**. `*-full-plan.md` = **master plan** (plan-master skill only). Never call doc 04 "the full plan" - say **architecture foundation** or **foundation doc 04**. Doc 01 heading: `Architecture directions (non-prescriptive - architecture foundation in doc 04)`. See [Terminology](#terminology-required--prevents-confusion-with-plan-master).
 
 ---
 
@@ -101,7 +103,7 @@ Or inline during certify:
 
 **Agent must:**
 
-1. Confirm all [S4 criteria](skill.md#s4--plan-master-readiness) (10 rows) with pass/fail + evidence
+1. Confirm all [S4 criteria](skill.md#s4-plan-master-readiness) (10 rows) with pass/fail + evidence
 2. Require `plan-master integrity` result on **foundation** artifacts
 3. On **yes**: write `Plan-master-ready: <date>` in HANDOFF §Repository state
 4. Recommend next: `@plan-master greenfield` (no master plan yet) or `@plan-master continue` (draft exists)
@@ -109,6 +111,8 @@ Or inline during certify:
 **Do not** run `@plan-master greenfield` if certification is **no**.
 
 ---
+
+<a id="master-plan-artifact"></a>
 
 ### Step 4 - Master implementation plan (plan-master skill)
 
@@ -330,7 +334,7 @@ Use for **foundation-complete** artifact presence - **not** for plan-master-read
 
 ## Foundation coverage map
 
-The **coverage profile** consumed by `@plan-foundation probe` (engine: [`.ai/skills/probe-protocol.md`](../probe-protocol.md)). Each dimension lists "what good looks like" and the [S4](skill.md#s4--plan-master-readiness) criteria it unblocks. Gate-blocking dimensions (weight 2 in the Coverage Score) are marked **★**.
+The **coverage profile** consumed by `@plan-foundation probe` (engine: [`.ai/skills/probe-protocol.md`](../probe-protocol.md)). Each dimension lists "what good looks like" and the [S4](skill.md#s4-plan-master-readiness) criteria it unblocks. Gate-blocking dimensions (weight 2 in the Coverage Score) are marked **★**.
 
 | Dim | Topic | What good looks like | Primary S4 link | Records into |
 |-----|-------|----------------------|-----------------|--------------|

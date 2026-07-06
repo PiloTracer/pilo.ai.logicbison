@@ -1,24 +1,33 @@
 {
-  "ref": "AIOS-1",
+  "ref": "full-audit-2026-07-06",
   "updated": "2026-07-06",
-  "goal": "Fix audit findings from external smoke-test session: master-plan template missing 11/25 required H2 sections, no mechanical MASTER_PLAN_STANDARD conformance check, plan-foundation greenfield does not warn on template touch-scope placeholders; post-verify template/opencode/dogfood consistency.",
+  "goal": "Full framework audit: verify consistency, eliminate gaps, generate report at .work/reports",
   "allowed_paths": [
-    "templates/work/plans/full/YYYYMMDD-full-plan.md.template",
-    "templates/cursorrules.template",
-    "scripts/master-plan-verify.sh",
-    "scripts/framework-verify.sh",
-    "scripts/install-opencode-config.sh",
-    "skills/plan-verify/reference.md",
-    "skills/plan-foundation/skill.md",
-    "standards/20260519-MASTER_PLAN_STANDARD.md",
-    "opencode.json",
-    "CHANGELOG.md",
+    ".cursorrules",
+    ".gitignore",
+    ".work/README.md",
+    ".work/PROTECTED_SURFACES.json",
     ".work/touch-scope",
-    ".work/context/HANDOFF.md",
-    ".work/plans/NEXT.md",
-    ".work/standards/.gitkeep",
-    ".work/docs/integration/.gitkeep",
-    ".work/analysis/20260706-mod06-master-plan-standard-fix.md"
+    "CHANGELOG.md",
+    "START_HERE.md",
+    "docs/guides/workflows/20260518-guide-workflows-index.md",
+    "scripts/framework-verify.sh",
+    "scripts/gate-verify.sh",
+    "scripts/mod06-output-check.sh",
+    "scripts/skill-functional-verify.py",
+    "skills/ai-director/reference.md",
+    "skills/concept-run/reference.md",
+    "skills/plan-foundation/reference.md",
+    "skills/plan-foundation/skill.md",
+    "skills/plan-master/reference.md",
+    "skills/plan-master/skill.md",
+    "skills/x-director/skill.md",
+    "templates/README.md",
+    "templates/bootstrap.sh",
+    "templates/cursorrules.template"
   ],
-  "allowed_patterns": []
+  "allowed_patterns": [
+    ".work/reports/*",
+    ".work/analysis/*"
+  ]
 }

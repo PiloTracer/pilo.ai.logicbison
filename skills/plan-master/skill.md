@@ -186,7 +186,7 @@ Execute P0→P6 in order; at each gate run [Continuous integrity rules](#continu
 
 ## Mandatory sections (artifact contract)
 
-The plan file structure - 25 H2 sections, header metadata, milestone schema, task record schema, approval gate - is defined in **[`.ai/standards/20260519-MASTER_PLAN_STANDARD.md`](../../standards/20260519-MASTER_PLAN_STANDARD.md)**. Do not restate the contract here.
+The plan file structure - 25 H2 sections, header metadata, milestone schema, task record schema, approval gate - is defined in **[`standards/20260519-MASTER_PLAN_STANDARD.md`](../../standards/20260519-MASTER_PLAN_STANDARD.md)**. Do not restate the contract here.
 
 When authoring or revising a plan, this skill is responsible for:
 

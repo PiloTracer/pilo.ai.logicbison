@@ -419,6 +419,11 @@ AI_RULES.md
 **/pg_sources/
 **/.next/
 **/node_modules/
+# opencode local dependency tree (tracked config lives under .opencode/mcp/; node_modules are vendored)
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock
 **/venv/
 **/build/
 **/dist/

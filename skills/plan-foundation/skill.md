@@ -16,6 +16,8 @@ description: >-
 
 ---
 
+<a id="terminology-required--prevents-confusion-with-plan-master"></a>
+
 ## Role charter (anti-drift)
 
 Guides foundation planning only — not implementation. **Charter, goals/boundaries, terminology, architecture directions, plan-master relationship, lifecycle, registries, traceability, gate model, integrity, hallucination prevention, fitness/UX/AI/cross-model rules:** [`reference.md` § Foundation concepts (detailed)](reference.md#foundation-concepts-detailed).
@@ -112,6 +114,8 @@ Redirect to `@plan-master status`; do not score here: [reference.md § Status pr
 Report template and rules: [reference.md § Status protocol (detailed)](reference.md#status-protocol-detailed) (S6).
 
 ---
+
+<a id="master-plan-artifact"></a>
 
 ## Continue protocol
 

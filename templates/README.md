@@ -37,7 +37,12 @@ Or: `@project-bootstrap init`
 | `.work/decisions/README.md` | `work/decisions/README.md.template` |
 | `.work/features/README.md` | `work/features/README.md.template` |
 | `.work/prompts/README.md` | `work/prompts/README.md.template` |
+| `.work/touch-scope` | `work/touch-scope.template` |
+| `.work/PROTECTED_SURFACES.json` | `work/PROTECTED_SURFACES.template` |
+| `.work/reports/README.md` | `work/reports/README.md.template` |
 | Empty dirs | `plans/foundation/`, `full/`, `operations/`, `proposals/`, `archives/` |
+| Output-sink dirs | `.work/analysis/`, `.work/scripts/`, `.work/reports/` |
+| Docs subdirs | `.work/docs/guides/`, `tutorials/`, `reference/`, `integration/` |
 
 **Not copied by bootstrap** (author via skills or copy manually):
 
@@ -62,7 +67,8 @@ Or: `@project-bootstrap init`
 | `REPLACE:DIRECTORY_MAP_FILE` | DIRECTORY_MAP filename |
 | `REPLACE:OBSERVABILITY_SPEC_PATH` | Observability standard path |
 | `REPLACE:BOUNDARY_MAP_PATH` | Boundary map path |
-| `REPLACE:APP_ROOT` / `REPLACE:APP_WORKDIR` | Application paths |
+| `REPLACE:APP_ROOT` / `REPLACE:APP_WORKDIR` / `REPLACE:APP_ENTRYPOINT` | Application paths |
+| `REPLACE:FRONTEND_ROOT` / `REPLACE:FRONTEND_WORKDIR` / `REPLACE:FRONTEND_CONFIG_PATHS` | Frontend paths |
 | `REPLACE:MIGRATIONS_DIR` / `REPLACE:MIGRATION_*` | SQL migrations |
 | `REPLACE:PLATFORM_PACKAGE` | Shared package import name |
 | `REPLACE:SERVICE_*` / `REPLACE:STACK_SUFFIX_VAR` | Docker Compose |
@@ -89,6 +95,8 @@ Also, `@plan-foundation greenfield` generates this project's own dated files und
 templates/work/
 ├── README.md.template
 ├── context/HANDOFF.md.template
+├── touch-scope.template
+├── PROTECTED_SURFACES.template
 ├── plans/
 │   ├── NEXT.md.template
 │   ├── ASSUMPTIONS.md.template
@@ -99,7 +107,9 @@ templates/work/
 │   └── operations/          ← docker compose proposal
 ├── features/example-slug/   ← SPEC template
 ├── decisions/               ← README + ADR template
-└── prompts/README.md.template
+├── prompts/README.md.template
+├── reports/                 ← verify-output README
+└── docs/                    ← guides/tutorials/reference/integration READMEs
 ```
 
 ---

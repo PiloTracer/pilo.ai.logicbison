@@ -60,10 +60,12 @@ for dir in foundation full operations proposals archives; do
 done
 
 # Create output-sink dirs (not populated by bootstrap; appear when work runs)
-for dir in analysis scripts; do
+for dir in analysis scripts reports; do
   mkdir -p "${WORK}/${dir}"
   touch "${WORK}/${dir}/.gitkeep"
 done
+
+copy_if_missing "${TPL}/reports/README.md.template" "${WORK}/reports/README.md"
 
 # Create docs subdirectories (populated by @docs skill + vendor integration cache)
 for dir in guides tutorials reference integration; do

@@ -273,6 +273,8 @@ Document in project README if adopted.
 
 ---
 
+<a id="phase-5-verification-and-integrity-validation"></a>
+
 ### Phase 5 - Verification and integrity validation
 
 **Objective:** Detect flaws before implementation at scale.
