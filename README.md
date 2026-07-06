@@ -170,7 +170,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 @session-control close
 ```
 
-**Jump ahead?** If planning is already done, open at [`§ 3 · Open a coding session`](#3--open-a-coding-session-every-day) below. If you only need setup files, see [First-time setup](#first-time-setup-human-or-agent).
+**Jump ahead?** If planning is already done, open at [`§ 3 · Open a coding session`](#full-flow-once-per-project--every-day--per-milestone) below. If you only need setup files, see [First-time setup](#first-time-setup-human-or-agent).
 
 ### Skills at a glance
 
@@ -346,7 +346,7 @@ Skill prerequisite gates: [`skills/SKILL_DEPENDENCIES.md`](skills/SKILL_DEPENDEN
 ## Required reads (when work is active)
 
 1. [`START_HERE.md`](START_HERE.md)
-2. **`.cursorrules`** (repo root - install via [First-time setup](#first-time-setup--install-cursorrules-human) if missing)
+2. **`.cursorrules`** (repo root - install via [First-time setup](#first-time-setup-human-or-agent) if missing)
 3. `.work/context/HANDOFF.md`
 4. `.work/plans/NEXT.md`
 5. `.work/plans/foundation/*-01-*-initial-scope.md` when present

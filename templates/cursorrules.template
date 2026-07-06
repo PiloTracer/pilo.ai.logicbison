@@ -125,6 +125,10 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 | `REPLACE:DEV_STACK_SCRIPT` | Host compose-control script |
 | `REPLACE:SERVICE_FRONTEND` | Optional compose UI service |
 | `REPLACE:FRONTEND_WORKDIR` | In-container frontend path |
+| `REPLACE:FRONTEND_CONFIG_PATHS` | Additional frontend config paths to protect (e.g. `vite.config.ts`, `next.config.js`) |
+| `REPLACE:SERVICE_API` | Compose service name for backend (e.g. `api`, `backend`) |
+| `REPLACE:STACK_SUFFIX_VAR` | Env var used for compose project isolation (e.g. `STACK_SUFFIX`) |
+| `REPLACE:SCRIPTS_DIR` | Directory for one-off operational scripts under the app tree (e.g. `scripts/`) |
 
 **P0 product intent (canonical):** `{PLANS_ROOT}/foundation/*-01-*-initial-scope.md` (from `@plan-foundation greenfield`). `{PROMPTS_ROOT}/initial.md` is user scratch — never read/create unless the user names that path.
 
