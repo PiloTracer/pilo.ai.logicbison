@@ -475,3 +475,5 @@ htmlcov/
 **/secret/
 **/tmp/
 **/temp/
+
+**/commit-ref-pending/
