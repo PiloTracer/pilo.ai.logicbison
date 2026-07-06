@@ -30,7 +30,7 @@ Detect from the user message. If ambiguous, ask once:
 | **continue** | "continue foundation", "what's next", "resume planning" | [Continue protocol](#continue-protocol) - detect phase → next gate |
 | **greenfield** | new project, empty repo, "start foundation" | [Greenfield protocol](#greenfield-protocol) - P0→P6 |
 | **probe** | "probe the project", "ask me questions", "fill the gaps", "make sure you understand", "what else do you need to know?" | [Probe protocol](#probe-protocol) - adaptive coverage loop; read+write planning artifacts only |
-| **certify** | "certify plan-master-ready", "verify foundation for plan-master" | Run [Plan-master readiness](#s4--plan-master-readiness); update HANDOFF if pass |
+| **certify** | "certify plan-master-ready", "verify foundation for plan-master" | Run [Plan-master readiness](reference.md#s4-plan-master-readiness); update HANDOFF if pass |
 
 **Do not** run greenfield INTERACTIONs when the user asked for **status** only.
 
@@ -44,9 +44,9 @@ Detect from the user message. If ambiguous, ask once:
 
 | Mode | Gate |
 |------|------|
-| **greenfield** | [GF0](#gf0--bootstrap-artifacts) |
-| **probe** | [GF0](#gf0--bootstrap-artifacts) (needs `{HANDOFF}` + doc 01 to record into); else suggest **greenfield** |
-| **certify** | [CF0](#cf0--foundation-complete) |
+| **greenfield** | [GF0](#gf0---bootstrap-artifacts) |
+| **probe** | [GF0](#gf0---bootstrap-artifacts) (needs `{HANDOFF}` + doc 01 to record into); else suggest **greenfield** |
+| **certify** | [CF0](#cf0---foundation-complete) |
 | **continue** | Foundation started (≥1 foundation doc or HANDOFF notes P0); else suggest **greenfield** |
 | **status** | - (read-only) |
 
@@ -68,7 +68,7 @@ Before P0 INTERACTIONs:
 
 Before **certify**:
 
-1. Evaluate [Foundation-complete (artifact check)](#s3b--foundation-complete-artifact-check).
+1. Evaluate [Foundation-complete (artifact check)](#s3b---foundation-complete-artifact-check).
 2. If **foundation-complete: no** → **stop** with the [blocked-report shape](#blocked-report-shape):
    - **Required:** `foundation-complete: yes` (P0–P6 gates closed)
    - **Detected:** `foundation-complete: no` - failing phase/gate list from status
@@ -122,12 +122,14 @@ Report template and rules: [reference.md § Status protocol (detailed)](referenc
 6. At GATE p3+ → apply [Architecture fitness review](reference.md#architecture-fitness-review); run `plan-master integrity` if contradictions found.
 **Invoke as:** `@plan-master integrity` (Cursor) or "Follow .ai/skills/plan-master/skill.md - integrity mode" (opencode/Codex). Returns integrity score: pass | pass with waivers | fail.
 7. Update `HANDOFF.md` and `NEXT.md` when a gate **passes** completion model (not merely when files are written).
-8. At P6 done → evaluate [Plan-master readiness](#s4--plan-master-readiness) → offer `p6-done` confirm only if **plan-master-ready** (or list blockers).
+8. At P6 done → evaluate [Plan-master readiness](reference.md#s4-plan-master-readiness) → offer `p6-done` confirm only if **plan-master-ready** (or list blockers).
 9. After **plan-master-ready**: recommend `@plan-master greenfield` | `continue` - do not author master plan in plan-foundation.
 10. After master plan exists → tell user to run `@plan-master status` for implementation-ready (not plan-foundation).
 11. Do not write broad multi-milestone implementation without **plan-master** Approved master plan (or HANDOFF waiver).
 
 ---
+
+## Probe protocol
 
 Adaptive gap-driven interrogation before certification. Engine: **[`.ai/skills/probe-protocol.md`](../probe-protocol.md)**.
 
@@ -139,10 +141,10 @@ Adaptive gap-driven interrogation before certification. Engine: **[`.ai/skills/p
 
 Use when the user asks to **certify**, **verify for plan-master**, or **plan-master-ready**.
 
-0. Run [CF0 - Foundation-complete](#cf0--foundation-complete).
+0. Run [CF0 - Foundation-complete](#cf0---foundation-complete).
 1. Run **Status protocol** S1–S3 (full evaluation).
 2. Run `@plan-master integrity` on foundation artifacts (read-only if status-only; update HANDOFF on certify).
-3. Evaluate [S4 - Plan-master readiness](#s4--plan-master-readiness) criterion by criterion with evidence.
+3. Evaluate [S4 - Plan-master readiness](reference.md#s4-plan-master-readiness) criterion by criterion with evidence.
 4. Output certification report:
 
 ```markdown
@@ -158,19 +160,24 @@ Use when the user asks to **certify**, **verify for plan-master**, or **plan-mas
 
 ### If yes
 - Record in HANDOFF: `Plan-master-ready: <date>`
-Use when user asks to **certify** or **plan-master-ready**.
+- Next: `@plan-master greenfield` or `continue`
 
-0. [CF0](#cf0--foundation-complete) → Status S1–S3 → `@plan-master integrity` → evaluate [S4](#s4---plan-master-readiness).
+### If no
+- Blockers: <ordered list>
+- Next: `@plan-foundation continue` (missing artifacts) or `@plan-foundation probe` (understanding gaps - vague scope, NFRs, constraints)
+```
+
+Do **not** create `*-full-plan.md` in certify mode - that is **plan-master**'s job.
+
 **Certification report template and steps:** [`reference.md` § Certify protocol (detailed)](reference.md#certify-protocol-detailed).
 
-Do **not** create `*-full-plan.md` in certify mode.
-
-**Binding:** Each phase has **Artifacts**, **GATE** checklist, and shared gate integrity. Greenfield INTERACTION ids (`p0-name`, `p1-integrations`, …) live in **`reference.md` § Greenfield walkthrough**.
+**Binding:** Each phase has **Artifacts**, **GATE** checklist, and shared gate integrity. Greenfield INTERACTION ids (`p0-name`, `p0-intent`, `p0-probe`, `p1-integrations`, …) live in **`reference.md` § Greenfield walkthrough**. **Order is binding:** name → initial prompt → product probe → **then** integrations and other technical questions.
 
 **Phase headers, artifact paths, and GATE checklists (P0–P6):** [`reference.md` § Phase gates P0–P6 (detailed)](reference.md#phase-gates-p0-p6-detailed).
 
-At P6 pass: evaluate [Plan-master readiness](#s4--plan-master-readiness); foundation orchestration certifies **plan-master-ready**; **plan-master** authors the [master plan artifact](reference.md#master-plan-artifact). **Not at P6:** implementation-ready (requires Approved master plan).
+At P6 pass: evaluate [Plan-master readiness](reference.md#s4-plan-master-readiness); foundation orchestration certifies **plan-master-ready**; **plan-master** authors the [master plan artifact](reference.md#master-plan-artifact). **Not at P6:** implementation-ready (requires Approved master plan).
 
+---
 
 ## Anti-patterns
 
@@ -191,11 +198,20 @@ At P6 pass: evaluate [Plan-master readiness](#s4--plan-master-readiness); founda
 - Running `@plan-master greenfield` before **plan-master-ready: yes**
 - Expanding `{PLANS_ROOT}/foundation/` into a substitute for `*-full-plan.md`
 - Calling foundation doc 04 "the full plan" in reports (say **architecture foundation** or **foundation doc 04**)
+- **Skipping `p0-intent` / `p0-probe` and jumping to `p1-integrations` or stack questions** (product understanding must precede technical choices)
 
-0. [GF0](#gf0--bootstrap-artifacts) → `p0-name` → P0 doc 01 + registries → walk P0→P6 gates → sync assumption ledger → no broad code until plan-master **Approved**.
+---
+
+## Greenfield protocol
+
+0. [GF0](#gf0---bootstrap-artifacts) → `p0-name` → `p0-intent` → `p0-probe` (product grill; no tech yet) → P0 doc 01 + registries → `p1-integrations` (agent-inferred + grill) → walk P1→P6 gates → sync assumption ledger → no broad code until plan-master **Approved**.
 
 **Full step list:** [`reference.md` § Greenfield protocol (detailed)](reference.md#greenfield-protocol-detailed).
 
+### Readiness snapshot
+
+| State | Result |
+|-------|--------|
 | **Plan-master-ready** | **yes** after `certify plan-master-ready` + integrity |
 | **Master plan** | **Approved** under `{PLANS_ROOT}/full/` |
 | **Implementation-ready** | Ask `@plan-master status` |

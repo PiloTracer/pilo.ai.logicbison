@@ -1,14 +1,17 @@
 {
   "ref": "AIOS-1",
   "updated": "2026-07-05",
-  "goal": "Token-optimize .cursorrules + template; fix MOD-07 drift; trim verbose prose",
+  "goal": "Fix plan-foundation greenfield question order (p0-intent, p0-probe before integrations); repair pre-existing skill.md structural corruption found during workflow verification; add same-file anchor/fence check to skill-functional-verify.py; log cross-skill anchor debt",
   "allowed_paths": [
-    ".cursorrules",
-    "templates/cursorrules.template",
+    "skills/plan-foundation/skill.md",
+    "skills/plan-foundation/reference.md",
+    "START_HERE.md",
     ".work/context/HANDOFF.md",
-    ".work/plans/NEXT.md",
     ".work/active-ref",
-    ".work/touch-scope"
+    ".work/touch-scope",
+    "scripts/skill-functional-verify.py",
+    ".work/plans/NEXT.md",
+    ".work/plans/UNKNOWNS.md"
   ],
   "allowed_patterns": []
 }

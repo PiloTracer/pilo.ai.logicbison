@@ -22,6 +22,7 @@
 | README customization note (2026-07-02) | README §Customization — adopters may adapt skills, rules, and project memory via their coding agent |
 | AIOS-1 change-safety layer (2026-07-04) | `blast-radius-check.sh`, `touch-scope-verify.sh`, `mod06-output-check.sh`, `golden-deploy-verify.sh`, `PROTECTED_SURFACES.json`, pre-commit hook, skills/docs/CI wiring; tag `v0.4.4` |
 | v0.5.0 rules token-optimization (2026-07-05) | `.cursorrules` −42%, `templates/cursorrules.template` −41% (all rules preserved, 31/31 verified); MOD-06→MOD-07 template fix; `CHANGELOG.md` [0.5.0]; tag `v0.5.0` + GitHub release |
+| AIOS-1 plan-foundation question-order fix + skill.md repair (2026-07-05) | Confirmed greenfield question order (name → p0-intent → p0-probe → integrations/stack); repaired pre-existing `skill.md` structural corruption (unclosed fence, missing headings, duplicated/orphaned text, dangling table, same-file anchor mismatches) dating to the v0.4.3 skill-trim; `plan-foundation` now in `ANCHOR_CLEAN` set; `skill-functional-verify.py` hardened with same-file anchor + fence-balance checks |
 
 ---
 
@@ -37,7 +38,10 @@
 
 | Priority | Item | Notes |
 |----------|------|-------|
-| **P1** | Deploy v0.5.0 to tools-project | `@deploy-files copy - /path` or `@deploy-basic update` — propagates token-optimized rules to adopters |
+| **P1** | Deploy v0.5.0 + AIOS-1 fix to tools-project | `@deploy-files copy - /path` or `@deploy-basic update` — propagates token-optimized rules + the repaired `plan-foundation/skill.md` to adopters. Resolve the actual source path dynamically from the current `.ai` repo location at invocation time (`pwd`/git-root), never from a memorized/hardcoded value — `deploy-files.sh`/`deploy-basic.sh` already derive `AI_ROOT` from the invoked script path, so pass the script's real current path. |
+| **P2** | Cross-skill anchor-hygiene cleanup | 18 pre-existing broken same-file `#anchor` links across 8 skills, surfaced as `DEBT` by the now-enhanced `skill-functional-verify.py` — see `UNKNOWNS.md` U1. `plan-foundation` already fixed (in `ANCHOR_CLEAN` set); repeat the same repair pattern for the rest, then promote them into `ANCHOR_CLEAN` |
+| **P3** | Clarify greenfield P0 registry-creation ordering | `UNKNOWNS.md` U2 — `p0-probe` needs `ASSUMPTIONS`/`RISK_REGISTRY`/`UNKNOWNS` to exist before it can record into them; current step order only guarantees this "by GATE p0" |
+| **P4** | Live greenfield walkthrough | Run `@plan-foundation greenfield` end-to-end on a scratch/test project now that `skill.md` is structurally clean, to confirm the AIOS-1 question-order fix behaves correctly in practice (deferred this session in favor of closing) |
 
 ---
 

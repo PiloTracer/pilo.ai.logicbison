@@ -4,13 +4,13 @@
 
 ## Session status
 
-**Closed:** 2026-07-05 — v0.5.0 released: token-optimized `.cursorrules` + template (−42% / −41%), MOD-07 drift fixed; committed, tagged, pushed, GitHub release published.
+**Closed:** 2026-07-05 — AIOS-1 plan-foundation question-order fix confirmed; discovered + repaired pre-existing `skill.md` structural corruption (unclosed fence, missing headings, orphaned/duplicate text) from the v0.4.3 skill-trim; enhanced `skill-functional-verify.py` with same-file anchor + fence-balance checks; cross-skill anchor debt (8 skills) and a greenfield P0 sequencing gap logged for follow-up. Live greenfield walkthrough deferred to next session.
 
 **Updated:** 2026-07-05
 
 Treat the next chat as a **new session**: do not assume unwritten goals from prior threads unless they appear here or in linked artifacts.
 
-**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`. Latest: v0.5.0 — token-optimized always-applied rules + adopter template; all normative rules preserved (31/31 verified); `framework-verify` + `skill-functional-verify` exit 0.
+**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`. Latest: v0.5.0 tag + AIOS-1 plan-foundation fix on top (uncommitted → committed this close). `plan-foundation/skill.md` now fully anchor-clean (`ANCHOR_CLEAN` set in `skill-functional-verify.py`); 8 other skills carry pre-existing same-file anchor debt reported as non-blocking `DEBT` (see NEXT.md P2). `framework-verify` + `skill-functional-verify` exit 0; `touch-scope-verify` pass; `blast-radius-check` warn (high blast radius, in declared scope).
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
@@ -56,6 +56,7 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | Date | Session | Artifacts |
 |------|---------|-----------|
+| 2026-07-05 | AIOS-1 plan-foundation fix + skill.md repair + verify-tooling hardening | `skills/plan-foundation/skill.md` (restored `## Probe protocol`/`## Greenfield protocol` headings, closed unclosed fence, removed leaked template heading + ~15 lines duplicated/orphaned text, fixed dangling table, corrected same-file anchor hyphen counts + cross-file `reference.md#` prefixes); `skills/plan-foundation/reference.md` (minor alignment); `scripts/skill-functional-verify.py` (`strict_slug`, `strip_fences`, `same_file_issues` — detects unclosed fences + broken same-file anchors; `ANCHOR_CLEAN` set); `.work/plans/UNKNOWNS.md` (U1 cross-skill anchor debt, U2 P0 registry-ordering ambiguity); `.work/plans/NEXT.md` (P2, P3) |
 | 2026-07-05 | AIOS-1 v0.5.0 rules token-optimization | `.cursorrules` (−42%), `templates/cursorrules.template` (−41%); MOD-06→MOD-07 template fix; `concept-run` desc fix (both files); `CHANGELOG.md` [0.5.0]; tag `v0.5.0`; GitHub release published; framework-verify + skill-functional-verify exit 0 |
 | 2026-07-04 | AIOS-1 change-safety layer | `blast-radius-check.sh`, `touch-scope-verify.sh`, `mod06-output-check.sh`, `golden-deploy-verify.sh`, `PROTECTED_SURFACES.json`, `hooks/pre-commit`, skills (code-verify, code-implementation, code-repair), `.cursorrules` §Change safety, `DOCS_TECH_STACK.md` dogfood, `CONTRIBUTING.md`, `CHANGELOG.md`, consumer templates (`touch-scope`, `PROTECTED_SURFACES`); framework-verify exit 0 |
 | 2026-07-02 | deploy + opencode verification + README customization | `install-opencode-config.sh`, `deploy-basic.sh`, `deploy-files.sh`, `framework-verify.sh`, deploy/opencode skills, `CHANGELOG.md`, `.quick/deploy-to-project.md`; live smoke tools-project + test-test clone; commit `17658f4`; README Customization section |
@@ -77,7 +78,8 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | ID | Summary | Blocks |
 |----|---------|--------|
-| - | | |
+| U1 | 18 pre-existing broken same-file `#anchor` links across 8 skills (`code-implementation`, `code-repair`, `db-migration`, `feature-spec`, `plan-master`, `plan-repair`, `plan-verify`, `session-control`), surfaced as `DEBT` by the enhanced `skill-functional-verify.py` | No — non-blocking `DEBT`, cleanup tracked as NEXT.md P2 |
+| U2 | Greenfield P0 protocol: `p0-probe` writes into `ASSUMPTIONS.md`/`RISK_REGISTRY.md`/`UNKNOWNS.md`, which are only guaranteed to exist "by GATE p0", not necessarily before `p0-probe` runs | No — deferred, tracked as NEXT.md P3 |
 
 ---
 

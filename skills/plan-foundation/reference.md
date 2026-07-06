@@ -381,24 +381,57 @@ When a product choice blocks SPECs (UX mode, vertical, compliance wording):
 
 ### Phase 0 - Capture (interactions)
 
+**Mandatory order (binding):** `p0-name` → `p0-intent` → `p0-probe` → **then** Phase 1. Do **not** skip ahead to `p1-integrations` or any stack/hosting INTERACTION until `p0-probe` exits.
+
 #### INTERACTION: p0-name
 
 **Q:** What is this project called? (Used in README, HANDOFF, and .cursorrules.)
 **Type:** free_text
 **Skip if:** README or HANDOFF already names the project and user did not ask to rename
 
+#### INTERACTION: p0-intent
+
+**Q:** Describe the project in as much detail as you can — the problem you are solving, who it is for, core workflows, what success looks like, constraints you already know, and anything else that matters. Paste a full initial prompt if you have one; more detail now means fewer wrong assumptions later.
+**Type:** free_text
+**Depends on:** `p0-name` answered (or skipped)
+**Skip if:** doc 01 §Founder intent already has substantive content (≥2 sentences or a pasted prompt block)
+**On answer:** Create or update doc 01; paste the answer **verbatim** under `### Founder intent (verbatim - P0 capture)` in the assumption ledger. Do **not** summarize or rewrite yet.
+
+#### INTERACTION: p0-probe
+
+**Type:** probe_loop (engine: [`.ai/skills/probe-protocol.md`](../probe-protocol.md))
+**Depends on:** `p0-intent` answered (or skipped with substantive founder intent already in doc 01)
+**Coverage subset (product only — no tech yet):** D1 (product intent & success), D2 (audience/personas), D3 (scope in/out), D4 (functional capabilities), D8 (constraints: budget, timeline, team, ops)
+**Exclude until Phase 1:** D5 (quantified NFRs), D6 (integrations), D7 (data model), D9 (deploy/hosting/tenancy), D10 (risks — capture obvious ones inline, formal registry sync at GATE p0)
+**Target:** D1 and D3 at least **partial**; D2 and D4 addressed (not **unknown**); user had opportunity to defer remaining gaps
+**Batch size:** ≤5 targeted questions per iteration (probe-protocol default)
+**Record into:** doc 01 (audience, scope, capabilities sections), `ASSUMPTIONS.md`, `UNKNOWNS.md`, `RISK_REGISTRY.md`, `{PLANS_ROOT}/foundation/PROBE_LEDGER.md`
+**Exit when:** product dimensions meet target **or** user says stop/defer/enough **or** three iterations with no new high-priority gaps
+**Hard rule:** Do **not** present `p1-integrations`, `p1-adjacent`, `p2-*`, or any stack/hosting INTERACTION until this step exits. If the user asks for tech choices early, acknowledge and redirect: product understanding first.
+
 ### Phase 1 - Exploration (interactions)
+
+**Prerequisite:** `p0-probe` exited. Phase 1 starts with **inferred** integrations, not a blank checklist.
 
 #### INTERACTION: p1-integrations
 
-**Q:** External integrations in v1?
-**Type:** multi_select
-**Options:**
+**Pre-step (agent — before asking):** From doc 01 + probe answers, infer likely external dependencies (REST APIs, gov/regulatory systems, payments, file exchange, auth/IdP, webhooks, etc.). For each inference: one-line rationale tied to a user statement or labeled **assumption** if inferred.
+**Q:** Based on what you described, these external integrations look relevant for v1:
+
+`<agent numbered list: integration | rationale | assumed vs stated>`
+
+Which apply? What is missing? What is explicitly **out of scope** for v1?
+**Type:** multi_select + free_text follow-up
+**Options:** (generate from pre-step — include `none` only if the agent found zero plausible deps)
 - `rest-api` | REST API | External HTTPS service
 - `gov-api` | Government / regulatory API | Tax, customs, e-invoicing
 - `payment` | Payment gateway | Stripe, acquirer, etc.
 - `file-exchange` | File exchange | XSD, EDI, CSV import/export
-- `none` | None | No external deps in v1
+- `auth-idp` | Auth / identity provider | SSO, OAuth, enterprise IdP
+- `webhooks` | Inbound/outbound webhooks | Event-driven partners
+- `none` | None confirmed | No external deps in v1 (only after agent pre-step found none)
+**Follow-up (mandatory when any integration selected):** ≤5 grill questions on that integration — vendor/system name, sandbox availability, auth model, data sensitivity, failure modes, v1 must-have vs defer.
+**Depends on:** `p0-probe` exited
 
 #### IF: p1-integrations includes gov-api or file-exchange
 
@@ -531,11 +564,12 @@ Create the files per the proposal. Update HANDOFF and NEXT to reflect approval.
 {PLANS_ROOT}/UNKNOWNS.md
 ```
 
-**Greenfield questions:** `p0-name` - see `reference.md` § Phase 0.
+**Greenfield questions:** `p0-name`, `p0-intent`, `p0-probe` — see `reference.md` § Phase 0. **Do not** enter Phase 1 until all three complete (or skip where allowed).
 
 ### GATE: p0
 
-- [ ] **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/*-01-*-initial-scope.md` (founder intent captured verbatim)
+- [ ] **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/*-01-*-initial-scope.md` (founder intent captured verbatim from `p0-intent`)
+- [ ] **Product probe** complete: `p0-probe` exited; D1/D3 at least partial; D2/D4 addressed; `PROBE_LEDGER.md` started
 - [ ] `.cursorrules` created with project name and evidence-first / no-PII principles
 - [ ] Planning registries created (`ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md`)
 
@@ -870,7 +904,7 @@ Adaptive, gap-driven interrogation that **guarantees foundation understanding** 
 4. **RECORD** answers to their canonical home (doc 01, ADR **Proposed** stubs, `ASSUMPTIONS`, `UNKNOWNS`, `RISK_REGISTRY`) - never fork lists; never set ADR **Decided** from a probe answer.
 5. Update `PROBE_LEDGER.md`; emit the [probe report](../probe-protocol.md#output-report-every-probe-run).
 6. **On target reached:** recommend `@plan-foundation certify plan-master-ready` (probe fills gaps; certify + `plan-master integrity` still own the gate).
-7. **Relationship to greenfield:** greenfield's static `INTERACTION` blocks seed D1–D10; probe adds adaptive follow-ups when an answer is vague or a dimension stays **unknown**. Use probe at each GATE to close residual gaps before declaring the gate done.
+7. **Relationship to greenfield:** greenfield **embeds** probe at P0 via `p0-probe` (product dimensions only) **before** any technical INTERACTION. Standalone `@plan-foundation probe` is for resume, gap-fill after partial greenfield, or pre-certify polish — not a substitute for the mandatory P0 grill. At later GATEs, run probe again on residual gaps before declaring the gate done.
 
 **Anti-patterns:** see [probe-protocol.md § Anti-patterns](../probe-protocol.md#anti-patterns). In foundation specifically: do **not** use probe to score **implementation-ready** (out of plan-foundation scope - redirect to `@plan-master status`).
 ---
@@ -919,13 +953,16 @@ Use when the user asks to **certify**, **verify for plan-master**, or **plan-mas
 ## Greenfield protocol
 
 0. Run [GF0 - Bootstrap artifacts](#gf0--bootstrap-artifacts).
-1. **Project name first** - run `p0-name` before any other INTERACTION unless user already gave the name in the same message.
-2. Create the **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/YYYYMMDD-01-<project-slug>-initial-scope.md` (foundation doc 01). Capture the raw product idea verbatim in a **Founder intent** subsection under **Assumption ledger**; add placeholder sections for audience, scope expansion, and architecture directions (filled in P1). **Do not** write `{PROMPTS_ROOT}/initial.md` - that path is user-owned scratch; skills read doc 01 instead.
-3. Create empty planning registries: `ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` (templates in reference.md).
-4. Walk phases P0→P6; at each **GATE**, present checklist + shared integrity; wait for approval before the next phase.
-5. Use **Assumption ledger** in foundation doc 01; sync to `ASSUMPTIONS.md` at GATE p1.
-6. Apply [Hallucination prevention](#hallucination-prevention) and [Traceability requirement](#traceability-requirement) throughout.
-7. Never write broad implementation code until **plan-master** master plan is **Approved** (foundation ends at plan-master-ready).
+1. **Project name first** — run `p0-name` before any other INTERACTION unless user already gave the name in the same message.
+2. **Initial prompt second** — run `p0-intent`; request the fullest project description the user can provide (paste-friendly). Record verbatim in doc 01 §Founder intent. **Do not** jump to integrations or stack questions here.
+3. **Product grill third** — run `p0-probe` (probe-protocol loop on D1–D4 + D8 only). Ask until product intent, audience, scope, and core capabilities are understood well enough to infer integrations — or the user defers. **Hard stop:** no `p1-integrations` or `p2-*` until `p0-probe` exits.
+4. Create the **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/YYYYMMDD-01-<project-slug>-initial-scope.md` (foundation doc 01) after `p0-intent` (update through `p0-probe`). Add placeholder sections for architecture directions (filled in later phases). **Do not** write `{PROMPTS_ROOT}/initial.md` — that path is user-owned scratch; skills read doc 01 instead.
+5. Create empty planning registries: `ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` (templates in reference.md) — may start at step 2 if convenient, but must exist before GATE p0.
+6. **Phase 1 integrations fourth** — run `p1-integrations` only after step 3: agent **infers** likely integrations from product answers, presents the list with rationale, then grills the user on each selected integration.
+7. Walk remaining phases P1→P6; at each **GATE**, present checklist + shared integrity; wait for approval before the next phase.
+8. Use **Assumption ledger** in foundation doc 01; sync to `ASSUMPTIONS.md` at GATE p1.
+9. Apply [Hallucination prevention](#hallucination-prevention) and [Traceability requirement](#traceability-requirement) throughout.
+10. Never write broad implementation code until **plan-master** master plan is **Approved** (foundation ends at plan-master-ready).
 ---
 
 ## Foundation concepts (detailed)

@@ -117,8 +117,8 @@ Replace `M{N}` with the milestone you're working on (see `NEXT.md ## Recommended
 
 | You need… | Run |
 |---|---|
-| To start a brand-new project | `@plan-foundation greenfield` |
-| The agent should ask questions until it truly understands the project | `@plan-foundation probe` (adaptive loop; fills scope/NFR/constraint gaps) |
+| To start a brand-new project | `@plan-foundation greenfield` (name → initial prompt → product grill → **then** integrations/stack) |
+| Resume or deepen understanding after partial foundation | `@plan-foundation probe` (adaptive loop; fills scope/NFR/constraint gaps — also embedded in greenfield P0) |
 | To check if foundation work is done | `@plan-foundation status` then `@plan-foundation certify` |
 | To audit foundation or master plans (symmetric to code-verify) | `@plan-verify foundation` · `@plan-verify master` · `@plan-verify alignment` |
 | To map app routes/pages/APIs to feature SPECs (code locate-ability) | `@plan-verify coverage` → `@plan-repair repair - from coverage` |

@@ -21,6 +21,53 @@ REQUIRED_IN_REFERENCE = {
     "plan-verify": ["Foundation verify protocol", "Brownfield detection"],
 }
 
+# Skills already audited clean for same-file anchor / fence integrity - hard FAIL
+# if these regress. Everything else reports pre-existing issues as DEBT until a
+# dedicated cross-skill anchor-hygiene cleanup runs (see NEXT.md).
+ANCHOR_CLEAN = {"plan-foundation"}
+
+def strict_slug(text: str) -> str:
+    """GitHub-accurate heading slug: does NOT collapse repeated hyphens
+    (unlike github_slug below, which is lenient for legacy reference.md
+    cross-file checks). A ' - ' in heading text yields '---' in the anchor."""
+    text = text.strip().lower()
+    for ch in ('–', '—', '−'):
+        text = text.replace(ch, '-')
+    text = re.sub(r'[^\w\s-]', '', text)
+    return re.sub(r'[\s]+', '-', text)
+
+def strip_fences(text: str) -> str:
+    out = []
+    infence = False
+    for line in text.splitlines():
+        if line.strip().startswith('```'):
+            infence = not infence
+            continue
+        if not infence:
+            out.append(line)
+    return "\n".join(out)
+
+def same_file_issues(text: str) -> list[str]:
+    """Detect unclosed code fences and same-file (#anchor) links that don't
+    resolve to any heading or <a id=...> in this file."""
+    issues = []
+    fence_count = sum(1 for l in text.splitlines() if l.strip().startswith('```'))
+    if fence_count % 2 != 0:
+        issues.append(f"unclosed code fence (``` count={fence_count})")
+    headings = set()
+    for line in text.splitlines():
+        m = re.match(r'^#{1,6}\s+(.+)$', line)
+        if m:
+            headings.add(strict_slug(m.group(1)))
+        m2 = re.match(r'^<a id="([^"]+)"', line)
+        if m2:
+            headings.add(m2.group(1))
+    body = strip_fences(text)
+    anchors = set(re.findall(r'\]\(#([a-zA-Z0-9_-]+)\)', body))
+    for a in sorted(anchors - headings):
+        issues.append(f"same-file anchor does not resolve: #{a}")
+    return issues
+
 def github_slug(text: str) -> str:
     text = text.strip().lower()
     for ch in ('–', '—', '−'):
@@ -58,6 +105,13 @@ for d in skill_dirs:
         fail += 1
     elif nbytes > SOFT:
         print(f"DEBT over soft budget: {name} ({nbytes}B)")
+
+    for issue in same_file_issues(text):
+        if name in ANCHOR_CLEAN:
+            print(f"FAIL {name}: {issue}")
+            fail += 1
+        else:
+            print(f"DEBT {name}: {issue} (pre-existing - see NEXT.md follow-up)")
 
 print(f"\n=== Trimmed skills ({len(TRIMMED)}) ===")
 for name in sorted(TRIMMED):
