@@ -63,6 +63,7 @@ Before P0 INTERACTIONs:
    - **Detected:** missing
    - **Run first:** `@project-bootstrap init`
 3. If `REPLACE:` tokens remain in `.cursorrules` → warn; foundation may proceed but record unfilled tokens in the greenfield report.
+4. If `.work/touch-scope` exists and still has the template placeholder `"ref": "REPLACE:PROJECT_REF"` (or empty `allowed_paths`/`allowed_patterns`) → warn; foundation may proceed, but record it in the greenfield report and remind the user that `@code-implementation` will block file writes on an undeclared/placeholder scope (`touch-scope-verify.sh --strict-fail`).
 
 ### CF0 - Foundation-complete
 

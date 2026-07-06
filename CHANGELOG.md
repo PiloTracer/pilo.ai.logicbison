@@ -4,6 +4,19 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+### Fixed
+- **`templates/work/plans/full/YYYYMMDD-full-plan.md.template` shipped only 11 of the 25 mandatory `MASTER_PLAN_STANDARD.md` H2 sections** (§9–§18, §22–§25 — Architecture, UX/UI, Data, Security, Infrastructure, Deployment, Scalability, Observability, Testing, Operational, Rollback, Technical Debt, AI-Agent Execution, Long-Term Maintainability — were entirely absent). Any `@plan-master greenfield` plan authored from the template inherited the gap and would fail `@plan-verify master` / `MASTER_PLAN_STANDARD.md` §4 Approval gate. Confirmed via an external framework smoke-test session. Template now carries all 25 sections in order.
+- **No mechanical check existed for `MASTER_PLAN_STANDARD.md` §2 (25-section completeness/ordering) or §4 (Approval gate ↔ integrity consistency)** — plans could be marked `Status: Approved` while `Integrity (P5): pending` with nothing catching the contradiction.
+- **`templates/cursorrules.template` Skills table drift** — `docs`, `project-query-setup`, and `tauri-development` were registered in live `.cursorrules` / `skills/README.md` but missing from the bootstrap template; new `@deploy-basic` consumers inherited an incomplete Skills table.
+- **`scripts/install-opencode-config.sh`** — sister-framework `COHABITATION.md` instructions are added only when the file exists on disk (prevents stale opencode paths for frameworks that lack that doc).
+- **`scripts/install-opencode-config.sh` `--sync-paths` on self-hosted repos** — `infer_old_prefix` no longer treats sister-framework `skills.paths` entries (e.g. `../.ai.ui/skills`) as the Agent OS root to replace; self-hosted sync now rebuilds framework sections via `sync_framework_sections` instead of destructive prefix-replace (was rewriting `../.ai.ui` → absolute `ai_root`).
+- **`standards/20260519-MASTER_PLAN_STANDARD.md`** — clarified framework standards path resolves per deploy mode (`standards/` self-hosted; `$AGENT_OS_SOURCE/standards/` or `.ai/standards/` in consumers).
+
+### Added
+- **`scripts/master-plan-verify.sh`** — mechanically verifies a master plan has all 25 mandatory H2 sections (`## 1.`…`## 25.`, in order) and that `Status: Approved` is never paired with `Integrity (P5): pending`. Wired into `@plan-verify master` (M3 conformance table) and `framework-verify.sh` self-test.
+- **`skills/plan-foundation/skill.md` GF0** — warns (non-blocking) when `.work/touch-scope` still carries the template placeholder ref or empty scope arrays, since `@code-implementation` will later block writes on an undeclared/placeholder scope.
+- **Self-hosted dogfood scaffold** — `.work/standards/.gitkeep` and `.work/docs/integration/.gitkeep` so the framework repo matches the v0.5.2 consumer layout it documents.
+
 ## [0.5.2] - 2026-07-06
 
 ### Changed

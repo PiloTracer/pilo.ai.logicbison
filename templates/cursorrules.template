@@ -136,6 +136,10 @@ Skills live under `.ai/skills/<id>/skill.md` (folder name = id). When a task mat
 
 | Skill | Purpose |
 |-------|---------|
+| deploy-files | Fat-client deploy into target (in-place no-overwrite bootstrap + `update` rules-aware merge) |
+| deploy-basic | Thin-client bootstrap: `.cursorrules` + `.work/` + stack doc only; rest resolves via `AGENT_OS_SOURCE` |
+| deploy-repo | Full repo deploy: clone (git mirror) or archive (snapshot) |
+| project-query-setup | Optional tools-project API key + MCP registration + connectivity test |
 | plan-foundation | P0–P6 orchestration; certify plan-master-ready |
 | plan-master | Master implementation plan; certify implementation-ready |
 | plan-verify | Plan audits: foundation, master, alignment, coverage (code→SPEC), brownfield |
@@ -144,15 +148,14 @@ Skills live under `.ai/skills/<id>/skill.md` (folder name = id). When a task mat
 | db-migration | Idempotent numbered SQL migration scripts |
 | code-implementation | Iteration execution from NEXT.md |
 | code-verify | Milestone/uncommitted/last audits |
+| tauri-development | Tauri desktop: IPC security, shell/webview, Rust backend, events |
 | code-repair | Fix verify/SPEC/migration findings |
 | dev-stack | Isolated Docker Compose dev stack helper |
 | process-router | Read-only process Q&A router |
 | feature-spec | Author, review, amend feature SPECs |
 | concept-run | Run MOD-01…MOD-07 concept prompts |
 | project-bootstrap | Copy `.work/` skeleton, `.cursorrules`, stack doc from templates |
-| deploy-files | Fat-client deploy (vendored): full `.ai/` tree into target; no-overwrite; `update` rules-aware merge |
-| deploy-basic | Thin-client bootstrap / `update`: re-sync `AGENT_OS_SOURCE` + merge local scaffold (skills resolve from source) |
-| deploy-repo | Full repo deploy: clone (git mirror) or archive (snapshot) |
+| docs | Create/manage project docs under `.work/docs/` |
 | ai-director | Free-text orchestrator; routes to `.ai` skill chain; skill-gap detection |
 | x-director | Cross-framework orchestrator (`.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`) |
 

@@ -7,15 +7,17 @@
 **Foundation snapshot:** foundation-complete · plan-master-ready  
 **Integrity (P5):** pending
 
----
-
-## 1. Executive summary
-
-One paragraph: what we are building, for whom, and the delivery shape (milestones M1…Mn).
+> **25 mandatory H2 sections (`.ai/standards/20260519-MASTER_PLAN_STANDARD.md` §2).** Every section below must be filled or explicitly marked `N/A - <reason>` - never silently omitted or left as an empty heading.
 
 ---
 
-## 2. Project goals
+## 1. Executive Summary
+
+One paragraph: what we are building, for whom, and the delivery shape (milestones M1…Mn). Top risks in 5-10 lines.
+
+---
+
+## 2. Project Goals
 
 | ID | Goal | Measurable | Priority |
 |----|------|------------|----------|
@@ -23,7 +25,7 @@ One paragraph: what we are building, for whom, and the delivery shape (milestone
 
 ---
 
-## 3. Functional requirements
+## 3. Functional Requirements
 
 ### FR1 - REPLACE:DOMAIN_A
 
@@ -33,7 +35,7 @@ One paragraph: what we are building, for whom, and the delivery shape (milestone
 
 ---
 
-## 4. Non-functional requirements
+## 4. Non-Functional Requirements
 
 | ID | Requirement | Target |
 |----|-------------|--------|
@@ -42,68 +44,164 @@ One paragraph: what we are building, for whom, and the delivery shape (milestone
 
 ---
 
-## 5. Milestone overview
+## 5. Constraints
 
-| Milestone | Name | Outcome |
-|-----------|------|---------|
-| M1 | Platform skeleton | health, settings, migrations |
-| M2 | REPLACE:M2_NAME | |
-| M3 | | |
+Hard constraints: budget, deadline, regulatory, technology. `N/A - <reason>` if none apply.
 
 ---
 
-## 6. Traceability matrix (excerpt)
+## 6. Assumptions
 
-| Goal | FR/NFR | Component | Task ID | Description | Test | Acceptance |
-|------|--------|-----------|---------|-------------|------|------------|
-| G1 | FR1.1 | REPLACE:CONTEXT | M1-T1 | | | |
+Inline summary only - canonical list lives at `{PLANS_ROOT}/ASSUMPTIONS.md` (link, do not fork).
 
 ---
 
-## 7. Global acceptance criteria
+## 7. Risks
+
+Top risks only - canonical list lives at `{PLANS_ROOT}/RISK_REGISTRY.md` (link, do not fork).
+
+---
+
+## 8. Unknowns / Open Questions
+
+Inline summary only - canonical list lives at `{PLANS_ROOT}/UNKNOWNS.md` (link, do not fork).
+
+---
+
+## 9. Architecture Overview
+
+System diagram, services, boundaries. Cite foundation doc 04 (architecture foundation) - do not duplicate it here.
+
+---
+
+## 10. UX/UI Strategy
+
+High-level UX direction; link personas and relevant ADRs. `N/A - no UI in scope` if applicable.
+
+---
+
+## 11. Data Strategy
+
+Database choice, schema strategy, retention policy, migration path (`REPLACE:MIGRATIONS_DIR`, `REPLACE:MIGRATION_RUNNER_PATH`).
+
+---
+
+## 12. Security Strategy
+
+Threat model summary; controls; AuthN/Z; secrets handling; data classification.
+
+---
+
+## 13. Infrastructure Strategy
+
+Hosting, environments, networking.
+
+---
+
+## 14. Deployment Strategy
+
+CI/CD, rollout strategy (blue/green or rolling).
+
+---
+
+## 15. Scalability Strategy
+
+Bottleneck plan; horizontal/vertical scaling; caching, queues.
+
+---
+
+## 16. Observability Strategy
+
+Metrics, traces, logs, SLO/SLI. Ties to `observability-spec` standard when present.
+
+---
+
+## 17. Testing Strategy
+
+Unit/integration/contract/e2e; coverage targets; CI gates.
+
+---
+
+## 18. Operational Strategy
+
+Runbooks, on-call, incident classes, runtime ops.
+
+---
+
+## 19. Incremental Execution Roadmap
+
+### M1 - Platform skeleton
+
+| ID | Description | Files | FR/NFR | Complexity | Status |
+|----|-------------|-------|--------|------------|--------|
+| M1-T1 | | `REPLACE:APP_ROOT/…` | | S | pending |
+
+**Objective:** one sentence. **Scope:** in / out. **Dependencies:** none.
+**Deliverables:** health endpoint, settings, migrations. **Acceptance criteria:** health endpoint 200; migrations idempotent; task gates pass.
+**Validation steps:** `REPLACE:TEST_COMMAND` / `REPLACE:LINT_COMMAND` / `REPLACE:TYPECHECK_COMMAND`.
+**Rollback considerations:** feature flags, migration reversibility. **Testing requirements:** unit/integration. **Complexity:** S. **Operational impact:** none (skeleton).
+
+### M2 - REPLACE:M2_TITLE
+
+*(repeat the full milestone schema above per milestone - see `MASTER_PLAN_STANDARD.md` §3)*
+
+---
+
+## 20. Acceptance Criteria (global)
 
 - [ ] REPLACE:GLOBAL_ACCEPTANCE_1
 
 ---
 
-## 8. Validation gates (§21)
+## 21. Validation Gates
 
 | Gate | Command / evidence | Owner |
 |------|-------------------|-------|
 | Tests | `REPLACE:TEST_COMMAND` | eng |
 | Lint | `REPLACE:LINT_COMMAND` | eng |
 | Type | `REPLACE:TYPECHECK_COMMAND` | eng |
-
----
-
-## 19. Incremental execution roadmap (task tables)
-
-### M1 - Platform skeleton
-
-| ID | Description | Files | FR/NFR | Size | Status |
-|----|-------------|-------|--------|------|--------|
-| M1-T1 | | `REPLACE:APP_ROOT/…` | | S | pending |
-
-**Acceptance:** health endpoint 200; migrations idempotent; task gates pass.
-
-### M2 - REPLACE:M2_TITLE
-
-*(repeat per milestone)*
-
----
-
-## 20. Global acceptance (release)
-
----
-
-## 21. Integrity / waivers
-
-| Check | Result | Waiver |
-|-------|--------|--------|
 | P5 integrity | pending | |
 
 ---
 
-## Appendix - Assumptions and unknowns
+## 22. Rollback and Recovery Considerations
 
-Link `.work/plans/ASSUMPTIONS.md`, `UNKNOWNS.md`.
+Per-milestone rollback strategy; feature flags; migration reversibility.
+
+---
+
+## 23. Technical Debt Prevention Strategy
+
+Refactor pressure points; debt ledger policy.
+
+---
+
+## 24. AI-Agent Execution Guidance
+
+Constraints, dangerous paths, model-tier hints (`light` | `standard` | `strong`) for agents executing this plan.
+
+---
+
+## 25. Long-Term Maintainability Strategy
+
+Ownership, doc upkeep, deprecation policy.
+
+---
+
+## Appendix - Decision log
+
+| ID | Date | Choice | Alternatives rejected |
+|----|------|--------|------------------------|
+| D1 | | | |
+
+## Appendix - Traceability matrix
+
+| Goal | FR/NFR | Component | Task ID | Description | Test | Acceptance |
+|------|--------|-----------|---------|-------------|------|------------|
+| G1 | FR1.1 | REPLACE:CONTEXT | M1-T1 | | | |
+
+Large matrices MAY move to `{PLANS_ROOT}/full/YYYYMMDD-full-plan-trace.md` with a link here.
+
+## Appendix - Registries reference
+
+Link only - do not fork content: `{PLANS_ROOT}/ASSUMPTIONS.md`, `{PLANS_ROOT}/RISK_REGISTRY.md`, `{PLANS_ROOT}/UNKNOWNS.md`.

@@ -10,7 +10,7 @@ last-updated: 2026-05-19
 Binding contract for the master implementation plan authored by `@plan-master`.
 File path (per repo convention): `{PLANS_ROOT}/full/YYYYMMDD-full-plan.md` (latest dated file by prefix is the active plan).
 
-This standard exists so the `plan-master` skill body stays focused on **process** while the **artifact contract** lives where engineering standards are kept (`.ai/standards/`).
+This standard exists so the `plan-master` skill body stays focused on **process** while the **artifact contract** lives in the framework standards tree (`standards/` self-hosted; `$AGENT_OS_SOURCE/standards/` or `.ai/standards/` in consumer repos).
 
 ---
 
@@ -137,6 +137,7 @@ Until Approved, broad implementation is forbidden unless `{HANDOFF}` records an 
 
 ## References
 
+- Mechanical conformance check (§2 section completeness/ordering + §4 Approval/integrity consistency): `bash .ai/scripts/master-plan-verify.sh` - run via `@plan-verify master` (M3) before treating a plan as `Approved`.
 - Skill that authors and revises plans: [`.ai/skills/plan-master/skill.md`](../skills/plan-master/skill.md).
 - Iteration carrier inheriting task rows: `{ITERATION_CARRIER}` (`.work/plans/NEXT.md`).
 - Foundation upstream: [`.ai/skills/plan-foundation/skill.md`](../skills/plan-foundation/skill.md).

@@ -251,7 +251,27 @@ assert 'custom-block' in c.get('mcp', {}), 'mcp must be preserved'
 "
 )
 ok "install-opencode-config --sync-paths repairs fat-client paths"
-rm -rf "${FC_SMOKE}" "${DF_SMOKE}"
+rm -rf "${FC_SMOKE}"
+
+# --- 2f. install-opencode-config --sync-paths (self-hosted) ---
+# Regression: infer_old_prefix must not treat ../.ai.ui/skills as Agent OS root and
+# rewrite sister paths to ai_root on self-hosted sync.
+note "install-opencode-config --sync-paths (self-hosted)"
+SH_SMOKE="$(mktemp -d)"
+cp "${REPO_ROOT}/opencode.json" "${SH_SMOKE}/opencode.json"
+REPO_ROOT="${SH_SMOKE}" AI_SOURCE="${REPO_ROOT}" \
+  bash "${REPO_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
+python3 -c "
+import json, os
+c=json.load(open('${SH_SMOKE}/opencode.json'))
+ui=c['references'].get('ai-ui', {}).get('path', '')
+assert ui == '../.ai.ui', ui
+assert '../.ai.ui/skills' in c['skills']['paths'], c['skills']['paths']
+assert not any('/.ai/skills' in p and '.ai.ui' not in p for p in c['skills']['paths']), c['skills']['paths']
+assert 'custom-block' not in c.get('mcp', {}), 'unexpected mcp mutation'
+"
+ok "install-opencode-config --sync-paths preserves self-hosted sister paths"
+rm -rf "${SH_SMOKE}" "${DF_SMOKE}"
 
 # --- 3. Removed vendor integration paths ---
 note "No stale vendor integration paths"
@@ -350,6 +370,43 @@ else
   die "traceability-verify rejected a fully-mapped plan"
 fi
 rm -rf "${TV_ROOT}"
+
+# --- 7b. master-plan-verify self-test (exercise the MASTER_PLAN_STANDARD linter) ---
+note "master-plan-verify self-test"
+MPV_ROOT="$(mktemp -d)"
+MPV_PLAN="${MPV_ROOT}/x-full-plan.md"
+
+# Reproduces the reported bug shape: only 12 of 25 mandatory H2 sections present.
+{
+  echo "# X"; echo; echo "**Status:** Draft"; echo
+  for n in 1 2 3 4 5 6 7 8 9 19 20 21; do echo "## ${n}. Section ${n}"; done
+} > "${MPV_PLAN}"
+if bash "${REPO_ROOT}/scripts/master-plan-verify.sh" "${MPV_PLAN}" >/dev/null 2>&1; then
+  die "master-plan-verify missed a plan with only 12/25 mandatory H2 sections"
+else
+  ok "master-plan-verify catches missing mandatory H2 sections"
+fi
+
+# Approved but Integrity (P5) still pending -> must fail.
+{
+  echo "# X"; echo; echo "**Status:** Approved"; echo
+  for n in $(seq 1 25); do echo "## ${n}. Section ${n}"; done
+  echo; echo "**Integrity (P5):** pending"
+} > "${MPV_PLAN}"
+if bash "${REPO_ROOT}/scripts/master-plan-verify.sh" "${MPV_PLAN}" >/dev/null 2>&1; then
+  die "master-plan-verify accepted Status: Approved with Integrity (P5): pending"
+else
+  ok "master-plan-verify rejects Approved plan with pending integrity"
+fi
+
+# Fully conformant -> must pass.
+sed 's/pending/pass/' "${MPV_PLAN}" > "${MPV_PLAN}.tmp" && mv "${MPV_PLAN}.tmp" "${MPV_PLAN}"
+if bash "${REPO_ROOT}/scripts/master-plan-verify.sh" "${MPV_PLAN}" >/dev/null 2>&1; then
+  ok "master-plan-verify passes a fully-conformant Approved plan"
+else
+  die "master-plan-verify rejected a fully-conformant Approved plan"
+fi
+rm -rf "${MPV_ROOT}"
 
 # --- 8. gate-verify self-test (exercise the completion-gate evidence linter) ---
 note "gate-verify self-test"

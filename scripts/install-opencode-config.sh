@@ -131,7 +131,7 @@ def build_config():
         join("PROCESS_ROUTER.md"),
     ]
 
-    sibling_parent = pathlib.Path(ai_root).parent
+    sibling_parent = pathlib.Path(repo_root).parent
     sisters = [
         ("ai-ui", ".ai.ui", "UI Design OS: UI component specs, design tokens, accessibility"),
         ("ai-biz", ".ai.biz", "Business OS: strategy, brand, content, pricing"),
@@ -148,6 +148,8 @@ def build_config():
         if sib.is_dir() and (sib / "skills" / "README.md").is_file():
             rel = os.path.relpath(sib, repo_root)
             cfg["instructions"].append(f"{rel}/START_HERE.md")
+            if (sib / "COHABITATION.md").is_file():
+                cfg["instructions"].append(f"{rel}/COHABITATION.md")
             refs[key] = {"path": rel, "description": desc}
 
     cfg["references"] = refs
@@ -237,8 +239,11 @@ def replace_prefix_in_tree(obj, old_prefix, new_prefix):
 def infer_old_prefix(cfg):
     if old_source:
         return old_source
+    sister_markers = (".ui/skills", ".biz/skills", ".soc/skills")
     paths = (cfg.get("skills") or {}).get("paths") or []
     for p in paths:
+        if any(m in str(p) for m in sister_markers):
+            continue
         p = norm_path(p)
         if p.endswith("/skills"):
             return p[: -len("/skills")]
@@ -334,10 +339,20 @@ def sync_framework_sections(cfg):
     fresh_paths = fresh["skills"]["paths"]
     old_paths = (cfg.get("skills") or {}).get("paths", [])
     sister_markers = (".ui/skills", ".biz/skills", ".soc/skills")
-    kept_paths = [
-        p for p in old_paths
-        if p not in fresh_paths and not any(m in str(p) for m in sister_markers)
-    ]
+    fresh_resolved = {
+        os.path.normpath(os.path.join(repo_root, p)) if not os.path.isabs(p) else os.path.normpath(p)
+        for p in fresh_paths
+    }
+
+    def is_stale_framework_path(p):
+        if p in fresh_paths:
+            return True
+        if any(m in str(p) for m in sister_markers):
+            return True
+        resolved = os.path.normpath(os.path.join(repo_root, p)) if not os.path.isabs(p) else os.path.normpath(p)
+        return resolved in fresh_resolved
+
+    kept_paths = [p for p in old_paths if not is_stale_framework_path(p)]
     new_paths = fresh_paths + [p for p in kept_paths if p not in fresh_paths]
     if old_paths != new_paths:
         cfg.setdefault("skills", {})["paths"] = new_paths
@@ -364,7 +379,10 @@ if sync_paths:
         cfg = json.load(f)
 
     changed = sanitize_corrupted_strings(cfg)
-    if is_fat_client_prefix():
+    if is_fat_client_prefix() or os_prefix == ".":
+        # Fat-client (.ai/) and self-hosted (.) — rebuild framework sections from
+        # build_config(); never prefix-replace (self-hosted infer_old_prefix used
+        # to pick up ../.ai.ui from skills.paths[1] and rewrite sisters to ai_root).
         changed = sync_framework_sections(cfg) or changed
     else:
         old_p = old_source or infer_old_prefix(cfg)
