@@ -47,8 +47,8 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 | Path | Source | If target exists |
 |------|--------|-------------------|
 | `.cursorrules` | `templates/cursorrules.template` with `AGENT_OS_SOURCE=<source>` substituted | skip (preserve); `--force` overwrites |
-| `.work/README.md`, `context/HANDOFF.md`, `plans/NEXT.md`, `plans/ASSUMPTIONS.md`, `plans/RISK_REGISTRY.md`, `plans/UNKNOWNS.md`, `decisions/README.md`, `prompts/README.md`, `features/README.md`, `docs/README.md`, `docs/features/README.md` | `templates/work/*.template` (suffix stripped) | skip (preserve) |
-| `.work/plans/{foundation,full,operations,proposals,archives}/.gitkeep`, `.work/{analysis,scripts}/.gitkeep`, `.work/docs/{guides,tutorials,reference,integration}/.gitkeep`, `.work/standards/.gitkeep` | created empty | skip (preserve) |
+| `.work/README.md`, `.work/context/HANDOFF.md`, `.work/plans/NEXT.md`, `.work/plans/ASSUMPTIONS.md`, `.work/plans/RISK_REGISTRY.md`, `.work/plans/UNKNOWNS.md`, `.work/decisions/README.md`, `.work/prompts/README.md`, `.work/features/README.md`, `.work/docs/README.md`, `.work/docs/features/README.md` | `templates/work/*.template` (suffix stripped) | skip (preserve) |
+| `.work/plans/{foundation,full,operations,proposals,archives}/.gitkeep`, `.work/{analysis,scripts}/`, `.work/docs/{guides,tutorials,reference,integration}/.gitkeep`, `.work/standards/.gitkeep` | created empty (directories populated later with README.md or generated content) | skip (preserve) |
 | `DOCS_TECH_STACK.md` | `templates/DOCS_TECH_STACK.md.template` | skip (preserve) |
 | `opencode.json` | `opencode.json.template` via `install-opencode-config.sh` | **Bootstrap:** create if missing. **Update:** `--sync-paths` only (framework paths); never `--force` unless operator requests. **`.opencode/` MCP dir:** never touched — use `@project-query-setup`. |
 | **Local `.ai/` directory** | **never created** | n/a — thin-client only; skills resolve from `$AGENT_OS_SOURCE` |

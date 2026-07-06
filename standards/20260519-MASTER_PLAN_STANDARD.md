@@ -137,8 +137,8 @@ Until Approved, broad implementation is forbidden unless `{HANDOFF}` records an 
 
 ## References
 
-- Mechanical conformance check (§2 section completeness/ordering + §4 Approval/integrity consistency): `bash .ai/scripts/master-plan-verify.sh` - run via `@plan-verify master` (M3) before treating a plan as `Approved`.
-- Skill that authors and revises plans: [`.ai/skills/plan-master/skill.md`](../skills/plan-master/skill.md).
+- Mechanical conformance check (§2 section completeness/ordering + §4 Approval/integrity consistency): `bash scripts/master-plan-verify.sh` — run via `@plan-verify master` (M3) before treating a plan as `Approved`.
+- Skill that authors and revises plans: [`skills/plan-master/skill.md`](../skills/plan-master/skill.md).
 - Iteration carrier inheriting task rows: `{ITERATION_CARRIER}` (`.work/plans/NEXT.md`).
-- Foundation upstream: [`.ai/skills/plan-foundation/skill.md`](../skills/plan-foundation/skill.md).
+- Foundation upstream: [`skills/plan-foundation/skill.md`](../skills/plan-foundation/skill.md).
 - Registries: `{PLANS_ROOT}/ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md`.

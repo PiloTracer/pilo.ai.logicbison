@@ -3,7 +3,8 @@
 # prepare-commit-msg — strip Co-authored-by trailers; auto-prepend task ref.
 #
 # Installation:
-#   bash .ai/scripts/install-git-hooks.sh
+#   bash scripts/install-git-hooks.sh          (self-hosted)
+#   bash .ai/scripts/install-git-hooks.sh      (fat-client)
 #   (or @project-bootstrap init / deploy-basic / bootstrap.sh)
 #
 # See .cursorrules § No Co-authored-by · § Task Refs

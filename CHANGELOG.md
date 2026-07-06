@@ -231,6 +231,16 @@ First public-ready cut of Agent OS as a portable framework.
 ### Removed
 - All project-specific integration artifacts under `docs/integration/` (Costa Rica Hacienda, OIDC, XAdES bundles) - replaced with agnostic `MANIFEST.template.txt` + `README.md`.
 
-[Unreleased]: https://github.com/PiloTracer/.ai/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/PiloTracer/.ai/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.2
+[0.5.1]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.1
+[0.5.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.0
+[0.4.4]: https://github.com/PiloTracer/.ai/releases/tag/v0.4.4
+[0.4.3]: https://github.com/PiloTracer/.ai/releases/tag/v0.4.3
+[0.4.2]: https://github.com/PiloTracer/.ai/releases/tag/v0.4.2
+[0.4.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.4.0
+[0.3.2]: https://github.com/PiloTracer/.ai/releases/tag/v0.3.2
+[0.3.1]: https://github.com/PiloTracer/.ai/releases/tag/v0.3.1
+[0.3.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.3.0
 [0.2.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.2.0
 [0.1.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.1.0

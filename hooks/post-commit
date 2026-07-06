@@ -8,7 +8,9 @@
 # background loop (github_background.py / process_pending_commit_refs).
 #
 # Installation:
-#   cp .ai/hooks/post-commit .git/hooks/post-commit
+#   cp hooks/post-commit .git/hooks/post-commit      (self-hosted)
+#   chmod +x .git/hooks/post-commit
+#   cp .ai/hooks/post-commit .git/hooks/post-commit  (fat-client)
 #   chmod +x .git/hooks/post-commit
 #
 # To skip:

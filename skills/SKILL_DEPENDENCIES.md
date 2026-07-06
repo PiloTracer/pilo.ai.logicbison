@@ -91,6 +91,7 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **code-implementation** `plan` *(alias: `plan-iteration`)* | Approved `*-full-plan.md` **or** HANDOFF M{N} waiver (PI1 gate) | **Required** |
 | **code-implementation** `start` / `continue` | Valid `NEXT.md` iteration block; **implementation-ready** or HANDOFF waiver (ST0 gate); auto-invokes `@code-verify uncommitted` at batch end (see § Self-verify auto-invoke) | **Required** |
 | **code-implementation** `complete` | Active iteration; `@code-verify milestone` pass | **Required** |
+| **code-implementation** `task` | Active iteration context; shorthand (`T3`) or globally-unique (`M1-T3`) task ID | - |
 | **code-implementation** `status` | - | Read-only |
 | **code-verify** `milestone` | Active milestone exists in `{MASTER_PLAN}` §19 **or** `NEXT.md` § Current iteration (M0 gate) | **Required** |
 | **code-verify** `uncommitted` / `last` | - | - |
@@ -104,6 +105,7 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **feature-spec** before **Approved** | §15 concept registry | **Required** per FEATURE_STANDARD |
 | **concept-run** `run` | Applicable trigger (SPEC §15, iteration registry, diff scope) | Per `.ai/concepts/README.md` |
 | **concept-run** `list` / `status` | - | Read-only |
+| **concept-run** `run-all` | Applicable trigger (SPEC §15, iteration registry, diff scope); runs all pending concepts | Per `.ai/concepts/README.md` |
 | **db-migration** `init` | Repo at Agent OS root; **IB0** brownfield gate detects existing runner + `001_init.sql` | - (brownfield prompts keep / overwrite-runner / overwrite-all / abort) |
 | **db-migration** `create` / `add` / `run` / `verify` | `db-migration init` already run (runner module + `001_init.sql` baseline present); `create` / `add` auto-invokes idempotency double-run (`@db-migration verify` on the new script, see § Self-verify auto-invoke) | **Required** |
 | **db-migration** `status` | - | Read-only |
@@ -220,7 +222,9 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 | `brownfield` | Discover/create missing planning artifacts from existing repo | plan-repair |
 | `alignment` / `drift` | NEXT vs master plan consistency | plan-verify (read-only), plan-repair (fix) |
 | `run` | Execute (scripts / prompts) | db-migration, concept-run |
+| `run-all` | Execute all pending concept prompts for the current iteration | concept-run |
 | `show` | Read-only inspect of a specific record | plan-master *(alias: `task`)* |
+| `task` | Execute a single task by shorthand or globally-unique ID (active iteration context) | code-implementation |
 | `- <free-text>` | Free-text routing: parse intent → classify → Confirm gate → execute skill chain | ai-director, x-director |
 | `- <free-text> -y` | Trust-mode: skip the Confirm gate | ai-director, x-director |
 | `- <free-text> --dry-run` | Render the routing plan, write nothing, stop | ai-director, x-director |

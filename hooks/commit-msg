@@ -3,7 +3,8 @@
 # commit-msg — reject Co-authored-by trailers; warn when task ref missing.
 #
 # Installation:
-#   bash .ai/scripts/install-git-hooks.sh
+#   bash scripts/install-git-hooks.sh          (self-hosted)
+#   bash .ai/scripts/install-git-hooks.sh      (fat-client)
 #
 # See .cursorrules § No Co-authored-by · § Commit Message Format
 

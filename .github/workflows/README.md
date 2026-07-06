@@ -1,6 +1,6 @@
-# GitHub Actions disabled
+# GitHub Actions
 
-`framework-verify.yml` was removed intentionally. Run verifiers locally before merge or tag:
+`framework-verify.yml` runs on push to main/master, PRs, and tags. Run locally before merge:
 
 ```bash
 bash scripts/framework-verify.sh

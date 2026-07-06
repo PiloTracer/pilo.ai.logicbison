@@ -78,8 +78,8 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 ## Explicit unknowns (promoted from UNKNOWNS)
 
-| ID | Summary | Blocks |
-|----|---------|--------|
+| ID | Summary | Blocks | Owner | Status |
+|----|---------|--------|-------|--------|
 | U1 | 18 pre-existing broken same-file `#anchor` links across 8 skills — **repaired 2026-07-06**; all 9 trimmed skills now in `ANCHOR_CLEAN` hard-fail set | No — resolved | owner | Closed |
 | U2 | Greenfield P0 registry ordering — **fixed 2026-07-06** (registries created greenfield step 3, before `p0-probe` step 4) | No — resolved | owner | Closed |
 

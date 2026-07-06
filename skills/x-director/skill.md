@@ -44,8 +44,8 @@ The x-director knows about every framework in the workspace. **Path resolution i
 2. Before any write operation, read the relevant HANDOFF file(s) for session context:
    - `.ai` work → `{HANDOFF}` (`.work/context/HANDOFF.md`)
    - `.ai.ui` work → `{HANDOFF_UI}` (`.work.ui/context/HANDOFF_UI.md`)
-       - `.ai.biz` work → `.work.biz/context/HANDOFF.md
-    - `.ai.soc` work → `.work.soc/context/HANDOFF.md`
+   - `.ai.biz` work → `.work.biz/context/HANDOFF.md`
+   - `.ai.soc` work → `.work.soc/context/HANDOFF.md`
 3. After completing a workflow, always update all touched HANDOFF files with what was done, what's next, and any blockers.
 4. Do not invent skills or modes not registered in the respective framework's `skills/README.md`. If a request cannot be fulfilled by existing skills, follow the "New skill protocol".
 5. Route through existing directors (`@ai-director`, `@ui-director`, `@biz-director`, `@soc-director`) whenever possible — they own their domain's skill chain and gates. x-director only classifies the framework; the director classifies the sub-bucket. ai-director never routes outside `.ai` directly — it channels all non-`.ai` and `unsure` requests to x-director.

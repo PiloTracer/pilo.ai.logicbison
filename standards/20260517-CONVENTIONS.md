@@ -29,7 +29,7 @@ Pairs with: foundation architecture doc, `REPLACE:TECH_STACK_DOC`, ADRs under `.
 - **Platform layer:** shared code in `REPLACE:PLATFORM_PACKAGE` at `REPLACE:PLATFORM_PATH` — choose an import name that does not shadow stdlib modules.
 - HTTP routes: `kebab-case`, plural nouns, no verbs in path segments unless using an approved action suffix pattern (see api-style-guide).
 - DB tables: `snake_case`, plural; prefix or schema per bounded context if the team uses prefixes.
-- Dated docs under `.ai/` and `.work/`: `YYYYMMDD-` prefix per `.cursorrules`.
+- Dated docs under `.work/` (and `docs/` for framework guides): `YYYYMMDD-` prefix per `.cursorrules`. In fat-client mode also under `.ai/`.
 
 ## 4. Money, quantities, and regulated fields
 
