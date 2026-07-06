@@ -4,18 +4,22 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-07-07
+
 ### Fixed
-- **`templates/work/plans/full/YYYYMMDD-full-plan.md.template` shipped only 11 of the 25 mandatory `MASTER_PLAN_STANDARD.md` H2 sections** (§9–§18, §22–§25 — Architecture, UX/UI, Data, Security, Infrastructure, Deployment, Scalability, Observability, Testing, Operational, Rollback, Technical Debt, AI-Agent Execution, Long-Term Maintainability — were entirely absent). Any `@plan-master greenfield` plan authored from the template inherited the gap and would fail `@plan-verify master` / `MASTER_PLAN_STANDARD.md` §4 Approval gate. Confirmed via an external framework smoke-test session. Template now carries all 25 sections in order.
-- **No mechanical check existed for `MASTER_PLAN_STANDARD.md` §2 (25-section completeness/ordering) or §4 (Approval gate ↔ integrity consistency)** — plans could be marked `Status: Approved` while `Integrity (P5): pending` with nothing catching the contradiction.
-- **`templates/cursorrules.template` Skills table drift** — `docs`, `project-query-setup`, and `tauri-development` were registered in live `.cursorrules` / `skills/README.md` but missing from the bootstrap template; new `@deploy-basic` consumers inherited an incomplete Skills table.
-- **`scripts/install-opencode-config.sh`** — sister-framework `COHABITATION.md` instructions are added only when the file exists on disk (prevents stale opencode paths for frameworks that lack that doc).
-- **`scripts/install-opencode-config.sh` `--sync-paths` on self-hosted repos** — `infer_old_prefix` no longer treats sister-framework `skills.paths` entries (e.g. `../.ai.ui/skills`) as the Agent OS root to replace; self-hosted sync now rebuilds framework sections via `sync_framework_sections` instead of destructive prefix-replace (was rewriting `../.ai.ui` → absolute `ai_root`).
-- **`standards/20260519-MASTER_PLAN_STANDARD.md`** — clarified framework standards path resolves per deploy mode (`standards/` self-hosted; `$AGENT_OS_SOURCE/standards/` or `.ai/standards/` in consumers).
+- **Full-repo framework audit (14 findings)** — 100% coverage across 167 files: fixed broken `.ai/` path references in standards (self-hosted layout), stale CI README, bare paths in `deploy-basic/skill.md` (missing `.work/` prefix), missing backtick in `x-director/skill.md`, CHANGELOG stale compare link + 10 missing version links, HANDOFF.md broken table header, deleted dead `scripts/setup-target.sh`, moved orphaned MOD-06 output, added self-hosted install paths to hooks, registered `task` + `run-all` canonical verbs.
+- **Independent audit follow-up (5 findings)** — fixed `hooks/pre-commit` permission (`644`→`755`), added 4 missing `REPLACE:` tokens to `cursorrules.template` placeholder map, fixed 2 broken anchors in `README.md`, added `deploy-to-project.md` to `.quick/README.md` table.
+- **`templates/work/plans/full/YYYYMMDD-full-plan.md.template`** — shipped only 11 of 25 mandatory `MASTER_PLAN_STANDARD.md` H2 sections; fixed to all 25 in order.
+- **`templates/cursorrules.template` Skills table drift** — `docs`, `project-query-setup`, and `tauri-development` were missing from the bootstrap template.
+- **`scripts/install-opencode-config.sh`** — sister-framework `COHABITATION.md` guard; `--sync-paths` self-hosted fix (no longer rewrites sister-framework paths).
+- **`standards/20260519-MASTER_PLAN_STANDARD.md`** — clarified framework standards path per deploy mode.
 
 ### Added
-- **`scripts/master-plan-verify.sh`** — mechanically verifies a master plan has all 25 mandatory H2 sections (`## 1.`…`## 25.`, in order) and that `Status: Approved` is never paired with `Integrity (P5): pending`. Wired into `@plan-verify master` (M3 conformance table) and `framework-verify.sh` self-test.
-- **`skills/plan-foundation/skill.md` GF0** — warns (non-blocking) when `.work/touch-scope` still carries the template placeholder ref or empty scope arrays, since `@code-implementation` will later block writes on an undeclared/placeholder scope.
-- **Self-hosted dogfood scaffold** — `.work/standards/.gitkeep` and `.work/docs/integration/.gitkeep` so the framework repo matches the v0.5.2 consumer layout it documents.
+- **`scripts/master-plan-verify.sh`** — mechanical conformance check for master plans (25-section completeness/ordering + Approved↔integrity consistency). Wired into `@plan-verify master` and `framework-verify.sh`.
+- **`skills/plan-foundation/skill.md` GF0** — warns on placeholder `.work/touch-scope`.
+- **Self-hosted dogfood scaffold** — `.work/standards/.gitkeep` and `.work/docs/integration/.gitkeep`.
+- **`.work/reports/20260707-framework-audit.md`** — full audit report for cross-validation.
+- **`.work/reports/20260707-independent-audit.md`** — independent verification of all fixes.
 
 ## [0.5.2] - 2026-07-06
 
@@ -231,7 +235,7 @@ First public-ready cut of Agent OS as a portable framework.
 ### Removed
 - All project-specific integration artifacts under `docs/integration/` (Costa Rica Hacienda, OIDC, XAdES bundles) - replaced with agnostic `MANIFEST.template.txt` + `README.md`.
 
-[Unreleased]: https://github.com/PiloTracer/.ai/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/PiloTracer/.ai/compare/v0.5.3...HEAD
 [0.5.2]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.2
 [0.5.1]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.1
 [0.5.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.0
