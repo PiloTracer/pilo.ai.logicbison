@@ -83,8 +83,8 @@ Before running any protocol, emit a **Request interpretation** block:
 | Iteration | `{ITERATION_CARRIER}` § Current iteration | Scope (S2), milestone id |
 | Master plan §19 | `{PLANS_ROOT}/full/*-full-plan.md` | FR/NFR trace (milestone mode) |
 | SPECs | `{FEATURE_SPEC_ROOT}/<slug>/*-SPEC.md` | R1… rules for touched contexts |
-| Standards | `.ai/standards/*CONVENTIONS*`, `*FEATURE_STANDARD*` | Invariants, naming |
-| Boundary map | `.ai/standards/*DIRECTORY_MAP*` or `{BOUNDARY_MAP}` | Cross-context edits |
+| Standards | `standards/*CONVENTIONS*`, `*FEATURE_STANDARD*` | Invariants, naming |
+| Boundary map | `standards/*DIRECTORY_MAP*` or `{BOUNDARY_MAP}` | Cross-context edits |
 | Concepts | `.ai/concepts/README.md` § Trigger table | MOD-06 (AI-assisted), MOD-01 (boundaries) |
 | HANDOFF | `{HANDOFF}` | Waivers, high-risk milestone review |
 | Git state | `git status`, diff range | uncommitted / last event |

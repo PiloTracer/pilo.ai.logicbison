@@ -67,4 +67,4 @@ It is **not** a copy of your entire directory tree - only **edges** that must no
 
 ## 5. Starter content (non-normative example)
 
-Until a dedicated `{BOUNDARY_MAP}` file exists, use **`.ai/standards/*-DIRECTORY_MAP.md`** as the **interim** boundary list (`REPLACE:PLATFORM_PACKAGE/`, `<context-a>/`, `<context-b>/`, …). Promote a trimmed **edge-only** table here or into a dedicated boundary file when M1 lands and import lint exists.
+Until a dedicated `{BOUNDARY_MAP}` file exists, use **`standards/*-DIRECTORY_MAP.md`** as the **interim** boundary list (`REPLACE:PLATFORM_PACKAGE/`, `<context-a>/`, `<context-b>/`, …). Promote a trimmed **edge-only** table here or into a dedicated boundary file when M1 lands and import lint exists.

@@ -222,13 +222,13 @@ This creates (without overwriting existing files):
 - `.cursorrules` from [`templates/cursorrules.template`](templates/cursorrules.template)
 - `DOCS_TECH_STACK.md` from [`templates/DOCS_TECH_STACK.md.template`](templates/DOCS_TECH_STACK.md.template)
 - `.work/` skeleton (HANDOFF, NEXT, registries, empty plan folders)
+- Empty project-root `standards/` and `docs/integration/` (sibling of `.work/` - never nested under `.ai/`)
 
 Then:
 
 1. Replace every **`REPLACE:`** token in `.cursorrules` ([checklist](templates/README.md)).
-2. Customize [`.ai/standards/`](standards/) templates and point `.cursorrules` at your dated filenames.
-3. Run **`@plan-foundation greenfield`** (foundation docs 01–04).
-4. Keep a **single** rules file - do not add `AGENTS.md` unless your team standardizes on it.
+2. Run **`@plan-foundation greenfield`** (foundation docs 01-04; also generates this project's own `standards/*.md` - CONVENTIONS, FEATURE_STANDARD, DIRECTORY_MAP, etc. - and points the `.cursorrules` `REPLACE:*_FILE` tokens at them).
+3. Keep a **single** rules file - do not add `AGENTS.md` unless your team standardizes on it.
 
 | Situation | What to do |
 |-----------|------------|
@@ -359,8 +359,8 @@ Agent rules file: **`.cursorrules` only** - do not add `AGENTS.md` without owner
 ## Copy to another project
 
 1. Copy the whole **`.ai/`** tree (includes `templates/`).
-2. At the **new repo root**, run **`bash .ai/templates/bootstrap.sh`** (or `@project-bootstrap init`).
-3. Fill **`REPLACE:`** tokens in `.cursorrules`; customize **standards** under `.ai/standards/`.
+2. At the **new repo root**, run **`bash .ai/templates/bootstrap.sh`** (or `@project-bootstrap init`) - this also scaffolds an empty project-root `standards/` (never under `.ai/`).
+3. Fill **`REPLACE:`** tokens in `.cursorrules`; **`@plan-foundation greenfield`** generates that project's own dated files under `standards/`.
 4. Follow the [bird's-eye flow](#birds-eye--how-to-use-agent-os): foundation → certify → master plan → status → daily session + milestones.
 
 Template sources: [`templates/work/`](templates/work/). This repo includes a demo [`.work/`](.work/) skeleton when Agent OS is the git root.

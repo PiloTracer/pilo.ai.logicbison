@@ -16,7 +16,7 @@ Execute implementation iterations derived from an **Approved master plan** (`{PL
 
 **Tool-agnostic** (Cursor, Claude Code, opencode, Codex). **Requires:** `implementation-ready: yes` from `@plan-master status`, or an explicit HANDOFF waiver noting which milestones may proceed early.
 
-**Pairs with:** `session-control` (bookends), `plan-master` (milestone source and revisions), `code-verify` (milestone / uncommitted / last audits), `code-repair` (remediate verify/migration failures), `db-migration` (all schema changes), `.ai/standards/*CONVENTIONS*`, `.ai/standards/*FEATURE_STANDARD*` (paths from `.cursorrules`).
+**Pairs with:** `session-control` (bookends), `plan-master` (milestone source and revisions), `code-verify` (milestone / uncommitted / last audits), `code-repair` (remediate verify/migration failures), `db-migration` (all schema changes), `standards/*CONVENTIONS*`, `standards/*FEATURE_STANDARD*` (paths from `.cursorrules`).
 
 **Registry:** [`.ai/skills/SKILL_DEPENDENCIES.md`](../SKILL_DEPENDENCIES.md).
 

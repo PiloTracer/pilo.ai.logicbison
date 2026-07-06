@@ -49,10 +49,11 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 | `.cursorrules` | `templates/cursorrules.template` with `AGENT_OS_SOURCE=<source>` substituted | skip (preserve); `--force` overwrites |
 | `.work/README.md`, `context/HANDOFF.md`, `plans/NEXT.md`, `plans/ASSUMPTIONS.md`, `plans/RISK_REGISTRY.md`, `plans/UNKNOWNS.md`, `decisions/README.md`, `prompts/README.md`, `features/README.md`, `docs/README.md`, `docs/features/README.md` | `templates/work/*.template` (suffix stripped) | skip (preserve) |
 | `.work/plans/{foundation,full,operations,proposals,archives}/.gitkeep`, `.work/{analysis,scripts}/.gitkeep`, `.work/docs/{guides,tutorials,reference}/.gitkeep` | created empty | skip (preserve) |
+| `standards/.gitkeep`, `docs/integration/.gitkeep` | created empty (project root, sibling of `.work/`) | skip (preserve) — populated later by `@plan-foundation greenfield` / vendor mirrors, never from source |
 | `DOCS_TECH_STACK.md` | `templates/DOCS_TECH_STACK.md.template` | skip (preserve) |
 | `opencode.json` | `opencode.json.template` via `install-opencode-config.sh` | **Bootstrap:** create if missing. **Update:** `--sync-paths` only (framework paths); never `--force` unless operator requests. **`.opencode/` MCP dir:** never touched — use `@project-query-setup`. |
 
-**Explicitly NOT copied (stay in source, loaded at runtime):** `skills/**`, `standards/**`, `concepts/**`, `docs/guides/**` (workflow guides), `scripts/**`, `templates/**`, `SKILL_DEPENDENCIES.md`, root `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `.github/`, `.gitignore`, `.gitattributes`.
+**Explicitly NOT copied (stay in source, loaded at runtime):** `skills/**`, source `standards/**` (the framework's template/example docs), `concepts/**`, `docs/guides/**` (workflow guides), `scripts/**`, `templates/**`, `SKILL_DEPENDENCIES.md`, root `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `.github/`, `.gitignore`, `.gitattributes`. Do not confuse this with the empty project-root `standards/` + `docs/integration/` scaffolded above — those are the target's **own** future deliverables, never sourced from or synced with the framework's `standards/`.
 
 ---
 
@@ -136,7 +137,7 @@ Reports:
 | 1 | Source `templates/cursorrules.template` readable | pass |
 | 2 | Target `.cursorrules` exists with valid `AGENT_OS_SOURCE` (resolves to a dir) | |
 | 3 | Source-resolution section present in target `.cursorrules` | |
-| 4 | `.work/` skeleton present (HANDOFF, NEXT, UNKNOWNS at minimum) | |
+| 4 | `.work/` skeleton present (HANDOFF, NEXT, UNKNOWNS at minimum); empty project-root `standards/` + `docs/integration/` present | |
 | 5 | No-overwrite honored (existing target files preserved; `--force` only when explicitly requested) | |
 | 6 | `update`: source pointer re-synced if stale; **opencode `--sync-paths`** run; merge candidate list produced; no wholesale replaces | |
 | 7 | Fat-client leak checked (no unexpected local `.ai/skills/`) | |

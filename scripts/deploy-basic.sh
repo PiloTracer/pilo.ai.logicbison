@@ -191,6 +191,13 @@ fi
 #   2. REPLACE:AI_UI_PATH → absolute path if .ai.ui/ exists as sibling, else leave token
 #   3. REPLACE:AI_BIZ_PATH → absolute path if .ai.biz/ exists as sibling, else leave token
 #   4. REPLACE:AI_SOC_PATH → absolute path if .ai.soc/ exists as sibling, else leave token
+#   5. `.ai/scripts/<name>` → `<AI_ROOT>/scripts/<name>` (Change-safety gate table +
+#      Co-authored-by hook install line). These commands live inside .cursorrules
+#      itself, not inside a skill doc, so the general "any .ai/<x> inside a skill
+#      resolves to $AGENT_OS_SOURCE/<x>" rule doesn't unambiguously cover them —
+#      bake the resolved absolute path here instead of relying on read-time
+#      interpretation (this is what a prior false "scripts not present" report
+#      against a thin-client target traced back to).
 subst_cursorules() {
   local AI_ROOT_ESC="${AI_ROOT//\//\\/}"
   local SIBLING_PARENT
@@ -218,6 +225,11 @@ subst_cursorules() {
       echo "  frameworks: ${token} not found on disk — leaving for runtime auto-discover"
     fi
   done
+
+  # Step 3: bake resolved script paths (Change-safety gate table + Co-authored-by
+  # hook install line) — see comment above subst_cursorules() for why this can't
+  # be left to read-time interpretation.
+  perl -i -pe "s{\.ai/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$tmpfile"
 
   cat "$tmpfile"
   rm -f "$tmpfile"
@@ -262,6 +274,28 @@ if [[ "$MODE" == "update" ]] && [[ "$existing_source" != "$AI_ROOT" ]]; then
       perl -i -pe "s/AGENT_OS_SOURCE=[^\n]*/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$CURS_DEST"
     echo "  cursorules: re-synced AGENT_OS_SOURCE → $AI_ROOT (was: ${existing_source:-<unset>})"
   fi
+fi
+# Re-bake script paths (Change-safety gate table + Co-authored-by hook install
+# line) whenever they're still unresolved or point at a since-moved source.
+# Handles two cases: (a) baked to a source that has since moved — replace the
+# OLD absolute prefix first, so case (b) below can't re-match inside it; (b)
+# never baked — target bootstrapped before this fix, still shows literal
+# `.ai/scripts/...` (lookbehind excludes any occurrence already prefixed by a
+# real path, e.g. inside an old source's own `.../.ai/scripts/` — without it,
+# case (b) would wrongly re-match text that case (a) just fixed, or an old
+# source path ending in `.ai`, and double-prefix it). No-op if already correct.
+if [[ "$MODE" == "update" ]] && [[ -f "$CURS_DEST" ]] && grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
+  AI_ROOT_ESC="${AI_ROOT//\//\\/}"
+  tmp_before_bake="$(mktemp)"
+  cp "$CURS_DEST" "$tmp_before_bake"
+  if [[ -n "$existing_source" ]] && [[ "$existing_source" != "$AI_ROOT" ]]; then
+    perl -i -pe "s{\Q${existing_source}\E/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$CURS_DEST"
+  fi
+  perl -i -pe "s{(?<!/)\.ai/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$CURS_DEST"
+  if ! cmp -s "$tmp_before_bake" "$CURS_DEST"; then
+    echo "  cursorules: re-baked script paths → $AI_ROOT/scripts/ (Change-safety gate table + hook install line)"
+  fi
+  rm -f "$tmp_before_bake"
 fi
 # If --update AND existing .cursorrules came from a fat-client template (no
 # AGENT_OS_SOURCE line at all), flag it — the source-resolution section is a

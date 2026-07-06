@@ -289,7 +289,7 @@ migrations/
 
 ### C5 - Register in DIRECTORY_MAP
 
-If this script introduces a new directory or a new bounded-context module, update `{BOUNDARY_MAP}` / `.ai/standards/*DIRECTORY_MAP*` (path from `.cursorrules`).
+If this script introduces a new directory or a new bounded-context module, update `{BOUNDARY_MAP}` / `standards/*DIRECTORY_MAP*` (path from `.cursorrules`).
 
 ### C6 - Output checklist
 

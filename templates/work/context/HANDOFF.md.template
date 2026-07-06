@@ -32,9 +32,9 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 | If the task touches… | Read first |
 |----------------------|------------|
 | Product scope / foundation | `.work/plans/foundation/*-01-*.md` … `*-04-*.md` |
-| Any code or new feature | `.ai/standards/*CONVENTIONS*`, `*FEATURE_STANDARD*` |
-| External integration | `*-02-*.md`, `.ai/docs/integration/MANIFEST.txt` (if any) |
-| Security | `.ai/standards/*threat-model*` |
+| Any code or new feature | `standards/*CONVENTIONS*`, `*FEATURE_STANDARD*` |
+| External integration | `*-02-*.md`, `docs/integration/MANIFEST.txt` (if any) |
+| Security | `standards/*threat-model*` |
 | Stack / topology | `REPLACE:TECH_STACK_DOC` |
 | Master plan / milestones | `.work/plans/full/*-full-plan.md` |
 | High-risk feature | Relevant `.work/features/<slug>/*-SPEC.md` |

@@ -32,7 +32,7 @@ Gates, artifacts, and readiness states: [`README.md`](../../README.md) · [`skil
 |------|--------|
 | 1 | `bash .ai/templates/bootstrap.sh` (or `@project-bootstrap init`) |
 | 2 | Fill **`REPLACE:`** tokens in `.cursorrules` and `DOCS_TECH_STACK.md` |
-| 3 | Copy/customize standards under `.ai/standards/` |
+| 3 | `@plan-foundation greenfield` generates this project's own standards under project-root `standards/` (never under `.ai/`) |
 | 4 | `@session-control start` every session |
 | 5 | Maintain `.work/plans/NEXT.md` **Recommended next** manually (or a single milestone you define) |
 | 6 | For each coding task: read relevant SPEC if it exists; run test/lint/type from `.cursorrules` before claiming done |

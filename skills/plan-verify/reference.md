@@ -184,7 +184,7 @@ Score each **canonical slot** against what exists on disk. Do not require formal
 | Architecture foundation 04 | `.work/plans/foundation/*-04-*` | ADR index, `docs/architecture.md`, DIRECTORY_MAP + code tree |
 | ADRs | `.work/decisions/` | `docs/adr/`, inline README decisions |
 | SPECs | `.work/features/*/…-SPEC.md` | Domain README, test names, module docstrings (infer **Inference**) |
-| Standards | `.ai/standards/*CONVENTIONS*`, `*FEATURE_STANDARD*`, `*DIRECTORY_MAP*` | Repo conventions doc; infer from linter config |
+| Standards | `standards/*CONVENTIONS*`, `*FEATURE_STANDARD*`, `*DIRECTORY_MAP*` | Repo conventions doc; infer from linter config |
 | Registries | `.work/plans/ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` | TODO/FIXME scan, issue tracker, empty template = gap |
 | Master plan | `.work/plans/full/*-full-plan.md` | `ROADMAP.md`, milestone issues, dense NEXT only |
 | Iteration | `.work/plans/NEXT.md` | Kanban export, sprint doc (partial credit) |
@@ -518,7 +518,7 @@ When **BF0 = yes**:
 | # | Read | When |
 |---|------|------|
 | 1 | `{AGENT_RULES_FILE}` — `REPLACE:APP_ROOT`, `REPLACE:FRONTEND_ROOT`, boundary placeholders | always |
-| 2 | `.ai/standards/*DIRECTORY_MAP*` (or `{BOUNDARY_MAP}`) | always |
+| 2 | `standards/*DIRECTORY_MAP*` (or `{BOUNDARY_MAP}`) | always |
 | 3 | `{FEATURE_SPEC_ROOT}/README.md` + each `*/…-SPEC.md` (Implementation map + Purpose) | always |
 | 4 | Application tree under `{APP}` (2–3 levels; route entrypoints) | always |
 
@@ -536,7 +536,7 @@ Build a **surface list** — one row per independently routable or operable unit
 | Workers / jobs | Celery tasks, queue consumers with dedicated modules |
 | Standalone utilities | Scripts under `{APP}` invoked in production (not one-off `scripts/` dev tools unless documented in HANDOFF) |
 
-**Exclude:** `tests/`, `migrations/`, generated code, vendor mirrors under `.ai/docs/integration/`, pure config.
+**Exclude:** `tests/`, `migrations/`, generated code, vendor mirrors under `docs/integration/`, pure config.
 
 Label each row **Confirmed** (file cite) | **Inference** (heuristic grouping).
 

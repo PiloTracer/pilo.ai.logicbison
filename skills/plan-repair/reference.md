@@ -321,11 +321,11 @@ Use the same BF0 rules as `plan-verify` § Brownfield detection. If **brownfield
 | `foundation/…-01-…-initial-scope.md` | Always if no 01 | README, HANDOFF, product brief |
 | `foundation/…-01-…-scope.md` | If no scope doc | initial-scope + issues/epics |
 | `foundation/…-04-…` | If no doc 04 | Code tree, ADRs, DIRECTORY_MAP, package layout |
-| `02` integration | If external APIs | `.ai/docs/integration/`, code clients |
+| `02` integration | If external APIs | `docs/integration/`, code clients |
 | `03` adjacency | If multi-product | README roadmap, module boundaries |
 | ADRs | If `{DECISIONS_ROOT}` thin | Migrate `docs/adr/*` → `.work/decisions/` or index with links |
 | SPECs | If contexts lack SPEC | `@feature-spec create - <slug>` from module + tests (**Inference** rules); or `@plan-verify coverage` → `repair - from coverage` |
-| Standards | If missing | Copy from `.ai/standards/` templates; fill **Inference** from linter/tsconfig |
+| Standards | If missing | Copy from `.ai/standards/*.md` templates into project-root `standards/`; fill **Inference** from linter/tsconfig |
 | Registries | If empty | Extract from TODOs, README risks, open issues |
 
 **Execution style:**

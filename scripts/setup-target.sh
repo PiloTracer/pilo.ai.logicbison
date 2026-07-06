@@ -69,18 +69,21 @@ fi
 cp "${AI_ROOT}/templates/cursorrules.template" "${TARGET}/.cursorrules"
 echo "  overwritten: .cursorrules (from template — fill REPLACE: tokens)"
 
-# ── 4. Overwrite standards ────────────────────────────────────────────
-# Copy contents into existing .ai/standards/ (full tree copy already created the dir)
-cp -r "${AI_ROOT}/standards/." "${TARGET}/.ai/standards/"
-echo "  overwritten: .ai/standards/"
+# ── 4. Scaffold project-owned standards/ + docs/integration/ ─────────
+# Project-specific deliverables live at the repo root, never nested under
+# .ai/ (which is a vendored copy re-synced on every setup-target re-run).
+mkdir -p "${TARGET}/standards"
+touch "${TARGET}/standards/.gitkeep"
+mkdir -p "${TARGET}/docs/integration"
+touch "${TARGET}/docs/integration/.gitkeep"
+echo "  scaffolded: standards/, docs/integration/ (project root)"
 
 echo ""
 echo "=== Setup scaffold done ==="
 echo ""
 echo "Next steps (for each target repo):"
 echo "  1. Edit .cursorrules — fill every REPLACE: token"
-echo "  2. Edit .ai/standards/ — customize CONVENTIONS, FEATURE_STANDARD, etc."
-echo "  3. Run @plan-foundation greenfield (or minimal: @session-control start)"
+echo "  2. Run @plan-foundation greenfield (generates this project's own standards/*.md — CONVENTIONS, FEATURE_STANDARD, etc. — and points .cursorrules at them)"
 echo ""
 echo "Lite path (existing repo, fast start):"
 echo "  docs/adoption/minimal-adoption.md"

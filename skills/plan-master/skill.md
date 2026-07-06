@@ -220,7 +220,7 @@ After every major phase, answer **yes/no** with evidence:
 - Label: **Confirmed** (file path + snippet or test command + exit code), **Inference**, **Unverified**, **Estimate**.
 - **Confirmed without cite** → downgrade to **Inference** in review; do not ship code on uncited Confirmed claims.
 - Prefer proven stack from `REPLACE:TECH_STACK_DOC` and ADRs.
-- For external integration: cite `.ai/docs/integration/` + `MANIFEST.txt` when present; do not invent endpoints.
+- For external integration: cite `docs/integration/` + `MANIFEST.txt` when present; do not invent endpoints.
 - Request clarification when uncertain; do not invent XSD fields or annex rules.
 
 ---

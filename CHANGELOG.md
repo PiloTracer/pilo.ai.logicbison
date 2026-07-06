@@ -4,6 +4,12 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-07-05
+
+### Fixed
+- **Consumer-project `standards`/`docs/integration` write-target bug** — `templates/cursorrules.template`, `templates/bootstrap.sh`, `scripts/setup-target.sh`, two `templates/work/**` templates, and 15+ skill docs instructed writing/reading project-owned deliverables (CONVENTIONS, FEATURE_STANDARD, DIRECTORY_MAP, threat-model, data-classification, observability-spec, api-style-guide, `docs/integration/MANIFEST.txt`) under a local `.ai/` prefix, breaking the thin-client contract (confirmed live in a consumer repo). Moved to project-root `standards/`+`docs/integration/` (sibling of `.work/`) in both fat- and thin-client modes; the framework-wide `.ai/standards/MASTER_PLAN_STANDARD.md` contract is unchanged. `bootstrap.sh`/`setup-target.sh` now scaffold both dirs empty.
+- **`skills/deploy-basic/skill.md`, `skills/deploy-files/skill.md`** — updated What-gets-copied/scaffold tables and clarified an ambiguous `update`-merge rule (`.ai/standards/*.md` vendored copy vs. project-root `standards/*.md`) so `@deploy-*` update flows never treat the new project-root deliverables as merge candidates.
+
 ## [0.5.0] - 2026-07-05
 
 ### Changed

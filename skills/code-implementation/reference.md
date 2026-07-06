@@ -567,8 +567,8 @@ Before ST1 (and before first line of application code):
 |---|------|---------------|
 | 1 | `.work/plans/NEXT.md` § Current iteration | Valid per [criteria](#valid-iteration-block-criteria) |
 | 2 | Relevant SPEC(s) for bounded context | Can state: R1… rules, data model, invariants, error codes |
-| 3 | `.ai/standards/*CONVENTIONS*` | Can state: module structure, naming, import rules, logging |
-| 4 | `.ai/standards/*FEATURE_STANDARD*` | Can state: service/repo/test layout for this context |
+| 3 | `standards/*CONVENTIONS*` | Can state: module structure, naming, import rules, logging |
+| 4 | `standards/*FEATURE_STANDARD*` | Can state: service/repo/test layout for this context |
 | 5 | `.work/context/HANDOFF.md` | Know: owner blockers, waivers, previous session state |
 | 6 | **Optional:** `.ai/docs/guides/workflows/README.md` (artifact matrix) and `20260518-guide-workflows-index.md` (curriculum), or repo equivalents | When concepts/workflows apply: know bootstrap, tutorials, and which artifacts touch plan vs implementation |
 

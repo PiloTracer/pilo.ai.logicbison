@@ -278,7 +278,7 @@ Cross-check foundation layer: P0–P6 gates, registries, traceability, semantic 
 | # | Read | When |
 |---|------|------|
 | 1 | `{AGENT_RULES_FILE}` — `REPLACE:APP_ROOT`, `REPLACE:FRONTEND_ROOT`, boundary placeholders | always |
-| 2 | `.ai/standards/*DIRECTORY_MAP*` (or `{BOUNDARY_MAP}`) | always |
+| 2 | `standards/*DIRECTORY_MAP*` (or `{BOUNDARY_MAP}`) | always |
 | 3 | `{FEATURE_SPEC_ROOT}/README.md` + each `*/…-SPEC.md` (Implementation map + Purpose) | always |
 | 4 | Application tree under `{APP}` (2–3 levels; route entrypoints) | always |
 
@@ -296,7 +296,7 @@ Build a **surface list** — one row per independently routable or operable unit
 | Workers / jobs | Celery tasks, queue consumers with dedicated modules |
 | Standalone utilities | Scripts under `{APP}` invoked in production (not one-off `scripts/` dev tools unless documented in HANDOFF) |
 
-**Exclude:** `tests/`, `migrations/`, generated code, vendor mirrors under `.ai/docs/integration/`, pure config.
+**Exclude:** `tests/`, `migrations/`, generated code, vendor mirrors under `docs/integration/`, pure config.
 
 Label each row **Confirmed** (file cite) | **Inference** (heuristic grouping).
 

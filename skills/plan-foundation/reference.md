@@ -263,7 +263,7 @@ Use for **foundation-complete** artifact presence - **not** for plan-master-read
 | P1 scope | `{PLANS_ROOT}/foundation/*-01-*.md` | 1 |
 | P1 architecture | `{PLANS_ROOT}/foundation/*-04-*.md` | 1 |
 | P2 ADRs | `{DECISIONS_ROOT}/20*.md` | ≥4 excluding README |
-| P3 conventions | `.ai/standards/*CONVENTIONS*.md` | 1 |
+| P3 conventions | `standards/*CONVENTIONS*.md` | 1 |
 | P3 features | `{FEATURE_SPEC_ROOT}/*/20*-SPEC.md` | ≥1 |
 | P4 stack | `REPLACE:TECH_STACK_DOC` | 1 |
 | P5 compose | `docker-compose.yml` OR `*docker-compose-proposal*` | 1 |
@@ -435,7 +435,7 @@ Which apply? What is missing? What is explicitly **out of scope** for v1?
 
 #### IF: p1-integrations includes gov-api or file-exchange
 
-Mirror vendor artifacts under `.ai/docs/integration/<vendor>-<version>/` + `MANIFEST.txt` (URL, path, SHA-256, date).
+Mirror vendor artifacts under `docs/integration/<vendor>-<version>/` (project root) + `MANIFEST.txt` (URL, path, SHA-256, date).
 
 #### INTERACTION: p1-adjacent
 
@@ -586,7 +586,7 @@ Create the files per the proposal. Update HANDOFF and NEXT to reflect approval.
 {PLANS_ROOT}/foundation/YYYYMMDD-02-*-integration.md     ← skip if p1-integrations = none
 {PLANS_ROOT}/foundation/YYYYMMDD-03-*-adjacency.md        ← skip if none adjacent
 {PLANS_ROOT}/foundation/YYYYMMDD-04-foundation-arch.md
-.ai/docs/integration/MANIFEST.txt                       ← skip if no integration mirror
+docs/integration/MANIFEST.txt                           ← skip if no integration mirror
 ```
 
 Doc 01 sections: Audience, Assumption ledger, Scope, Risks; heading **Architecture directions (non-prescriptive - architecture foundation in doc 04)** per [Terminology](#terminology-required--prevents-confusion-with-plan-master). Doc 04: Bounded contexts, decisions register §13, foundation-ready gate §14 - title may say "plan" but role is **architecture foundation**, not `*-full-plan.md`.
@@ -634,9 +634,9 @@ ADR: Context → Decision → Consequences → Alternatives → References. Stat
 ## Phase 3 - Specifications
 
 ```
-.ai/standards/YYYYMMDD-CONVENTIONS.md
-.ai/standards/YYYYMMDD-FEATURE_STANDARD.md
-.ai/standards/YYYYMMDD-DIRECTORY_MAP.md
+standards/YYYYMMDD-CONVENTIONS.md
+standards/YYYYMMDD-FEATURE_STANDARD.md
+standards/YYYYMMDD-DIRECTORY_MAP.md
 {FEATURE_SPEC_ROOT}/<bounded-context>/YYYYMMDD-SPEC.md
 {FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC-amendment-NN.md
 ```
@@ -663,10 +663,10 @@ SPEC sections: Purpose · In/Out scope · Domain language · Rules (R1…) · Da
 
 ```
 REPLACE:TECH_STACK_DOC
-.ai/standards/YYYYMMDD-threat-model.md
-.ai/standards/YYYYMMDD-data-classification.md
-.ai/standards/YYYYMMDD-observability-spec.md
-.ai/standards/YYYYMMDD-api-style-guide.md
+standards/YYYYMMDD-threat-model.md
+standards/YYYYMMDD-data-classification.md
+standards/YYYYMMDD-observability-spec.md
+standards/YYYYMMDD-api-style-guide.md
 {PLANS_ROOT}/YYYYMMDD-personas-v1.md               ← if UI (p2-frontend != none)
 ```
 
@@ -1189,7 +1189,7 @@ Agents **MUST**:
 - Avoid inventing undocumented APIs, framework capabilities, or compliance rules.
 - Mark speculative decisions in ASSUMPTIONS and Decision log (ADR).
 - Request clarification when uncertain; do not fake certainty.
-- Verify critical technical claims against `REPLACE:TECH_STACK_DOC`, ADRs, `.ai/docs/integration/`, or official vendor docs.
+- Verify critical technical claims against `REPLACE:TECH_STACK_DOC`, ADRs, `docs/integration/`, or official vendor docs.
 
 Prefer proven stack pins and operational simplicity over speculative designs.
 

@@ -30,7 +30,7 @@
 | `.ai/` | Agent OS (skills, standards, guides) |
 | `.work/` | Plans, SPECs, ADRs, HANDOFF |
 
-See `.ai/standards/*-DIRECTORY_MAP.md` after customization.
+See `standards/*-DIRECTORY_MAP.md` after customization.
 
 ---
 

@@ -10,7 +10,7 @@ description: >-
 
 # feature-spec
 
-Orchestrate **feature SPEC** artifacts under `{FEATURE_SPEC_ROOT}/<feature-slug>/` per `.ai/standards/*FEATURE_STANDARD*` (path from `.cursorrules` `REPLACE:FEATURE_STANDARD_FILE`).
+Orchestrate **feature SPEC** artifacts under `{FEATURE_SPEC_ROOT}/<feature-slug>/` per `standards/*FEATURE_STANDARD*` (path from `.cursorrules` `REPLACE:FEATURE_STANDARD_FILE`).
 
 **Tool-agnostic.** **Pairs with:** `concept-run` (§15 registry), `plan-foundation` P3, `code-implementation` (reads Approved SPECs).
 

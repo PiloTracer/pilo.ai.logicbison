@@ -96,6 +96,7 @@ Scaffold honor table (no-overwrite):
 | Target path | If exists |
 |-------------|-----------|
 | `.work/**` skeleton files | skip (preserve) |
+| Project-root `standards/.gitkeep`, `docs/integration/.gitkeep` | skip (preserve) — empty scaffold only; populated later by `@plan-foundation greenfield` / vendor mirrors, never overwritten by re-deploy |
 | `.cursorrules` | skip (preserve) |
 | `DOCS_TECH_STACK.md` | skip (preserve) |
 | `opencode.json` | create if missing via `install-opencode-config.sh`; on `--update` run `--sync-paths` only (`.opencode/` MCP dir never touched) |
@@ -106,19 +107,19 @@ Scaffold honor table (no-overwrite):
 
 After I1 (no-overwrite copy) the script:
 
-1. Prints a **merge candidate list** for differing files under `.ai/`.
+1. Prints a **merge candidate list** for differing files under `.ai/` (the vendored fat-client copy — never the project-root `standards/`/`docs/integration/` scaffolded by I2, which are the target's own deliverables and are never merge candidates).
 2. Runs **`install-opencode-config.sh --sync-paths`** on the consumer repo root (fat-client `.ai/skills` paths; preserves custom `mcp` entries).
 3. The **agent** performs rules-aware merge for each `.ai/` merge candidate (agent work, not script work).
 
-**Framework-owned file classes** (merge applies; preserve target customizations):
+**Framework-owned file classes** (all paths relative to `<target>/.ai/`; merge applies; preserve target customizations):
 
 | Class | Examples | Merge rule |
 |-------|----------|------------|
-| Skills | `skills/<skill>/skill.md`, `reference.md` | Append new sections/rules absent in target; update shared sections where source changed; **never** drop target-only verbs/tables/notes |
-| Standards | `standards/*.md` | Append new sections; update shared section text where source changed; preserve dated target overrides |
-| Framework docs | `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `concepts/`, `docs/guides/` | Append new sections; update shared paragraphs where source changed; preserve target examples/paths |
-| Templates | `templates/**` | Prefer source version (templates are framework-owned); but if target edited a template intentionally, keep target + record in report |
-| Scripts | `scripts/**` | Prefer source version (mechanical); overwrite target copy → record in report |
+| Skills | `.ai/skills/<skill>/skill.md`, `reference.md` | Append new sections/rules absent in target; update shared sections where source changed; **never** drop target-only verbs/tables/notes |
+| Standards (vendored copy, template/example docs) | `.ai/standards/*.md` | Append new sections; update shared section text where source changed; preserve dated target overrides. **Not** the project-root `standards/*.md` the target generates for itself via `@plan-foundation` — that tree is never a merge candidate. |
+| Framework docs | `.ai/README.md`, `.ai/PROCESS_ROUTER.md`, `.ai/START_HERE.md`, `.ai/concepts/`, `.ai/docs/guides/` | Append new sections; update shared paragraphs where source changed; preserve target examples/paths |
+| Templates | `.ai/templates/**` | Prefer source version (templates are framework-owned); but if target edited a template intentionally, keep target + record in report |
+| Scripts | `.ai/scripts/**` | Prefer source version (mechanical); overwrite target copy → record in report |
 
 **Preserve invariants (never drop):**
 - Target `REPLACE:` tokens the user has filled (the merge must keep target values, not source `REPLACE:*` placeholders).
@@ -149,7 +150,7 @@ After I1 (no-overwrite copy) the script:
 | 4 | `.github/` excluded from destination | |
 | 5 | `.cursorrules` excluded from copy (created by scaffold or `@project-bootstrap init`) | |
 | 6 | No-overwrite honored (skipped count reported; `--force` only when explicitly requested) | |
-| 7 | Scaffold ran **into target** (in-place only); target `.work/` + `.cursorrules` present | |
+| 7 | Scaffold ran **into target** (in-place only); target `.work/` + `.cursorrules` + empty project-root `standards/` + `docs/integration/` present | |
 | 8 | `update`: merge candidate list processed; each merged file recorded; no wholesale replaces | |
 | 9 | User informed of next steps | |
 

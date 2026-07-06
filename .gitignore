@@ -447,8 +447,9 @@ miscellaneous/
 *.p12
 
 # Vendor integration mirrors stay tracked (.cursorrules); undo global *.xlsx above
-!.ai/docs/integration/**/*.xlsx
-!.ai/docs/integration/**/*.xls
+# (project-root docs/integration/ — never nested under .ai/, see .cursorrules § Documentation layout)
+!docs/integration/**/*.xlsx
+!docs/integration/**/*.xls
 
 # Python / test caches
 *.egg-info/
