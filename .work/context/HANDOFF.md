@@ -4,13 +4,13 @@
 
 ## Session status
 
-**Closed:** 2026-07-05 — AIOS-1 plan-foundation question-order fix confirmed; discovered + repaired pre-existing `skill.md` structural corruption (unclosed fence, missing headings, orphaned/duplicate text) from the v0.4.3 skill-trim; enhanced `skill-functional-verify.py` with same-file anchor + fence-balance checks; cross-skill anchor debt (8 skills) and a greenfield P0 sequencing gap logged for follow-up. Live greenfield walkthrough deferred to next session.
+**Closed:** 2026-07-05 — session was opened for P1 (deploy v0.5.0 + AIOS-1 fix to tools-project) but no deploy action was executed; closing as a no-op rather than leaving a stale "Open" status. **P1 remains pending** — no `touch-scope` was declared and no files outside this HANDOFF line changed. Next session should either run the deploy (`@deploy-files copy - <path>` or `@deploy-basic update`, resolving the source path from the live `.ai` repo location — never hardcoded) or explicitly re-scope.
 
 **Updated:** 2026-07-05
 
 Treat the next chat as a **new session**: do not assume unwritten goals from prior threads unless they appear here or in linked artifacts.
 
-**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`. Latest: v0.5.0 tag + AIOS-1 plan-foundation fix on top (uncommitted → committed this close). `plan-foundation/skill.md` now fully anchor-clean (`ANCHOR_CLEAN` set in `skill-functional-verify.py`); 8 other skills carry pre-existing same-file anchor debt reported as non-blocking `DEBT` (see NEXT.md P2). `framework-verify` + `skill-functional-verify` exit 0; `touch-scope-verify` pass; `blast-radius-check` warn (high blast radius, in declared scope).
+**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main` at `2b1433a` (AIOS-1 plan-foundation fix). `plan-foundation/skill.md` fully anchor-clean (`ANCHOR_CLEAN` set in `skill-functional-verify.py`); 8 other skills carry pre-existing same-file anchor debt reported as non-blocking `DEBT` (see NEXT.md P2). `framework-verify` + `skill-functional-verify` exit 0.
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
