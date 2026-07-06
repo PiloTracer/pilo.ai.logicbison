@@ -220,9 +220,9 @@ subst_cursorrules() {
     if [[ -d "$fw_dir_abs" ]] && [[ -f "${fw_dir_abs}/skills/README.md" ]]; then
       local fw_esc="${fw_dir_abs//\//\\/}"
       perl -i -pe "s{${token} \\(default: \\\`[^)]*\\)}{${fw_esc} (discovered at deploy time)}" "$tmpfile"
-      echo "  frameworks: resolved ${token} → ${fw_dir_abs}"
+      echo "  frameworks: resolved ${token} → ${fw_dir_abs}" >&2
     else
-      echo "  frameworks: ${token} not found on disk — leaving for runtime auto-discover"
+      echo "  frameworks: ${token} not found on disk — leaving for runtime auto-discover" >&2
     fi
   done
 
