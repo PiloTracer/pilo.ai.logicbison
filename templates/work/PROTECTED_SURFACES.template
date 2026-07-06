@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Machine-readable high-blast paths for this consumer project. Customize for your repository; framework defaults are separate in .ai/standards/PROTECTED_SURFACES.json.",
+  "description": "Machine-readable high-blast paths for this consumer project. Customize for your repository; framework defaults live in the Agent OS source at standards/PROTECTED_SURFACES.json ($AGENT_OS_SOURCE/standards/ when thin-client).",
   "rule": "fail_verify_without_owner_approval",
   "paths": [
     "package.json",
