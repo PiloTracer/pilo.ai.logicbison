@@ -4,13 +4,13 @@
 
 ## Session status
 
-**Closed:** 2026-07-05 — Fixed the consumer-project `standards`/`docs/integration` write-target bug: `templates/cursorrules.template`, `templates/bootstrap.sh`, `templates/work/context/HANDOFF.md.template`, two `templates/work/plans/foundation/*.template` files, `scripts/setup-target.sh`, and ~15 skill docs instructed writing/reading project-owned deliverables (CONVENTIONS, FEATURE_STANDARD, DIRECTORY_MAP, threat-model, data-classification, observability-spec, api-style-guide, `docs/integration/MANIFEST.txt`) under a local `.ai/` prefix — confirmed live in `tools-rfp` (stray `.ai/standards/` + `.ai/docs/integration/` created there). Fixed to project-root `standards/` + `docs/integration/` everywhere except the legitimate framework-wide `.ai/standards/MASTER_PLAN_STANDARD.md` contract. `bootstrap.sh`/`setup-target.sh` now scaffold empty project-root `standards/`+`docs/integration/`; smoke-tested live against all three deploy paths (`deploy-basic` thin bootstrap, `deploy-files` outbound copy, `deploy-files` in-place fat bootstrap) — all three correctly produce empty project-root `standards/`+`docs/integration/` alongside the (fat-client-only) vendored `.ai/standards/` copy, with no cross-contamination. Fixed two resulting documentation gaps in `skills/deploy-basic/skill.md` (What-gets-copied table) and `skills/deploy-files/skill.md` (scaffold table + update-merge protocol's `.ai/standards/*.md` row, which was ambiguous against the new project-root `standards/`). `deploy-repo` unaffected (git clone/archive of the whole self-hosted tree verbatim; no `.ai/`-prefix logic). **Scope: `.ai` framework repo only this pass — `tools-rfp`/`tools-project` explicitly not touched; remediation tracked as NEXT.md P5, needs owner go-ahead.** The thin-client script-path baking fix (`deploy-basic.sh`, prior goal) is separately complete and already validated live against `tools-rfp`.
+**Closed:** 2026-07-06 — v0.5.2 layout consolidation: all project-owned customization under `.work/standards/` + `.work/docs/integration/`; `@deploy-basic` never creates local `.ai/`; bootstrap purges deprecated repo-root scaffolds; deploy-basic patches legacy cursorrules paths; skills/docs/templates aligned; self-hosted `.cursorrules` updated; MOD-07 sweep; anchor hygiene (9 skills → `ANCHOR_CLEAN`); greenfield registry ordering fix (U2 closed); MOD-06 output at `.work/analysis/20260706-mod06-aios1-layout-consolidation.md`. `framework-verify` + `skill-functional-verify` exit 0 (verified).
 
-**Updated:** 2026-07-05
+**Updated:** 2026-07-06
 
 Treat the next chat as a **new session**: do not assume unwritten goals from prior threads unless they appear here or in linked artifacts.
 
-**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`, tagged `v0.5.1` (standards/docs-integration path fix). `plan-foundation/skill.md` fully anchor-clean (`ANCHOR_CLEAN` set in `skill-functional-verify.py`); 8 other skills carry pre-existing same-file anchor debt reported as non-blocking `DEBT` (see NEXT.md P2). `framework-verify` + `skill-functional-verify` exit 0; `touch-scope-verify` pass; `blast-radius-check` reports expected high risk (protected deploy scripts/templates, pre-approved).
+**Repository state:** Agent OS framework repo (self-hosted). `main` synced with `origin/main`, tagged `v0.5.1` (prior release). **Uncommitted WIP:** v0.5.2 layout consolidation + audit fixes (commit pending). All skills in `ANCHOR_CLEAN` set after anchor hygiene pass. `framework-verify` + `skill-functional-verify` exit 0 (verified 2026-07-06).
 
 **Recommended pick-up file:** `.work/plans/NEXT.md`
 
@@ -34,9 +34,9 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 | If the task touches… | Read first |
 |----------------------|------------|
 | Product scope / foundation | `.work/plans/foundation/*-01-*.md` … `*-04-*.md` |
-| Any code or new feature | `standards/*CONVENTIONS*`, `*FEATURE_STANDARD*` |
-| External integration | `*-02-*.md`, `docs/integration/MANIFEST.txt` (if any) |
-| Security | `standards/*threat-model*` |
+| Any code or new feature | `.work/standards/*CONVENTIONS*`, `*FEATURE_STANDARD*` |
+| External integration | `*-02-*.md`, `.work/docs/integration/MANIFEST.txt` (if any) |
+| Security | `.work/standards/*threat-model*` |
 | Stack / topology | `REPLACE:TECH_STACK_DOC` |
 | Master plan / milestones | `.work/plans/full/*-full-plan.md` |
 | High-risk feature | Relevant `.work/features/<slug>/*-SPEC.md` |
@@ -79,8 +79,8 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | ID | Summary | Blocks |
 |----|---------|--------|
-| U1 | 18 pre-existing broken same-file `#anchor` links across 8 skills (`code-implementation`, `code-repair`, `db-migration`, `feature-spec`, `plan-master`, `plan-repair`, `plan-verify`, `session-control`), surfaced as `DEBT` by the enhanced `skill-functional-verify.py` | No — non-blocking `DEBT`, cleanup tracked as NEXT.md P2 |
-| U2 | Greenfield P0 protocol: `p0-probe` writes into `ASSUMPTIONS.md`/`RISK_REGISTRY.md`/`UNKNOWNS.md`, which are only guaranteed to exist "by GATE p0", not necessarily before `p0-probe` runs | No — deferred, tracked as NEXT.md P3 |
+| U1 | 18 pre-existing broken same-file `#anchor` links across 8 skills — **repaired 2026-07-06**; all 9 trimmed skills now in `ANCHOR_CLEAN` hard-fail set | No — resolved | owner | Closed |
+| U2 | Greenfield P0 registry ordering — **fixed 2026-07-06** (registries created greenfield step 3, before `p0-probe` step 4) | No — resolved | owner | Closed |
 
 ---
 

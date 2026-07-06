@@ -25,7 +25,7 @@ Verification layer for **planning documentation** — not application code. **Do
 - **Read-only** — no writes to `{HANDOFF}`, `{ITERATION_CARRIER}`, foundation docs, or `*-full-plan.md` unless the user explicitly asks to persist a verify result in HANDOFF.
 - **Delegate, do not duplicate** — invoke upstream skills by **following** their `skill.md` protocols (same agent turn); do not reimplement certify, revise, or greenfield logic inline.
 - **Layer discipline** — foundation verify must **not** score **implementation-ready** (redirect to `@plan-master status`). Master verify must **not** certify **plan-master-ready** (redirect to `@plan-foundation certify`).
-- **Brownfield-first** — when [Brownfield detection](#brownfield-detection-bf0) is **yes**, use [Brownfield verify](#brownfield-verify-protocol) (or the BF branch inside the requested mode). Do **not** hard-stop solely because `@plan-foundation` / `@plan-master` were never run; assess **framework alignment** from repo evidence.
+- **Brownfield-first** — when [Brownfield detection](reference.md#brownfield-detection-bf0) is **yes**, use [Brownfield verify](reference.md#brownfield-verify-protocol) (or the BF branch inside the requested mode). Do **not** hard-stop solely because `@plan-foundation` / `@plan-master` were never run; assess **framework alignment** from repo evidence.
 - Every mode ends with a **Completion checklist** — each item `pass` | `fail` | `skip` with evidence.
 
 ---
@@ -38,10 +38,10 @@ Normalize to **mode** + optional scope. Use ASCII hyphen **`-`** between tokens.
 |-----------|------|--------|
 | `@plan-verify` **foundation** | foundation | [Foundation verify](#foundation-verify-protocol) |
 | `@plan-verify` **master** | master | [Master verify](#master-verify-protocol) |
-| `@plan-verify` **alignment** | alignment | [Alignment verify](#alignment-verify-protocol) — NEXT vs `{MASTER_PLAN}` |
+| `@plan-verify` **alignment** | alignment | [Alignment verify](reference.md#alignment-verify-protocol) — NEXT vs `{MASTER_PLAN}` |
 | `@plan-verify` **drift** | alignment | Alias for **alignment** |
 | `@plan-verify` **status** | status | [Status protocol](#status-protocol) — read-only summary |
-| `@plan-verify` **brownfield** | brownfield | [Brownfield verify](#brownfield-verify-protocol) — full framework alignment pass |
+| `@plan-verify` **brownfield** | brownfield | [Brownfield verify](reference.md#brownfield-verify-protocol) — full framework alignment pass |
 | `@plan-verify` **coverage** | coverage | [Coverage verify](#coverage-verify-protocol) — app surfaces vs SPECs / DIRECTORY_MAP |
 | `@plan-verify` **registry** | coverage | Alias for **coverage** |
 | `@plan-verify` **verify** | *(infer)* | See **Default** below |
@@ -123,7 +123,7 @@ Cross-check **foundation layer** readiness: P0–P6 gates, registries, traceabil
 
 When **BF0 = yes**:
 
-1. Run [BF1](#bf1---repo-discovery-mandatory) slot inventory for foundation rows only.
+1. Run [BF1](reference.md#bf1-repo-discovery-mandatory) slot inventory for foundation rows only.
 2. **Skip** hard fail when `plan-foundation status` would show all **not started** — instead score each P0–P6 row: **present** | **substitute** | **partial** | **missing** with substitute path.
 3. Run `plan-master integrity` only if ≥2 foundation artifacts exist (01, 04, ADR, or SPEC); else **integrity: skip**.
 4. Verdict may be **pass with gaps** or **aligned-best-effort** when substitutes cover scope + architecture; list **formal-foundation-complete: no** explicitly.
@@ -216,7 +216,7 @@ When **BF0 = yes**:
 If **plan-master-ready: no** in HANDOFF / foundation status:
 
 - **brownfield: no** → verdict **fail** with **Run first:** `@plan-foundation certify plan-master-ready`.
-- **brownfield: yes** → continue; report formal gate open; use [Master verify — brownfield branch](#master-verify--brownfield-branch-bf).
+- **brownfield: yes** → continue; report formal gate open; use [Master verify — brownfield branch](reference.md#master-verify-brownfield-branch-bf).
 
 ### M1 - Invoke upstream status (mandatory)
 
@@ -278,7 +278,7 @@ Cross-check foundation layer: P0–P6 gates, registries, traceability, semantic 
 | # | Read | When |
 |---|------|------|
 | 1 | `{AGENT_RULES_FILE}` — `REPLACE:APP_ROOT`, `REPLACE:FRONTEND_ROOT`, boundary placeholders | always |
-| 2 | `standards/*DIRECTORY_MAP*` (or `{BOUNDARY_MAP}`) | always |
+| 2 | `.work/standards/*DIRECTORY_MAP*` (or `{BOUNDARY_MAP}`) | always |
 | 3 | `{FEATURE_SPEC_ROOT}/README.md` + each `*/…-SPEC.md` (Implementation map + Purpose) | always |
 | 4 | Application tree under `{APP}` (2–3 levels; route entrypoints) | always |
 
@@ -296,7 +296,7 @@ Build a **surface list** — one row per independently routable or operable unit
 | Workers / jobs | Celery tasks, queue consumers with dedicated modules |
 | Standalone utilities | Scripts under `{APP}` invoked in production (not one-off `scripts/` dev tools unless documented in HANDOFF) |
 
-**Exclude:** `tests/`, `migrations/`, generated code, vendor mirrors under `docs/integration/`, pure config.
+**Exclude:** `tests/`, `migrations/`, generated code, vendor mirrors under `.work/docs/integration/`, pure config.
 
 Label each row **Confirmed** (file cite) | **Inference** (heuristic grouping).
 
@@ -322,6 +322,12 @@ Cross-check master plan and implementation-ready prerequisites (report only).
 | `code-verify` | **Orthogonal** — code vs plan; run both before broad release |
 | `code-repair` | Wrong layer for plan gaps — redirect to `plan-repair` |
 | `code-implementation` | Regenerates iteration block after master/plan repair |
+
+---
+
+## Status protocol
+
+Read-only summary of plan-verify readiness. Emit a compact table: foundation status (from `@plan-foundation status` when present), master status (`@plan-master status`), active iteration in `{ITERATION_CARRIER}`, and top gaps from `{PLANS_ROOT}/UNKNOWNS.md`. **No writes.**
 
 ---
 
@@ -355,7 +361,7 @@ Cross-check master plan and implementation-ready prerequisites (report only).
 - Introducing parallel registries (`feature.yml`, per-repo domain-registry files) instead of SPEC **Implementation map** + DIRECTORY_MAP
 Detect drift between `{ITERATION_CARRIER}` and `{MASTER_PLAN}`.
 
-**BF branch, A0 existence gate, A1 checks, A2 report template:** [`reference.md` § Alignment verify protocol (detailed)](reference.md#alignment-verify-protocol).
+**BF branch, A0 existence gate, A1 checks, A2 report template:** [`reference.md` § Alignment verify protocol (detailed)](reference.md#alignment-verify-protocol-detailed).
 
 Read-only inventory of deployable surfaces vs SPEC Implementation map + DIRECTORY_MAP.
 

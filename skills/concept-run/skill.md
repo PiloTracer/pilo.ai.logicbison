@@ -1,7 +1,7 @@
 ---
 name: concept-run
 description: >-
-  Run architecture concept prompts (MOD-01 through MOD-06) per the trigger table.
+  Run architecture concept prompts (MOD-01 through MOD-07) per the trigger table.
   Use when opening a SPEC §15, planning an iteration registry, AI-assisted PR
   review, boundary-crossing diffs, or verify pending concept rows. Attaches
   structured output to PR, NEXT.md task Notes, or SPEC/ADR as specified.
@@ -35,7 +35,7 @@ Execute **concept pack** procedures under `.ai/concepts/<name>/prompt.md`. Regis
 | `@concept-run` - MOD-0N | run | alias |
 | `@concept-run` **run-all** - pending | run-all | All iteration rows with Applies=yes, Status=pending |
 
-**Ids:** MOD-01 … MOD-06 - map to folders in `.ai/concepts/README.md` § Concept index.
+**Ids:** MOD-01 … MOD-07 - map to folders in `.ai/concepts/README.md` § Concept index.
 
 ---
 
@@ -107,6 +107,7 @@ proceed | conditions | block - per prompt Recommendation section
 | MOD-04 | `ops-headcount/` |
 | MOD-05 | `modularity-vs-distribution/` |
 | MOD-06 | `ai-amplification/` |
+| MOD-07 | `prompt-architecture/` |
 
 ---
 

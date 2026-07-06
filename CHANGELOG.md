@@ -4,6 +4,18 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-07-06
+
+### Changed
+- **Project memory layout consolidation** — all project-owned customization now lives under `.work/` only: binding standards → `.work/standards/`, vendor integration cache → `.work/docs/integration/`. `@deploy-basic` never creates a local `.ai/` directory (thin-client invariant). Bootstrap and `setup-target.sh` purge deprecated repo-root `standards/` and `docs/integration/` scaffolds when empty; `deploy-basic.sh` patches legacy `.cursorrules` paths on `update`. Skills, templates, standards, and `framework-verify` consumer smoke updated.
+- **Self-hosted `.cursorrules`** — `{STANDARDS_ROOT}`, `{INTEGRATION_ROOT}` placeholders; project binding under `.work/standards/` + `.work/docs/integration/`; framework `standards/` documented as templates until `.work/standards/` is populated.
+- **MOD-07 sweep** — `MOD-01–MOD-07` range aligned across `concept-run`, `README.md`, `START_HERE.md`, `PROCESS_ROUTER.md`, `FEATURE_STANDARD.md`, `feature-spec`, workflows matrix, and director/implementation references.
+- **`skills/plan-foundation/reference.md`** — greenfield step 3 creates registries before `p0-probe` step 4 (U2 closed).
+
+### Fixed
+- **Cross-skill anchor hygiene** — nine trimmed skills promoted to `ANCHOR_CLEAN` in `skill-functional-verify.py`; explicit `<a id>` tags and corrected `reference.md#` slugs in `feature-spec`, `plan-repair`, `plan-master`, `plan-verify`, `session-control`, and peers (`skill-functional-verify` exit 0).
+- **`scripts/deploy-basic.sh`** — function rename `subst_cursorrules`/`write_cursorrules`; legacy path patching for `.work/standards/` layout.
+
 ## [0.5.1] - 2026-07-05
 
 ### Fixed

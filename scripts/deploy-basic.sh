@@ -198,7 +198,7 @@ fi
 #      bake the resolved absolute path here instead of relying on read-time
 #      interpretation (this is what a prior false "scripts not present" report
 #      against a thin-client target traced back to).
-subst_cursorules() {
+subst_cursorrules() {
   local AI_ROOT_ESC="${AI_ROOT//\//\\/}"
   local SIBLING_PARENT
   SIBLING_PARENT="$(cd "$AI_ROOT/.." && pwd)"
@@ -227,7 +227,7 @@ subst_cursorules() {
   done
 
   # Step 3: bake resolved script paths (Change-safety gate table + Co-authored-by
-  # hook install line) — see comment above subst_cursorules() for why this can't
+  # hook install line) — see comment above subst_cursorrules() for why this can't
   # be left to read-time interpretation.
   perl -i -pe "s{\.ai/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$tmpfile"
 
@@ -235,13 +235,13 @@ subst_cursorules() {
   rm -f "$tmpfile"
 }
 
-write_cursorules() {
+write_cursorrules() {
   # $1 = force | skip
   if [[ "$1" == "force" ]] || [[ ! -f "$CURS_DEST" ]]; then
-    subst_cursorules > "$CURS_DEST"
-    echo "  cursorules: wrote (subst AGENT_OS_SOURCE=$AI_ROOT)"
+    subst_cursorrules > "$CURS_DEST"
+    echo "  cursorrules: wrote (subst AGENT_OS_SOURCE=$AI_ROOT)"
   else
-    echo "  cursorules: skip (exists) — keeping existing target .cursorrules"
+    echo "  cursorrules: skip (exists) — keeping existing target .cursorrules"
   fi
 }
 
@@ -254,25 +254,24 @@ fi
 
 # Step 1: .cursorrules (no-overwrite by default; --force overwrites).
 if [[ "$MODE" == "force" ]]; then
-  write_cursorules force
+  write_cursorrules force
 else
   if [[ -f "$CURS_DEST" ]]; then
-    echo "  cursorules: skip (exists) — keeping existing target .cursorrules"
+    echo "  cursorrules: skip (exists) — keeping existing target .cursorrules"
   else
-    write_cursorules skip  # creates it (no existing → fallthrough to write)
+    write_cursorrules skip  # creates it (no existing → fallthrough to write)
   fi
 fi
-# Re-sync the source pointer when --update AND the existing .cursorrules still
-# carries REPLACE_BASICSOURCE or a stale path. This is a no-op when target is
-# already current.
-if [[ "$MODE" == "update" ]] && [[ "$existing_source" != "$AI_ROOT" ]]; then
+# Re-sync the source pointer when --update AND the existing .cursorrules had a
+# stale non-empty path. Skip when existing_source is empty (fresh write above).
+if [[ "$MODE" == "update" ]] && [[ -n "$existing_source" ]] && [[ "$existing_source" != "$AI_ROOT" ]]; then
   if [[ -f "$CURS_DEST" ]] && grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
     # Substitute just the source line in-place (preserve all other target edits).
     AI_ROOT_ESC="${AI_ROOT//\//\\/}"
     OLD_ESC="${existing_source//\//\\/}"
     perl -i -pe "s{AGENT_OS_SOURCE=\Q${existing_source}\E}{AGENT_OS_SOURCE=${AI_ROOT_ESC}}" "$CURS_DEST" 2>/dev/null || \
       perl -i -pe "s/AGENT_OS_SOURCE=[^\n]*/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$CURS_DEST"
-    echo "  cursorules: re-synced AGENT_OS_SOURCE → $AI_ROOT (was: ${existing_source:-<unset>})"
+    echo "  cursorrules: re-synced AGENT_OS_SOURCE → $AI_ROOT (was: ${existing_source:-<unset>})"
   fi
 fi
 # Re-bake script paths (Change-safety gate table + Co-authored-by hook install
@@ -293,7 +292,7 @@ if [[ "$MODE" == "update" ]] && [[ -f "$CURS_DEST" ]] && grep -q 'AGENT_OS_SOURC
   fi
   perl -i -pe "s{(?<!/)\.ai/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$CURS_DEST"
   if ! cmp -s "$tmp_before_bake" "$CURS_DEST"; then
-    echo "  cursorules: re-baked script paths → $AI_ROOT/scripts/ (Change-safety gate table + hook install line)"
+    echo "  cursorrules: re-baked script paths → $AI_ROOT/scripts/ (Change-safety gate table + hook install line)"
   fi
   rm -f "$tmp_before_bake"
 fi
@@ -301,7 +300,7 @@ fi
 # AGENT_OS_SOURCE line at all), flag it — the source-resolution section is a
 # merge candidate, handled by the agent (see skill § update-merge protocol).
 if [[ "$MODE" == "update" ]] && [[ -f "$CURS_DEST" ]] && ! grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
-  echo "  cursorules: MERGE CANDIDATE — existing .cursorrules lacks the Source-resolution section"
+  echo "  cursorrules: MERGE CANDIDATE — existing .cursorrules lacks the Source-resolution section"
   echo "    (agent merges the section from the current template; preserves target REPLACE tokens)"
 fi
 
@@ -311,8 +310,38 @@ fi
 BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT="$DEST_ROOT" bash "$AI_ROOT/templates/bootstrap.sh" \
   > /tmp/deploy-basic-bootstrap.$$.log 2>&1 || { cat /tmp/deploy-basic-bootstrap.$$.log; rm -f /tmp/deploy-basic-bootstrap.$$.log; exit 1; }
 # Surface a trimmed version of bootstrap output (created/skip lines).
-grep -E '^(created:|skip )' /tmp/deploy-basic-bootstrap.$$.log | sed 's/^/  work: /'
+grep -E '^(created:|skip |scaffold:|removed )' /tmp/deploy-basic-bootstrap.$$.log | sed 's/^/  work: /'
 rm -f /tmp/deploy-basic-bootstrap.$$.log
+
+# Patch stale repo-root standards/docs paths in existing .cursorrules (pre-v0.5.2 layout).
+# Preserves filled REPLACE: tokens and AGENT_OS_SOURCE; only rewrites known path literals.
+patch_cursorrules_project_paths() {
+  local f="$1"
+  [[ -f "$f" ]] || return 0
+  local tmp
+  tmp="$(mktemp)"
+  cp "$f" "$tmp"
+  perl -i -pe '
+    s{\| `standards/|\| `.work/standards/|g;
+    s{\| `docs/integration/|\| `.work/docs/integration/|g;
+    s/\{BOUNDARY_MAP\}` \| standards\//{BOUNDARY_MAP}` | .work\/standards\//;
+    s/under `docs\/integration\`/under `.work\/docs\/integration\`/g;
+    s/log every download in `docs\/integration\/MANIFEST/log every download in `.work\/docs\/integration\/MANIFEST/g;
+    s/- \*\*`standards\/\*\* and \*\*`docs\/integration\/\*\* \(project root, sibling of `\.work\/`\):/- **`.work\/standards\/`** and **`.work\/docs\/integration\/`** (under `.work\/`):/;
+    s/\| `standards\/` \| This project.s own binding/\| `.work\/standards\/` | This project.s own binding/;
+    s/\| `docs\/integration\/` \| This project.s vendor/\| `.work\/docs\/integration\/` | This project.s vendor/;
+    s/## Documentation layout \(`\.ai\/` vs `\.work\/` vs project root\)/## Documentation layout (`.ai\/` vs `.work\/`)/;
+    s/- \*\*`\.work\/`\:\*\* project-specific — plans/- **`.work\/`:** **all project-specific memory and customization** — plans/;
+  ' "$f" 2>/dev/null || true
+  if ! grep -q '{STANDARDS_ROOT}' "$f"; then
+    perl -i -0777 -pe 's/(\| `\{TOUCH_SCOPE\}` \| `\.work\/touch-scope` \|\n)/$1| `{STANDARDS_ROOT}` | `.work\/standards\/` |\n| `{INTEGRATION_ROOT}` | `.work\/docs\/integration\/` |\n/s' "$f" 2>/dev/null || true
+  fi
+  if ! cmp -s "$tmp" "$f"; then
+    echo "  cursorrules: patched deprecated repo-root standards/docs paths → .work/"
+  fi
+  rm -f "$tmp"
+}
+patch_cursorrules_project_paths "$CURS_DEST"
 
 REPO_ROOT="$DEST_ROOT" bash "$AI_ROOT/scripts/install-git-hooks.sh" 2>/dev/null || true
 REPO_ROOT="$DEST_ROOT" AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/install-opencode-config.sh" 2>/dev/null || true
@@ -336,7 +365,7 @@ if [[ "$MODE" == "update" ]]; then
   # .cursorrules vs the freshly-substituted template
   if [[ -f "$CURS_DEST" ]]; then
     tmp_cur="$(mktemp)"
-    subst_cursorules > "$tmp_cur"
+    subst_cursorrules > "$tmp_cur"
     if ! cmp -s "$tmp_cur" "$CURS_DEST"; then
       echo "  merge: .cursorrules  (differs from current template-with-source)"
     fi
@@ -385,7 +414,10 @@ echo "=== Done: thin-client bootstrap → $DEST_ROOT ==="
 echo "  .cursorrules: $([ -f "$CURS_DEST" ] && echo present || echo MISSING)"
 echo "  AGENT_OS_SOURCE: $(grep -oE 'AGENT_OS_SOURCE=[^ ]*' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || echo '<unset — fat-client>')"
 echo "  .work/: $([ -d "${DEST_ROOT}/.work" ] && echo present || echo MISSING)"
-echo "  skills (local): $([ -d "${DEST_ROOT}/.ai/skills" ] && echo "present — fat-client (unexpected for basic)" || echo 'absent — thin-client (skills load from source)')"
+echo "  skills (local): $([ -d "${DEST_ROOT}/.ai/skills" ] && echo "present — fat-client (deploy-basic does NOT create this; use @deploy-files if intentional)" || echo 'absent — thin-client (correct; skills load from source)')"
+if [[ -d "${DEST_ROOT}/.ai" ]] && [[ ! -d "${DEST_ROOT}/.ai/skills" ]]; then
+  echo "  WARN: .ai/ exists but lacks skills/ — unexpected; review target layout"
+fi
 echo ""
 echo "Next steps in target project:"
 echo "  1. Edit ${DEST_ROOT}/.cursorrules — fill every REPLACE: token EXCEPT AGENT_OS_SOURCE (deploy-basic set it)"

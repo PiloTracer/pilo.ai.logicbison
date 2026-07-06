@@ -28,7 +28,7 @@ Default to **minimal diffs**. Run before commit / `@code-implementation complete
 |------|---------|-----------|
 | Touch scope | `bash scripts/touch-scope-verify.sh` | File outside `.work/touch-scope` or iteration **Files** |
 | Blast radius | `bash scripts/blast-radius-check.sh` | `risk: high` (cross-area or oversized diff) |
-| Protected surfaces | `standards/PROTECTED_SURFACES.json` + §Protected Files | High-blast path without owner approval |
+| Protected surfaces | `standards/PROTECTED_SURFACES.json` + `.work/PROTECTED_SURFACES.json` + §Protected Files | High-blast path without owner approval |
 | Tests | `bash scripts/framework-verify.sh` (see `DOCS_TECH_STACK.md`) | Non-zero exit |
 
 **Declare scope first:** copy `templates/work/touch-scope.template` → `.work/touch-scope`, or `@code-implementation plan` with **Files** per task. **MOD-06** required for agent-authored code (`concepts/README.md` § Trigger table); `human-only` opt-out only when the human declares it in the same message. **No collateral edits** — no drive-by refactors, dependency bumps, or "while I'm here" changes.
@@ -61,9 +61,9 @@ Sister frameworks are siblings on disk; `.ai/` is self (self-hosted). Paths reso
 | `START_HERE.md` | What to invoke now; forgetfulness checklist |
 | `PROCESS_ROUTER.md` | Process Q&A; `@process-router` vs `@session-control status` |
 | `DOCS_TECH_STACK.md` | Stack + verification commands |
-| `standards/REPLACE:CONVENTIONS_FILE` | Code layout, naming, maintainability |
-| `standards/REPLACE:FEATURE_STANDARD_FILE` | Feature SPEC lifecycle |
-| `standards/REPLACE:DIRECTORY_MAP_FILE` | Repo layout and boundaries |
+| `.work/standards/REPLACE:CONVENTIONS_FILE` | Code layout, naming, maintainability |
+| `.work/standards/REPLACE:FEATURE_STANDARD_FILE` | Feature SPEC lifecycle |
+| `.work/standards/REPLACE:DIRECTORY_MAP_FILE` | Repo layout and boundaries |
 | `.work/context/HANDOFF.md` | Session handoff |
 | `docs/guides/workflows/README.md` | Workflow index and artifact matrix |
 
@@ -83,6 +83,8 @@ Sister frameworks are siblings on disk; `.ai/` is self (self-hosted). Paths reso
 | `{MASTER_PLAN}` | `.work/plans/full/*-full-plan.md` (latest **Approved**) |
 | `{HANDOFF}` | `.work/context/HANDOFF.md` |
 | `{TOUCH_SCOPE}` | `.work/touch-scope` |
+| `{STANDARDS_ROOT}` | `.work/standards/` |
+| `{INTEGRATION_ROOT}` | `.work/docs/integration/` |
 | `{CONCEPTS_ROOT}` | `concepts/` |
 | `{SKILLS_ROOT}` | `skills/` |
 | `{OBSERVABILITY_SPEC}` | REPLACE:OBSERVABILITY_SPEC_PATH |
@@ -140,14 +142,14 @@ Skills live under `skills/<id>/skill.md` (folder name = id). When a task matches
 
 ## External integration docs (optional)
 
-Cache vendor APIs/XSDs/PDFs/OpenAPI under `docs/integration/`. Rules: organize by source+version subfolders (no silent overwrite on upgrade); log every download in `docs/integration/MANIFEST.txt`; prefer official domains; never store keys/PEM/tokens/`.env`; verify file type after download; vendor artifacts only. Read cached copies during implementation; refresh when versions change.
+Cache vendor APIs/XSDs/PDFs/OpenAPI under `.work/docs/integration/` (per-project cache under project memory). Rules: organize by source+version subfolders (no silent overwrite on upgrade); log every download in `.work/docs/integration/MANIFEST.txt`; prefer official domains; never store keys/PEM/tokens/`.env`; verify file type after download; vendor artifacts only. Read cached copies during implementation; refresh when versions change.
 
 ---
 
 ## Protected Files
 
 - **File access override:** read any path the user provides, regardless of `.gitignore`.
-- **Do NOT modify unless explicitly asked:** paths in `standards/PROTECTED_SURFACES.json` (deploy scripts, templates, CI). Consumer examples: `package.json`, `docker-compose*.yml`, `Dockerfile.*`, `REPLACE:FRONTEND_CONFIG_PATHS`, `.env*`.
+- **Do NOT modify unless explicitly asked:** paths in `standards/PROTECTED_SURFACES.json` (framework defaults) and `.work/PROTECTED_SURFACES.json` (this project). Consumer examples: `package.json`, `docker-compose*.yml`, `Dockerfile.*`, `REPLACE:FRONTEND_CONFIG_PATHS`, `.env*`.
 - **If a protected file needs a change:** stop, explain why, ask permission.
 
 ---
@@ -243,10 +245,10 @@ Use Context7 MCP (`@upstash/context7-mcp`) for version-specific library docs whe
 
 ## Documentation layout (framework vs project memory)
 
-Self-hosted: the `.ai/` layer sits at repo root without the `.ai/` prefix.
+Self-hosted: the framework layer sits at repo root without the `.ai/` prefix.
 
-- **`/` (framework layer):** agnostic — `skills/`, `standards/`, `concepts/`, workflow guides, `START_HERE.md`, `PROCESS_ROUTER.md`, `templates/`. Pointer READMEs only under `plans/`, `features/`.
-- **`.work/`:** project-specific — plans, SPECs, ADRs, prompts, `HANDOFF.md`. Generated filenames use the `YYYYMMDD-` prefix (except `NEXT.md`, `HANDOFF.md`).
+- **`/` (framework layer):** agnostic — `skills/`, `standards/` (template library + `PROTECTED_SURFACES.json`), `concepts/`, workflow guides, `START_HERE.md`, `PROCESS_ROUTER.md`, `templates/`. Pointer READMEs only under `plans/`, `features/`.
+- **`.work/`:** **all project-specific memory and customization** — plans, SPECs, ADRs, prompts, `HANDOFF.md`, `PROTECTED_SURFACES.json`, binding **`.work/standards/`**, and **`.work/docs/`** (including **`.work/docs/integration/`** vendor cache). Generated filenames use the `YYYYMMDD-` prefix (except `NEXT.md`, `HANDOFF.md`).
 
 | Path | Layer |
 |------|-------|
@@ -255,8 +257,11 @@ Self-hosted: the `.ai/` layer sits at repo root without the `.ai/` prefix.
 | `.work/decisions/` | ADRs |
 | `.work/prompts/` | Questionnaires; user scratch |
 | `.work/context/HANDOFF.md` | Session handoff |
-| `standards/` | Binding engineering standards |
+| `.work/PROTECTED_SURFACES.json` | This project's high-blast paths |
+| `.work/standards/` | This project's binding engineering standards (generated; `@plan-foundation` P3) |
+| `.work/docs/integration/` | This project's vendor/API integration cache |
+| `standards/` | Framework **template** standards (e.g. `20260517-*.md`); self-hosted dogfood may read these until `.work/standards/` is populated |
 | `skills/` | Portable agent skills |
-| `templates/cursorrules.template` | Copy to repo-root `.cursorrules` when bootstrapping |
+| `templates/cursorrules.template` | Copy to repo-root `.cursorrules` when bootstrapping consumers |
 
 Canonical map: `README.md` · Working tree: `.work/README.md`.

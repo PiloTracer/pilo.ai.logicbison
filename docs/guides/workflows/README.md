@@ -11,7 +11,7 @@ This directory holds portable workflow documentation with two filename shapes:
 
 Links to `…/workflows/README.md` land here.
 
-**Matrix scope:** list paths **normatively referenced** by **`.cursorrules`**, **`.ai/skills/*/skill.md`** (and their `reference.md` companions), project-root **`standards/*.md`** (per-project, generated) plus the framework-wide **`.ai/standards/MASTER_PLAN_STANDARD.md`** contract, the **`.ai/concepts/`** workflow (`README` + per-concept `README` / `prompt.md`), the **workflow guides** in this directory, and **custom agent** wrappers only when they defer to the same rules/skills (no parallel “shadow” governance).
+**Matrix scope:** list paths **normatively referenced** by **`.cursorrules`**, **`.ai/skills/*/skill.md`** (and their `reference.md` companions), **`.work/standards/*.md`** (per-project, generated) plus the framework-wide **`.ai/standards/MASTER_PLAN_STANDARD.md`** contract, the **`.ai/concepts/`** workflow (`README` + per-concept `README` / `prompt.md`), the **workflow guides** in this directory, and **custom agent** wrappers only when they defer to the same rules/skills (no parallel “shadow” governance).
 
 The **artifact matrix** below maps **planning** vs **implementation** (plus cross-cutting and operations) for those official layers only.
 
@@ -67,13 +67,13 @@ The **artifact matrix** below maps **planning** vs **implementation** (plus cros
 | `.work/features/<slug>/YYYYMMDD-SPEC-amendment-*.md` | Planning | Planning | Post-approval SPEC deltas (do not edit merged SPEC in place). |
 | `.work/decisions/README.md` | Planning | Context | ADR index. |
 | `.work/decisions/YYYYMMDD-NNN-*.md` | Both | Binding | Architectural decision records. |
-| `standards/20260517-CONVENTIONS.md` | Both | Binding | Code layout, naming, tests tooling, logging discipline. |
-| `standards/20260517-FEATURE_STANDARD.md` | Both | Binding | Feature lifecycle, SPEC template (incl. section 15 concept registry). |
-| `standards/20260517-DIRECTORY_MAP.md` | Both | Binding | Repo directory gate; interim **module boundary** reference. |
-| `standards/20260517-observability-spec.md` | Both | Binding | Metrics, traces, logs, SLO expectations. |
-| `standards/20260517-api-style-guide.md` | Both | Binding | HTTP API style (RFC 7807, pagination, idempotency). |
-| `standards/20260517-threat-model.md` | Both | Binding | STRIDE threat model. |
-| `standards/20260517-data-classification.md` | Both | Binding | Data classes + handling matrix. |
+| `.work/standards/*CONVENTIONS*.md` | Both | Binding | Code layout, naming, tests tooling, logging discipline. |
+| `.work/standards/*FEATURE_STANDARD*.md` | Both | Binding | Feature lifecycle, SPEC template (incl. section 15 concept registry). |
+| `.work/standards/*DIRECTORY_MAP*.md` | Both | Binding | Repo directory gate; interim **module boundary** reference. |
+| `.work/standards/*observability*.md` | Both | Binding | Metrics, traces, logs, SLO expectations. |
+| `.work/standards/*api-style*.md` | Both | Binding | HTTP API style (RFC 7807, pagination, idempotency). |
+| `.work/standards/*threat-model*.md` | Both | Binding | STRIDE threat model. |
+| `.work/standards/*data-classification*.md` | Both | Binding | Data classes + handling matrix. |
 | `.ai/skills/README.md` | Both | Skill | Skill registry and **kebab-case** naming protocol. |
 | `.ai/skills/plan-foundation/skill.md` | Planning | Skill | Foundation P0–P6; certify **plan-master-ready**. |
 | `.ai/skills/plan-foundation/reference.md` | Planning | Context | Optional extended procedures for `plan-foundation`. |
@@ -98,8 +98,8 @@ The **artifact matrix** below maps **planning** vs **implementation** (plus cros
 | `.ai/skills/process-router/skill.md` | Both | Skill | Read-only router: process questions → skill verb, guide, standard (no writes). |
 | `.ai/skills/process-router/reference.md` | Both | Context | Routing table and example invocations for `process-router`. |
 | `.ai/skills/feature-spec/skill.md` | Planning | Skill | Author, review, amend feature SPECs per FEATURE_STANDARD. |
-| `.ai/skills/concept-run/skill.md` | Both | Skill | Run MOD-01…MOD-06 concept prompts; attach output to PR/NEXT/SPEC. |
-| `.ai/concepts/README.md` | Both | Context | Architecture / NFR **concept pack** index (e.g. MOD-01–MOD-06). |
+| `.ai/skills/concept-run/skill.md` | Both | Skill | Run MOD-01…MOD-07 concept prompts; attach output to PR/NEXT/SPEC. |
+| `.ai/concepts/README.md` | Both | Context | Architecture / NFR **concept pack** index (e.g. MOD-01–MOD-07). |
 | `.ai/concepts/<concept>/README.md` | Both | Context | Per-concept human + agent context. |
 | `.ai/concepts/<concept>/prompt.md` | Both | Guide | Per-concept agent procedure + output shape. |
 | `.ai/docs/guides/workflows/README.md` | Both | Context | This file: filename rules + **canonical artifact matrix**. |
@@ -107,8 +107,8 @@ The **artifact matrix** below maps **planning** vs **implementation** (plus cros
 | `.ai/docs/guides/workflows/20260518-guide-*.md` | Both | Guide | Reference workflow docs (pattern): end-to-end template, boundary map, observability, testing-in-process, plan companions. |
 | `.ai/docs/guides/workflows/20260518-tutorial-*.md` | Both | Guide | Operator step-by-step tutorials (pattern): bootstrap, walk-throughs, NEXT/delivery, test requests. |
 | `.ai/docs/guides/workflows/20260529-tutorial-probe-project.md` | Planning | Guide | Operator tutorial: `probe` mode - adaptive interrogation to fill foundation/plan gaps before certification. |
-| `docs/integration/MANIFEST.txt` | Implementation | Context | Vendor artifact inventory (project adds; see `docs/integration/README.md`). |
-| `docs/integration/**` | Implementation | Context | Cached vendor specs (project-owned; read on demand). |
+| `.work/docs/integration/MANIFEST.txt` | Implementation | Context | Vendor artifact inventory (project adds; see `.ai/docs/integration/README.md`). |
+| `.work/docs/integration/**` | Implementation | Context | Cached vendor specs (project-owned; read on demand). |
 | `.work/plans/foundation/*-01-*-initial-scope.md` | Planning | Living | **P0 initial scope** mini-plan - `@plan-foundation` greenfield creates; canonical product-intent capture (not `{PROMPTS_ROOT}/initial.md`). |
 | `.work/prompts/*` (project-local) | Planning | Context | Questionnaires, archived decision prompts, optional **user scratch** (`initial.md`). Skills **do not** read `initial.md` unless the user explicitly names it. |
 | `REPLACE:APP_ROOT/**` | Implementation | Application | Application source and bounded contexts. |

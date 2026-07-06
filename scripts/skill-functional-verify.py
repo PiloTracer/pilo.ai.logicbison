@@ -24,7 +24,17 @@ REQUIRED_IN_REFERENCE = {
 # Skills already audited clean for same-file anchor / fence integrity - hard FAIL
 # if these regress. Everything else reports pre-existing issues as DEBT until a
 # dedicated cross-skill anchor-hygiene cleanup runs (see NEXT.md).
-ANCHOR_CLEAN = {"plan-foundation"}
+ANCHOR_CLEAN = {
+    "plan-foundation",
+    "code-implementation",
+    "code-repair",
+    "db-migration",
+    "feature-spec",
+    "plan-master",
+    "plan-repair",
+    "plan-verify",
+    "session-control",
+}
 
 def strict_slug(text: str) -> str:
     """GitHub-accurate heading slug: does NOT collapse repeated hyphens

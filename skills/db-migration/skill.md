@@ -260,6 +260,7 @@ migrations/
 | Constraints/indexes | `ALTER TABLE … ADD CONSTRAINT IF NOT EXISTS` | `{NNN}_constraints.sql` (append) or new numbered |
 | Schema change (add column) | `ALTER TABLE … ADD COLUMN IF NOT EXISTS` | Append to latest `schema_changes` script or new numbered |
 
+<a id="c3--apply-idempotency-pattern"></a>
 ### C3 - Apply idempotency pattern
 
 | Operation | Idempotent form |
@@ -289,7 +290,7 @@ migrations/
 
 ### C5 - Register in DIRECTORY_MAP
 
-If this script introduces a new directory or a new bounded-context module, update `{BOUNDARY_MAP}` / `standards/*DIRECTORY_MAP*` (path from `.cursorrules`).
+If this script introduces a new directory or a new bounded-context module, update `{BOUNDARY_MAP}` / `.work/standards/*DIRECTORY_MAP*` (path from `.cursorrules`).
 
 ### C6 - Output checklist
 

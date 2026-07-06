@@ -169,7 +169,7 @@ Use when: an operator (or agent) wants full session context for ad-hoc reasoning
 
 ### X1 - Mandatory context reads (read in full)
 
-Same set as [S1](#s1--baseline-reads-mandatory):
+Same set as [S1](reference.md#s1-baseline-reads-mandatory):
 
 | # | File (repo-root path) | Pass criteria |
 |---|----------------------|----------------|
@@ -179,7 +179,7 @@ Same set as [S1](#s1--baseline-reads-mandatory):
 | 4 | `.work/plans/UNKNOWNS.md` | every open unknown + owner + Blocks |
 | 5 | `.work/plans/foundation/*-01-*-initial-scope.md` **if present** | one-sentence product intent (or skip) |
 
-Conditional reads per [S2](#s2--conditional-reads-task-based) only when the operator named a domain.
+Conditional reads per [S2](reference.md#s2-conditional-reads-task-based) only when the operator named a domain.
 
 ### X2 - Uncommitted-aware snapshot (evidence)
 

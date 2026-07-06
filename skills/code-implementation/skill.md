@@ -16,7 +16,7 @@ Execute implementation iterations derived from an **Approved master plan** (`{PL
 
 **Tool-agnostic** (Cursor, Claude Code, opencode, Codex). **Requires:** `implementation-ready: yes` from `@plan-master status`, or an explicit HANDOFF waiver noting which milestones may proceed early.
 
-**Pairs with:** `session-control` (bookends), `plan-master` (milestone source and revisions), `code-verify` (milestone / uncommitted / last audits), `code-repair` (remediate verify/migration failures), `db-migration` (all schema changes), `standards/*CONVENTIONS*`, `standards/*FEATURE_STANDARD*` (paths from `.cursorrules`).
+**Pairs with:** `session-control` (bookends), `plan-master` (milestone source and revisions), `code-verify` (milestone / uncommitted / last audits), `code-repair` (remediate verify/migration failures), `db-migration` (all schema changes), `.work/standards/*CONVENTIONS*`, `.work/standards/*FEATURE_STANDARD*` (paths from `.cursorrules`).
 
 **Registry:** [`.ai/skills/SKILL_DEPENDENCIES.md`](../SKILL_DEPENDENCIES.md).
 
@@ -148,6 +148,7 @@ Plan report template: [reference.md § Plan protocol (detailed)](reference.md#pl
 
 ## Start protocol
 
+<a id="st0--implementation-gate"></a>
 ### ST0 - Implementation gate
 
 HANDOFF waiver or `@plan-master status` **implementation-ready** before code: [reference.md § Start protocol (detailed)](reference.md#start-protocol-detailed) (ST0).
@@ -174,6 +175,7 @@ Start report template: [reference.md § Start protocol (detailed)](reference.md#
 
 ---
 
+<a id="continue-target-parse--argument"></a>
 ## Continue target (parse `-` argument)
 
 Resolve the batch **before** the task loop. Default when `-` is omitted: **`count=1`**.

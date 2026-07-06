@@ -94,7 +94,7 @@ The verb is optional - `@process-router - <question>` is enough. Aliases: `ask`,
 | `code-implementation` | Iteration tasks, task gates, complete |
 | `code-verify` | Milestone / uncommitted / last audits |
 | `feature-spec` | Author/review SPECs |
-| `concept-run` | Run MOD-01…06 prompts |
+| `concept-run` | Run MOD-01…07 prompts |
 | `db-migration` | Idempotent SQL scripts |
 | `dev-stack` | Local Docker helper |
 | `deploy-basic` / `deploy-files` / `deploy-repo` | Thin-client / fat-client / full-repo deploy into target projects |

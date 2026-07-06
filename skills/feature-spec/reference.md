@@ -81,7 +81,7 @@ Amendment filenames:
 | Approved SPEC has defect | Use **amend** - never edit the Approved SPEC in place |
 | Single reviewer on high-risk SPEC (threat model) | Flag in review; gate blocks approve unless ADR/owner waives |
 | Slug collision with another SPEC | Block create; suggest distinguishing slug (e.g. `oauth-login` vs `user-auth`) |
-| FEATURE_STANDARD path moved | Read project-root `standards/` for latest `*FEATURE_STANDARD*` by date prefix |
+| FEATURE_STANDARD path moved | Read `.work/standards/` for latest `*FEATURE_STANDARD*` by date prefix |
 | No concept pack in repo | §15 required anyway; mark each MOD row `N/A - no pack` with reason |
 | §2 Out of scope empty | Review fails - must be explicit, not `TBD` |
 | Intake request is vague ("make it better") | Class `underspecified` → route to `@plan-foundation probe`; do not create a SPEC yet |

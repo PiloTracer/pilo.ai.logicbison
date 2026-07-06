@@ -9,7 +9,7 @@
 - Doc 01 - `*-01-*-initial-scope.md`
 - Doc 02 - `*-02-*` (if integrations)
 - Doc 03 - `*-03-*` (if adjacency)
-- `.cursorrules` · `REPLACE:TECH_STACK_DOC` · `standards/*`
+- `.cursorrules` · `REPLACE:TECH_STACK_DOC` · `.work/standards/*`
 
 ---
 
@@ -28,7 +28,7 @@
 | `REPLACE:PLATFORM_PACKAGE` | Cross-cutting platform | settings, logging, DB bootstrap | all contexts |
 | REPLACE:CONTEXT_A | | | ports / events |
 
-Folder layout must match `standards/*-DIRECTORY_MAP.md` after customization.
+Folder layout must match `.work/standards/*-DIRECTORY_MAP.md` after customization.
 
 ---
 
@@ -68,7 +68,7 @@ REPLACE:APP_ROOT/
 
 ## 6. Security summary
 
-Link `standards/*threat-model*` and `*data-classification*`.
+Link `.work/standards/*threat-model*` and `*data-classification*`.
 
 ---
 

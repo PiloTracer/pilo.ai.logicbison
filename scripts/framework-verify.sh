@@ -134,7 +134,7 @@ rsync -a \
   cd "${SMOKE_ROOT}"
   git init -q
   bash .ai/templates/bootstrap.sh >/dev/null
-  for f in .work/context/HANDOFF.md .work/plans/NEXT.md .cursorrules DOCS_TECH_STACK.md; do
+  for f in .work/context/HANDOFF.md .work/plans/NEXT.md .work/standards/.gitkeep .work/docs/integration/.gitkeep .cursorrules DOCS_TECH_STACK.md; do
     if [[ -f "${f}" ]]; then
       ok "consumer created ${f}"
     else
@@ -143,6 +143,9 @@ rsync -a \
   done
   if [[ -d .ai/.work ]]; then
     die "bootstrap placed .work inside .ai/ (expected repo root)"
+  fi
+  if [[ -d standards ]] || [[ -d docs/integration ]]; then
+    die "bootstrap created deprecated repo-root standards/ or docs/integration/ (must be under .work/ only)"
   fi
 )
 

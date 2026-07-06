@@ -23,7 +23,7 @@ After filling, every human and agent reads **one** table instead of hunting path
 | `{MASTER_PLAN}` | Approved roadmap (milestones, FR/NFR) | `.work/plans/full/*-full-plan.md` (pick latest Approved) |
 | `{HANDOFF}` | Session / pick-up file | `.work/context/HANDOFF.md` |
 | `{BOUNDARY_MAP}` | Module / package boundary contract | *(author per* [Boundary map how-to](20260518-guide-boundary-map-howto.md)*)* - e.g. extend your directory map |
-| `{OBSERVABILITY_SPEC}` | Logging, metrics, trace fields | e.g. `standards/*observability*.md` if present |
+| `{OBSERVABILITY_SPEC}` | Logging, metrics, trace fields | e.g. `.work/standards/*observability*.md` if present |
 | `{AGENT_RULES_FILE}` | Global agent rules | `.cursorrules` (do not add `AGENTS.md` without owner approval) |
 
 ---

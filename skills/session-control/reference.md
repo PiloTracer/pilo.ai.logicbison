@@ -708,9 +708,9 @@ If HANDOFF §"Fresh start" lists extras, or the user named a domain, read those 
 
 | Task touches | Read |
 |--------------|------|
-| Code / new feature | `standards/*CONVENTIONS*`, `standards/*FEATURE_STANDARD*` |
-| Stack / infra | `REPLACE:TECH_STACK_DOC` (from `.cursorrules`), `standards/*DIRECTORY_MAP*` |
-| External integration | domain SPEC, `{PLANS_ROOT}/foundation/*-02-*.md`, `docs/integration/MANIFEST.txt` on demand |
+| Code / new feature | `.work/standards/*CONVENTIONS*`, `.work/standards/*FEATURE_STANDARD*` |
+| Stack / infra | `REPLACE:TECH_STACK_DOC` (from `.cursorrules`), `.work/standards/*DIRECTORY_MAP*` |
+| External integration | domain SPEC, `{PLANS_ROOT}/foundation/*-02-*.md`, `.work/docs/integration/MANIFEST.txt` on demand |
 | Foundation planning | `plan-foundation` skill → **status** mode (read-only) |
 | Security / new columns | threat-model, data-classification |
 

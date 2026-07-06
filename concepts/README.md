@@ -50,7 +50,7 @@ This table answers: **"I am about to do X — which concept prompt MUST I run, a
 
 | If you are about to… | Run prompt | Output goes to | Required or recommended |
 |---|---|---|---|
-| Open a feature SPEC (`{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md`) | List MOD-01…MOD-06 in **§15 Concept / NFR registry** with `applies yes/no` + reason | SPEC §15 | **Required** by `FEATURE_STANDARD §3` |
+| Open a feature SPEC (`{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md`) | List MOD-01…MOD-07 in **§15 Concept / NFR registry** with `applies yes/no` + reason | SPEC §15 | **Required** by `FEATURE_STANDARD §3` |
 | Run `@code-implementation plan - M{N}` | Copy SPEC §15 rows into `### Concept / NFR registry (this iteration)` in `NEXT.md` | `NEXT.md ## Current iteration` | **Required** by `code-implementation` valid-iteration criteria |
 | Run **`@code-implementation`** (start / continue / complete) in a **Cursor or agent session** | [`ai-amplification/prompt.md`](ai-amplification/prompt.md) (MOD-06) | PR description, task `Notes`, or `NEXT.md` iteration registry | **Required** — treat as **AI-assisted: yes** by default; only **`human-only`** (same message, human author) opts out |
 | Implement a task whose diff crosses **>1 hard module boundary** (per `{BOUNDARY_MAP}` or interim `DIRECTORY_MAP`) | [`coupling-audit/prompt.md`](coupling-audit/prompt.md) (MOD-01) | PR description; attach to iteration `Notes` | **Required** when boundaries crossed |

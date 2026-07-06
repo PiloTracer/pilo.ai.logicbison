@@ -153,7 +153,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
   @process-router - <question>      lost? read-only signpost (no file writes)
   @feature-spec create - <slug>     feature SPEC (see Skills at a glance)
-  @concept-run list | - MOD-0N      architecture prompts MOD-01…06 (MOD-06 default for agent code)
+  @concept-run list | - MOD-0N      architecture prompts MOD-01…07 (MOD-06 default for agent code)
   @dev-stack                        Docker dev helper script (bin/start.sh)
   @code-verify uncommitted | last   commit hygiene (milestone mode is in the loop above)
 ```
@@ -188,7 +188,7 @@ All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **code-verify** | Audits (not implementation): milestone, dirty tree, last commit/push | `milestone` · `uncommitted` · `last` |
 | **code-repair** | Fix verifier/migration/SPEC findings; re-verify before pass | `repair - from uncommitted` · `repair - custom - …` · `status` |
 | **feature-spec** | Triage, author, review, or amend feature SPECs | `intake - <free sentence>` · `create - <slug>` · `review - <path>` · `amend - <slug>` |
-| **concept-run** | Run MOD-01…06 architecture/NFR prompts | `list` · `status` · `run - MOD-06` (required for agent-assisted code) |
+| **concept-run** | Run MOD-01…07 architecture/NFR prompts | `list` · `status` · `run - MOD-06` (required for agent-assisted code) |
 | **db-migration** | Idempotent numbered SQL scripts (no Alembic chain) | `init` · `create - <description>` · `run` · `status` · `verify` |
 | **dev-stack** | Generate or update isolated Docker `bin/start.sh` | `init` · `status` |
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
@@ -221,13 +221,13 @@ This creates (without overwriting existing files):
 
 - `.cursorrules` from [`templates/cursorrules.template`](templates/cursorrules.template)
 - `DOCS_TECH_STACK.md` from [`templates/DOCS_TECH_STACK.md.template`](templates/DOCS_TECH_STACK.md.template)
-- `.work/` skeleton (HANDOFF, NEXT, registries, empty plan folders)
-- Empty project-root `standards/` and `docs/integration/` (sibling of `.work/` - never nested under `.ai/`)
+- `.work/` skeleton (HANDOFF, NEXT, registries, empty plan folders, `.work/standards/`, `.work/docs/integration/`)
+- **No local `.ai/` directory** when using `@deploy-basic` (thin-client — skills load from `$AGENT_OS_SOURCE`)
 
 Then:
 
 1. Replace every **`REPLACE:`** token in `.cursorrules` ([checklist](templates/README.md)).
-2. Run **`@plan-foundation greenfield`** (foundation docs 01-04; also generates this project's own `standards/*.md` - CONVENTIONS, FEATURE_STANDARD, DIRECTORY_MAP, etc. - and points the `.cursorrules` `REPLACE:*_FILE` tokens at them).
+2. Run **`@plan-foundation greenfield`** (foundation docs 01-04; also generates this project's own `.work/standards/*.md` - CONVENTIONS, FEATURE_STANDARD, DIRECTORY_MAP, etc. - and points the `.cursorrules` `REPLACE:*_FILE` tokens at them).
 3. Keep a **single** rules file - do not add `AGENTS.md` unless your team standardizes on it.
 
 | Situation | What to do |
@@ -299,7 +299,7 @@ The bird's-eye flow above is the conceptual map. Below is the **literal command 
 |------|-----|
 | Re-explaining workflows every chat | **Skills** - `@session-control`, `@code-implementation`, … |
 | Drifty code style | **Standards** - conventions, SPEC template, directory map |
-| Architecture surprises at AI speed | **Concepts** MOD-01…06 - run before big splits |
+| Architecture surprises at AI speed | **Concepts** MOD-01…07 - run before big splits |
 | Context evaporates overnight | **`.work/`** + session bookends |
 
 ---
@@ -334,9 +334,9 @@ Skill prerequisite gates: [`skills/SKILL_DEPENDENCIES.md`](skills/SKILL_DEPENDEN
 |--------|------|
 | [`skills/`](skills/README.md) | Executable playbooks - full registry |
 | [`standards/`](standards/) | Engineering contract **templates** (customize per project) |
-| [`concepts/`](concepts/README.md) | MOD-01…06 architecture prompts |
+| [`concepts/`](concepts/README.md) | MOD-01…07 architecture prompts |
 | [`docs/guides/workflows/`](docs/guides/workflows/README.md) | Tutorials + artifact matrix |
-| [`docs/integration/`](docs/integration/) | Vendor mirror layout + `MANIFEST` template (project adds artifacts) |
+| [`docs/integration/`](docs/integration/) | Framework MANIFEST template (consumer copies to `.work/docs/integration/` in their project) |
 | [`templates/`](templates/README.md) | **`cursorrules.template`** - copy to repo root as `.cursorrules`; **`.ai/.cursorrules`** mirrors the template when present (keep in sync) |
 | `plans/`, `features/`, … | **Pointers only** → `.work/` |
 | [`.quick/`](.quick/README.md) | Copy-paste cheat sheets for common workflows |
@@ -350,7 +350,7 @@ Skill prerequisite gates: [`skills/SKILL_DEPENDENCIES.md`](skills/SKILL_DEPENDEN
 3. `.work/context/HANDOFF.md`
 4. `.work/plans/NEXT.md`
 5. `.work/plans/foundation/*-01-*-initial-scope.md` when present
-6. For code: customize then use your dated standards under `standards/` (templates ship as `20260517-*.md` - rename or copy after replacing `REPLACE:` tokens)
+6. For code: use your dated standards under `.work/standards/` (framework templates ship as `standards/20260517-*.md` in source — copy/rename into `.work/standards/` after replacing `REPLACE:` tokens, or run `@plan-foundation greenfield` to generate them)
 
 Agent rules file: **`.cursorrules` only** - do not add `AGENTS.md` without owner approval.
 
@@ -359,8 +359,8 @@ Agent rules file: **`.cursorrules` only** - do not add `AGENTS.md` without owner
 ## Copy to another project
 
 1. Copy the whole **`.ai/`** tree (includes `templates/`).
-2. At the **new repo root**, run **`bash .ai/templates/bootstrap.sh`** (or `@project-bootstrap init`) - this also scaffolds an empty project-root `standards/` (never under `.ai/`).
-3. Fill **`REPLACE:`** tokens in `.cursorrules`; **`@plan-foundation greenfield`** generates that project's own dated files under `standards/`.
+2. At the **new repo root**, run **`bash .ai/templates/bootstrap.sh`** (or `@project-bootstrap init`) — scaffolds `.work/` including empty `.work/standards/` and `.work/docs/integration/`.
+3. Fill **`REPLACE:`** tokens in `.cursorrules`; **`@plan-foundation greenfield`** generates that project's own dated files under `.work/standards/`.
 4. Follow the [bird's-eye flow](#birds-eye--how-to-use-agent-os): foundation → certify → master plan → status → daily session + milestones.
 
 Template sources: [`templates/work/`](templates/work/). This repo includes a demo [`.work/`](.work/) skeleton when Agent OS is the git root.

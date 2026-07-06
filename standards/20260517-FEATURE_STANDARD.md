@@ -59,7 +59,7 @@ Proposal → Spec → Implementation → Release notes → Archive
 
 **§14 Implementation map** — list primary code paths so `@plan-verify coverage` and agents can find files without tree walks. Not a substitute for R1… behavioural rules. Use for cross-cutting surfaces (shell, layout, analytics dashboards) and brownfield adoption.
 
-**§15 Concept / NFR registry** — one row per MOD-01…MOD-06 (`Applies` yes/no + reason). Required before **Approved** (see `feature-spec` skill).
+**§15 Concept / NFR registry** — one row per MOD-01…MOD-07 (`Applies` yes/no + reason). Required before **Approved** (see `feature-spec` skill).
 
 ```markdown
 ## 14. Implementation map (optional)

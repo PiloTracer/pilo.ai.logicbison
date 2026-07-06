@@ -116,7 +116,7 @@ Validate with `@plan-master status` and the **approved** `{PLANS_ROOT}/full/YYYY
 | M1 | Platform skeleton | CONVENTIONS, DIRECTORY_MAP, health route, migration runner |
 | M2 | Core domain module A | `<slug-a>/SPEC` |
 | M3 | Core domain module B + API stubs | `<slug-b>/SPEC` |
-| M4 | External integration shell | integration SPEC + `docs/integration/MANIFEST.txt` |
+| M4 | External integration shell | integration SPEC + `.work/docs/integration/MANIFEST.txt` |
 | M5 | Integration E2E (sandbox) | Same SPEC + runbook |
 | M6 | Frontend shell (if any) | UI conventions |
 
@@ -161,7 +161,7 @@ Validate with `@plan-master status` and the **approved** `{PLANS_ROOT}/full/YYYY
 
 ### Concept / NFR registry (this iteration)
 <!-- Required by skill.md § Valid iteration block criteria #6.
-     One row per MOD-01…MOD-06 (or single `N/A - no pack` row if the repo has no concept pack). -->
+     One row per MOD-01…MOD-07 (or single `N/A - no pack` row if the repo has no concept pack). -->
 | Concept id | Applies | Status | Evidence / trigger |
 |------------|---------|--------|-------------------|
 | MOD-01 | yes/no | pending/done/n-a | … |
@@ -305,6 +305,8 @@ Document in project README if adopted.
 <a id="continue-protocol-detailed"></a>
 
 1. Run [ST0 - Implementation gate](#st0--implementation-gate) (abbreviated if start ran in the same session with no plan/HANDOFF change).
+<a id="continue-target-parse--argument"></a>
+
 2. **Parse continue target** → [Continue target](#continue-target-parse--argument). Emit the planned queue in the opening report (task ids + batch mode).
 3. **Unblock check:** Read `{PLANS_ROOT}/UNKNOWNS.md` and `{HANDOFF}`. Scan the iteration block for any task with status `blocked`:
    a. For each `blocked` task in the queue: find the blocker in `### Owner blockers` and/or `UNKNOWNS.md`.
@@ -567,8 +569,8 @@ Before ST1 (and before first line of application code):
 |---|------|---------------|
 | 1 | `.work/plans/NEXT.md` § Current iteration | Valid per [criteria](#valid-iteration-block-criteria) |
 | 2 | Relevant SPEC(s) for bounded context | Can state: R1… rules, data model, invariants, error codes |
-| 3 | `standards/*CONVENTIONS*` | Can state: module structure, naming, import rules, logging |
-| 4 | `standards/*FEATURE_STANDARD*` | Can state: service/repo/test layout for this context |
+| 3 | `.work/standards/*CONVENTIONS*` | Can state: module structure, naming, import rules, logging |
+| 4 | `.work/standards/*FEATURE_STANDARD*` | Can state: service/repo/test layout for this context |
 | 5 | `.work/context/HANDOFF.md` | Know: owner blockers, waivers, previous session state |
 | 6 | **Optional:** `.ai/docs/guides/workflows/README.md` (artifact matrix) and `20260518-guide-workflows-index.md` (curriculum), or repo equivalents | When concepts/workflows apply: know bootstrap, tutorials, and which artifacts touch plan vs implementation |
 

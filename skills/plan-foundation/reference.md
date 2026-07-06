@@ -263,7 +263,7 @@ Use for **foundation-complete** artifact presence - **not** for plan-master-read
 | P1 scope | `{PLANS_ROOT}/foundation/*-01-*.md` | 1 |
 | P1 architecture | `{PLANS_ROOT}/foundation/*-04-*.md` | 1 |
 | P2 ADRs | `{DECISIONS_ROOT}/20*.md` | ≥4 excluding README |
-| P3 conventions | `standards/*CONVENTIONS*.md` | 1 |
+| P3 conventions | `.work/standards/*CONVENTIONS*.md` | 1 |
 | P3 features | `{FEATURE_SPEC_ROOT}/*/20*-SPEC.md` | ≥1 |
 | P4 stack | `REPLACE:TECH_STACK_DOC` | 1 |
 | P5 compose | `docker-compose.yml` OR `*docker-compose-proposal*` | 1 |
@@ -405,7 +405,7 @@ When a product choice blocks SPECs (UX mode, vertical, compliance wording):
 **Exclude until Phase 1:** D5 (quantified NFRs), D6 (integrations), D7 (data model), D9 (deploy/hosting/tenancy), D10 (risks — capture obvious ones inline, formal registry sync at GATE p0)
 **Target:** D1 and D3 at least **partial**; D2 and D4 addressed (not **unknown**); user had opportunity to defer remaining gaps
 **Batch size:** ≤5 targeted questions per iteration (probe-protocol default)
-**Record into:** doc 01 (audience, scope, capabilities sections), `ASSUMPTIONS.md`, `UNKNOWNS.md`, `RISK_REGISTRY.md`, `{PLANS_ROOT}/foundation/PROBE_LEDGER.md`
+**Record into:** doc 01 (audience, scope, capabilities sections), `ASSUMPTIONS.md`, `UNKNOWNS.md`, `RISK_REGISTRY.md`, `{PLANS_ROOT}/foundation/PROBE_LEDGER.md` (create registry files from templates on first write if missing — see greenfield step 3)
 **Exit when:** product dimensions meet target **or** user says stop/defer/enough **or** three iterations with no new high-priority gaps
 **Hard rule:** Do **not** present `p1-integrations`, `p1-adjacent`, `p2-*`, or any stack/hosting INTERACTION until this step exits. If the user asks for tech choices early, acknowledge and redirect: product understanding first.
 
@@ -435,7 +435,7 @@ Which apply? What is missing? What is explicitly **out of scope** for v1?
 
 #### IF: p1-integrations includes gov-api or file-exchange
 
-Mirror vendor artifacts under `docs/integration/<vendor>-<version>/` (project root) + `MANIFEST.txt` (URL, path, SHA-256, date).
+Mirror vendor artifacts under `.work/docs/integration/<vendor>-<version>/` + `MANIFEST.txt` (URL, path, SHA-256, date).
 
 #### INTERACTION: p1-adjacent
 
@@ -586,7 +586,7 @@ Create the files per the proposal. Update HANDOFF and NEXT to reflect approval.
 {PLANS_ROOT}/foundation/YYYYMMDD-02-*-integration.md     ← skip if p1-integrations = none
 {PLANS_ROOT}/foundation/YYYYMMDD-03-*-adjacency.md        ← skip if none adjacent
 {PLANS_ROOT}/foundation/YYYYMMDD-04-foundation-arch.md
-docs/integration/MANIFEST.txt                           ← skip if no integration mirror
+.work/docs/integration/MANIFEST.txt                           ← skip if no integration mirror
 ```
 
 Doc 01 sections: Audience, Assumption ledger, Scope, Risks; heading **Architecture directions (non-prescriptive - architecture foundation in doc 04)** per [Terminology](#terminology-required--prevents-confusion-with-plan-master). Doc 04: Bounded contexts, decisions register §13, foundation-ready gate §14 - title may say "plan" but role is **architecture foundation**, not `*-full-plan.md`.
@@ -634,9 +634,9 @@ ADR: Context → Decision → Consequences → Alternatives → References. Stat
 ## Phase 3 - Specifications
 
 ```
-standards/YYYYMMDD-CONVENTIONS.md
-standards/YYYYMMDD-FEATURE_STANDARD.md
-standards/YYYYMMDD-DIRECTORY_MAP.md
+.work/standards/YYYYMMDD-CONVENTIONS.md
+.work/standards/YYYYMMDD-FEATURE_STANDARD.md
+.work/standards/YYYYMMDD-DIRECTORY_MAP.md
 {FEATURE_SPEC_ROOT}/<bounded-context>/YYYYMMDD-SPEC.md
 {FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC-amendment-NN.md
 ```
@@ -663,10 +663,10 @@ SPEC sections: Purpose · In/Out scope · Domain language · Rules (R1…) · Da
 
 ```
 REPLACE:TECH_STACK_DOC
-standards/YYYYMMDD-threat-model.md
-standards/YYYYMMDD-data-classification.md
-standards/YYYYMMDD-observability-spec.md
-standards/YYYYMMDD-api-style-guide.md
+.work/standards/YYYYMMDD-threat-model.md
+.work/standards/YYYYMMDD-data-classification.md
+.work/standards/YYYYMMDD-observability-spec.md
+.work/standards/YYYYMMDD-api-style-guide.md
 {PLANS_ROOT}/YYYYMMDD-personas-v1.md               ← if UI (p2-frontend != none)
 ```
 
@@ -955,10 +955,10 @@ Use when the user asks to **certify**, **verify for plan-master**, or **plan-mas
 0. Run [GF0 - Bootstrap artifacts](#gf0--bootstrap-artifacts).
 1. **Project name first** — run `p0-name` before any other INTERACTION unless user already gave the name in the same message.
 2. **Initial prompt second** — run `p0-intent`; request the fullest project description the user can provide (paste-friendly). Record verbatim in doc 01 §Founder intent. **Do not** jump to integrations or stack questions here.
-3. **Product grill third** — run `p0-probe` (probe-protocol loop on D1–D4 + D8 only). Ask until product intent, audience, scope, and core capabilities are understood well enough to infer integrations — or the user defers. **Hard stop:** no `p1-integrations` or `p2-*` until `p0-probe` exits.
-4. Create the **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/YYYYMMDD-01-<project-slug>-initial-scope.md` (foundation doc 01) after `p0-intent` (update through `p0-probe`). Add placeholder sections for architecture directions (filled in later phases). **Do not** write `{PROMPTS_ROOT}/initial.md` — that path is user-owned scratch; skills read doc 01 instead.
-5. Create empty planning registries: `ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` (templates in reference.md) — may start at step 2 if convenient, but must exist before GATE p0.
-6. **Phase 1 integrations fourth** — run `p1-integrations` only after step 3: agent **infers** likely integrations from product answers, presents the list with rationale, then grills the user on each selected integration.
+3. **Planning registries third** — create empty `{PLANS_ROOT}/ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` from templates in [Planning registry templates](#planning-registry-templates) (idempotent if already present). **Required before `p0-probe`** — probe records into these files.
+4. **Product grill fourth** — run `p0-probe` (probe-protocol loop on D1–D4 + D8 only). Ask until product intent, audience, scope, and core capabilities are understood well enough to infer integrations — or the user defers. **Hard stop:** no `p1-integrations` or `p2-*` until `p0-probe` exits.
+5. Create the **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/YYYYMMDD-01-<project-slug>-initial-scope.md` (foundation doc 01) after `p0-intent` (update through `p0-probe`). Add placeholder sections for architecture directions (filled in later phases). **Do not** write `{PROMPTS_ROOT}/initial.md` — that path is user-owned scratch; skills read doc 01 instead.
+6. **Phase 1 integrations fifth** — run `p1-integrations` only after step 4: agent **infers** likely integrations from product answers, presents the list with rationale, then grills the user on each selected integration.
 7. Walk remaining phases P1→P6; at each **GATE**, present checklist + shared integrity; wait for approval before the next phase.
 8. Use **Assumption ledger** in foundation doc 01; sync to `ASSUMPTIONS.md` at GATE p1.
 9. Apply [Hallucination prevention](#hallucination-prevention) and [Traceability requirement](#traceability-requirement) throughout.
@@ -1189,7 +1189,7 @@ Agents **MUST**:
 - Avoid inventing undocumented APIs, framework capabilities, or compliance rules.
 - Mark speculative decisions in ASSUMPTIONS and Decision log (ADR).
 - Request clarification when uncertain; do not fake certainty.
-- Verify critical technical claims against `REPLACE:TECH_STACK_DOC`, ADRs, `docs/integration/`, or official vendor docs.
+- Verify critical technical claims against `REPLACE:TECH_STACK_DOC`, ADRs, `.work/docs/integration/`, or official vendor docs.
 
 Prefer proven stack pins and operational simplicity over speculative designs.
 

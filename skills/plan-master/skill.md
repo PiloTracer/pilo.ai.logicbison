@@ -124,7 +124,7 @@ Normalize the user message to **verb** + optional **modifiers** + optional **goa
 | **continue** | [Continue protocol](#continue-protocol) |
 | **greenfield** | [Greenfield protocol](#greenfield-protocol) |
 | **probe** | [Probe protocol](#probe-protocol) - adaptive plan-completeness loop; fills human-answerable gaps before `integrity` |
-| **integrity** | [Phase 5 - Verification](#phase-5--verification--integrity-validation) report only. Can be invoked standalone (`@plan-master integrity`) or from `plan-foundation` continue P3+/P6. |
+| **integrity** | [Phase 5 - Verification](reference.md#phase-5-verification-and-integrity-validation) report only. Can be invoked standalone (`@plan-master integrity`) or from `plan-foundation` continue P3+/P6. |
 | **revise** | Read existing plan → apply delta → re-run Phase 5 subset |
 | **show** *(alias: `task`)* | [Show protocol](#show-protocol) - read-only; show task record(s) by `M{N}-T{N}` or milestone |
 
@@ -220,7 +220,7 @@ After every major phase, answer **yes/no** with evidence:
 - Label: **Confirmed** (file path + snippet or test command + exit code), **Inference**, **Unverified**, **Estimate**.
 - **Confirmed without cite** → downgrade to **Inference** in review; do not ship code on uncited Confirmed claims.
 - Prefer proven stack from `REPLACE:TECH_STACK_DOC` and ADRs.
-- For external integration: cite `docs/integration/` + `MANIFEST.txt` when present; do not invent endpoints.
+- For external integration: cite `.work/docs/integration/` + `MANIFEST.txt` when present; do not invent endpoints.
 - Request clarification when uncertain; do not invent XSD fields or annex rules.
 
 ---

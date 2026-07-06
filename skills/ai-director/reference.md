@@ -20,7 +20,7 @@ All 17 registered skills + 2 deploy utilities. Source of truth: `skills/README.m
 | `code-verify` | `code-verify/` | Audits: milestone, uncommitted, last commit/push | `milestone`, `uncommitted`, `last`, `status` | Read-only (report) | **Required:** Active milestone (for milestone mode) |
 | `code-repair` | `code-repair/` | Fix verifier/migration/SPEC findings; re-verify before pass | `repair - from <source>`, `repair - custom - …`, `status` | Yes (code) | Verifier report or custom brief |
 | `feature-spec` | `feature-spec/` | Triage, author, review, or amend feature SPECs | `intake - <sentence>`, `create - <slug>`, `review - <path>`, `amend - <slug>`, `approve`, `status` | Yes (SPECs) | FEATURE_STANDARD |
-| `concept-run` | `concept-run/` | Run MOD-01…06 architecture/NFR prompts | `list`, `status`, `run - MOD-0N` | Varies (attachments) | Trigger table in `concepts/README.md` |
+| `concept-run` | `concept-run/` | Run MOD-01…07 architecture/NFR prompts | `list`, `status`, `run - MOD-0N` | Varies (attachments) | Trigger table in `concepts/README.md` |
 | `db-migration` | `db-migration/` | Idempotent numbered SQL migration scripts | `init`, `create - <description>`, `run`, `verify`, `status` | Yes (SQL scripts) | **Required:** `db-migration init` (for create/run) |
 | `dev-stack` | `dev-stack/` | Generate/update isolated Docker compose dev helper | `init`, `status` | Yes (`bin/start.sh`) | `docker-compose*.yml` present |
 | `process-router` | `process-router/` | Read-only: "how do I…?" → right skill or guide | `- <question>`, `help` | Read-only | — |
@@ -180,7 +180,7 @@ When a user request spans multiple domains or belongs to another framework (e.g.
 | Resource | Location | Purpose |
 |----------|----------|---------|
 | Probe protocol | `skills/probe-protocol.md` | Shared adaptive interrogation loop |
-| Standards | `standards/*.md` | Binding engineering templates |
+| Standards | `.work/standards/*.md` (binding); framework templates at `standards/*.md` in source | Binding engineering standards |
 | Concepts | `concepts/*/` (MOD-01..06) | Architecture/NFR quality prompts |
 | Guides | `docs/guides/workflows/` | Tutorials + artifact matrix |
 | Templates | `templates/` | cursorrules.template, bootstrap scripts |

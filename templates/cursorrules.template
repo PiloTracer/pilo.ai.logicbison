@@ -85,9 +85,9 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 | `.ai/START_HERE.md` | What to invoke now; forgetfulness checklist |
 | `.ai/PROCESS_ROUTER.md` | Process Q&A; `@process-router` vs `@session-control status` |
 | `REPLACE:TECH_STACK_DOC` | Stack (e.g. `DOCS_TECH_STACK.md` at repo root) |
-| `standards/REPLACE:CONVENTIONS_FILE` | Code layout, naming, maintainability |
-| `standards/REPLACE:FEATURE_STANDARD_FILE` | Feature SPEC lifecycle |
-| `standards/REPLACE:DIRECTORY_MAP_FILE` | Repo layout and boundaries |
+| `.work/standards/REPLACE:CONVENTIONS_FILE` | Code layout, naming, maintainability |
+| `.work/standards/REPLACE:FEATURE_STANDARD_FILE` | Feature SPEC lifecycle |
+| `.work/standards/REPLACE:DIRECTORY_MAP_FILE` | Repo layout and boundaries |
 | `.work/context/HANDOFF.md` | Session handoff |
 | `.ai/docs/guides/workflows/README.md` | Workflow index and artifact matrix |
 
@@ -106,6 +106,8 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 | `{MASTER_PLAN}` | `.work/plans/full/*-full-plan.md` (latest **Approved**) |
 | `{HANDOFF}` | `.work/context/HANDOFF.md` |
 | `{TOUCH_SCOPE}` | `.work/touch-scope` |
+| `{STANDARDS_ROOT}` | `.work/standards/` |
+| `{INTEGRATION_ROOT}` | `.work/docs/integration/` |
 | `{CONCEPTS_ROOT}` | `.ai/concepts/` |
 | `{SKILLS_ROOT}` | `.ai/skills/` |
 | `{OBSERVABILITY_SPEC}` | REPLACE:OBSERVABILITY_SPEC_PATH |
@@ -160,7 +162,7 @@ Skills live under `.ai/skills/<id>/skill.md` (folder name = id). When a task mat
 
 ## External integration docs (optional)
 
-Cache vendor APIs/XSDs/PDFs/OpenAPI under `docs/integration/` (project root — a per-project cache, not a framework asset; always local in both fat and thin-client modes, same as `.work/`). Rules: organize by source+version subfolders (no silent overwrite on upgrade); log every download in `docs/integration/MANIFEST.txt`; prefer official domains; never store keys/PEM/tokens/`.env`; verify file type after download; vendor artifacts only. Read cached copies during implementation; refresh when versions change.
+Cache vendor APIs/XSDs/PDFs/OpenAPI under `.work/docs/integration/` (per-project cache under project memory — always local in both fat- and thin-client modes). Rules: organize by source+version subfolders (no silent overwrite on upgrade); log every download in `.work/docs/integration/MANIFEST.txt`; prefer official domains; never store keys/PEM/tokens/`.env`; verify file type after download; vendor artifacts only. Read cached copies during implementation; refresh when versions change.
 
 ---
 
@@ -267,11 +269,10 @@ Use Context7 MCP (`@upstash/context7-mcp`) for version-specific library docs whe
 
 ---
 
-## Documentation layout (`.ai/` vs `.work/` vs project root)
+## Documentation layout (`.ai/` vs `.work/`)
 
-- **`.ai/`:** agnostic — skills, concepts, workflow guides, `START_HERE.md`, `PROCESS_ROUTER.md`, `templates/`, plus framework-wide contract/schema docs (e.g. `MASTER_PLAN_STANDARD.md`) that are identical across every project. Pointer READMEs only under `.ai/plans/`, `.ai/features/`.
-- **`.work/`:** project-specific — plans, SPECs, ADRs, prompts, `HANDOFF.md`, `PROTECTED_SURFACES.json`. Generated filenames use the `YYYYMMDD-` prefix (except `NEXT.md`, `HANDOFF.md`).
-- **`standards/`** and **`docs/integration/`** (project root, sibling of `.work/`): project-specific deliverables `plan-foundation`/`plan-master` generate for *this* project (conventions, feature-standard, directory-map, threat-model, data-classification, observability-spec, api-style-guide, vendor integration mirrors). Always local in **both** fat- and thin-client modes — never nested under `.ai/`, never resolved from `$AGENT_OS_SOURCE` (same rule as `.work/`).
+- **`.ai/`:** framework-only — skills, concepts, workflow guides, `START_HERE.md`, `PROCESS_ROUTER.md`, `templates/`, plus framework-wide contract/schema docs (e.g. `MASTER_PLAN_STANDARD.md`). **Never created by `@deploy-basic`** (thin-client). Fat-client only via `@deploy-files` / `@project-bootstrap init` when you explicitly vend a local copy. Pointer READMEs only under `.ai/plans/`, `.ai/features/`.
+- **`.work/`:** **all project-specific memory and customization** — plans, SPECs, ADRs, prompts, `HANDOFF.md`, `PROTECTED_SURFACES.json`, binding **`.work/standards/`**, and **`.work/docs/`** (including vendor **`.work/docs/integration/`** cache). Generated filenames use the `YYYYMMDD-` prefix (except `NEXT.md`, `HANDOFF.md`). Always local in **both** fat- and thin-client modes — never resolved from `$AGENT_OS_SOURCE`.
 
 | Path | Layer |
 |------|-------|
@@ -281,9 +282,10 @@ Use Context7 MCP (`@upstash/context7-mcp`) for version-specific library docs whe
 | `.work/prompts/` | Questionnaires; user scratch |
 | `.work/context/HANDOFF.md` | Session handoff |
 | `.work/PROTECTED_SURFACES.json` | This project's high-blast paths |
-| `standards/` | This project's own binding engineering standards (generated, not vendored) |
-| `docs/integration/` | This project's vendor/API integration cache |
-| `.ai/skills/` | Portable agent skills |
+| `.work/standards/` | This project's binding engineering standards (generated, not vendored) |
+| `.work/docs/integration/` | This project's vendor/API integration cache |
+| `.work/docs/` | Project docs (`guides/`, `tutorials/`, `reference/`, `features/`) |
+| `.ai/skills/` | Portable agent skills (fat-client local, or `$AGENT_OS_SOURCE` in thin-client) |
 | `.ai/standards/MASTER_PLAN_STANDARD.md` | Framework-wide master-plan structural contract (shared, not project-specific) |
 | `.ai/templates/cursorrules.template` | Copy to repo-root `.cursorrules` when bootstrapping |
 

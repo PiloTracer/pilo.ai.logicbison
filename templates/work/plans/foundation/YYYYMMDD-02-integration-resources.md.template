@@ -16,7 +16,7 @@
 | P1 | Legal / regulatory primary sources | Compliance interpretation (with advisor) |
 | P2 | Community posts | Hints only - never override P0 |
 
-**Offline mirror:** `docs/integration/` (project root) + `MANIFEST.txt` (one URL per line: `canonical_url<TAB>relative_path`).
+**Offline mirror:** `.work/docs/integration/` + `MANIFEST.txt` (one URL per line: `canonical_url<TAB>relative_path`).
 
 If no external integrations: state **n/a** and skip mirror setup.
 
@@ -26,7 +26,7 @@ If no external integrations: state **n/a** and skip mirror setup.
 
 | System | Role | Mirror subfolder | Status |
 |--------|------|------------------|--------|
-| REPLACE:VENDOR_A | REPLACE:ROLE | `docs/integration/REPLACE:VENDOR_A/` | Planned |
+| REPLACE:VENDOR_A | REPLACE:ROLE | `.work/docs/integration/REPLACE:VENDOR_A/` | Planned |
 
 ---
 

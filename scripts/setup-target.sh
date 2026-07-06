@@ -69,21 +69,20 @@ fi
 cp "${AI_ROOT}/templates/cursorrules.template" "${TARGET}/.cursorrules"
 echo "  overwritten: .cursorrules (from template — fill REPLACE: tokens)"
 
-# ── 4. Scaffold project-owned standards/ + docs/integration/ ─────────
-# Project-specific deliverables live at the repo root, never nested under
-# .ai/ (which is a vendored copy re-synced on every setup-target re-run).
-mkdir -p "${TARGET}/standards"
-touch "${TARGET}/standards/.gitkeep"
-mkdir -p "${TARGET}/docs/integration"
-touch "${TARGET}/docs/integration/.gitkeep"
-echo "  scaffolded: standards/, docs/integration/ (project root)"
+# ── 4. Scaffold project-owned .work/standards + .work/docs/integration ─
+# All project customization lives under .work/ — never at repo root.
+mkdir -p "${TARGET}/.work/standards"
+touch "${TARGET}/.work/standards/.gitkeep"
+mkdir -p "${TARGET}/.work/docs/integration"
+touch "${TARGET}/.work/docs/integration/.gitkeep"
+echo "  scaffolded: .work/standards/, .work/docs/integration/"
 
 echo ""
 echo "=== Setup scaffold done ==="
 echo ""
 echo "Next steps (for each target repo):"
 echo "  1. Edit .cursorrules — fill every REPLACE: token"
-echo "  2. Run @plan-foundation greenfield (generates this project's own standards/*.md — CONVENTIONS, FEATURE_STANDARD, etc. — and points .cursorrules at them)"
+echo "  2. Run @plan-foundation greenfield (generates this project's own .work/standards/*.md — CONVENTIONS, FEATURE_STANDARD, etc. — and points .cursorrules at them)"
 echo ""
 echo "Lite path (existing repo, fast start):"
 echo "  docs/adoption/minimal-adoption.md"

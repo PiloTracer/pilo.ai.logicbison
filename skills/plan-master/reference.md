@@ -54,11 +54,11 @@ When planning, **prefer cite over rewrite**:
 | Topic | Primary evidence |
 |-------|------------------|
 | Scope | `{PLANS_ROOT}/foundation/*-01-*.md` |
-| Integrations | `*-02-*.md`, `docs/integration/MANIFEST.txt` (if any) |
+| Integrations | `*-02-*.md`, `.work/docs/integration/MANIFEST.txt` (if any) |
 | Product lanes | `*-03-*.md` (if any) |
 | Architecture | `*-04-foundation-architecture.md` |
 | Stack | `REPLACE:TECH_STACK_DOC` |
-| Layout | `standards/*-DIRECTORY_MAP.md` |
+| Layout | `.work/standards/*-DIRECTORY_MAP.md` |
 | Feature SPECs | `{FEATURE_SPEC_ROOT}/<slug>/*-SPEC.md` |
 | Threats / data | threat-model, data-classification standards |
 | Local infra | compose files, ops proposals under `{PLANS_ROOT}/operations/` |
@@ -209,7 +209,7 @@ Document in project README if adopted.
 
 **Objective:** Understand the project before proposing architecture.
 
-**Mandatory reads (when present):** `{HANDOFF}`, `{ITERATION_CARRIER}`, foundation docs 01 + 04, `REPLACE:TECH_STACK_DOC`, ADR index + relevant ADRs, `standards/*CONVENTIONS*` + `*FEATURE_STANDARD*`, risk-critical SPECs. Skip absent files; do **not** read `{PROMPTS_ROOT}/initial.md` unless user names it.
+**Mandatory reads (when present):** `{HANDOFF}`, `{ITERATION_CARRIER}`, foundation docs 01 + 04, `REPLACE:TECH_STACK_DOC`, ADR index + relevant ADRs, `.work/standards/*CONVENTIONS*` + `*FEATURE_STANDARD*`, risk-critical SPECs. Skip absent files; do **not** read `{PROMPTS_ROOT}/initial.md` unless user names it.
 
 **Actions:** summarize product intent (one paragraph); extract existing decisions (flag conflicts, do not re-decide); detect hidden assumptions, regulatory surface; build initial risk + clarification questionnaire.
 

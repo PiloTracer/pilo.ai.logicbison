@@ -129,7 +129,7 @@ Replace `M{N}` with the milestone you're working on (see `NEXT.md ## Recommended
 | To check if you can start coding | `@plan-master status` (only this skill scores `implementation-ready`) |
 | A free-text feature idea (don't know where it goes) | `@feature-spec intake - <free sentence>` (classifies local / cross-cutting / brownfield / underspecified and routes it) |
 | A new feature SPEC | `@feature-spec create - <slug>` (see `FEATURE_STANDARD` §3; **do not skip §15**) |
-| Concept / NFR prompts (MOD-01…06) | `@concept-run list` · `@concept-run - MOD-06` |
+| Concept / NFR prompts (MOD-01…07) | `@concept-run list` · `@concept-run - MOD-06` |
 | A new ADR | `.work/decisions/YYYYMMDD-NNN-<slug>.md` - see existing ADRs for shape |
 | A schema migration | `@db-migration create - <description>` (idempotent; no Alembic) |
 

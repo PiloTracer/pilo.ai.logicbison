@@ -22,13 +22,15 @@
 | Path | Purpose |
 |------|---------|
 | `skills/` | Agent skills (`skill.md` per folder) |
-| `standards/` | Engineering standards + `PROTECTED_SURFACES.json` |
+| `standards/` | Framework template standards + `PROTECTED_SURFACES.json` |
+| `.work/standards/` | Project binding standards (generated) |
+| `.work/docs/integration/` | Vendor integration cache |
 | `scripts/` | Deploy, verify, hooks |
 | `templates/` | Bootstrap artifacts for consumer repos |
 | `concepts/` | MOD-01…MOD-07 architecture prompts |
 | `.work/` | Plans, HANDOFF, `touch-scope` |
 
-See `standards/20260517-DIRECTORY_MAP.md`.
+See `.work/standards/*-DIRECTORY_MAP.md` after customization (framework templates: `standards/20260517-DIRECTORY_MAP.md`).
 
 ---
 

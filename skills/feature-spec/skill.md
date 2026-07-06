@@ -10,7 +10,7 @@ description: >-
 
 # feature-spec
 
-Orchestrate **feature SPEC** artifacts under `{FEATURE_SPEC_ROOT}/<feature-slug>/` per `standards/*FEATURE_STANDARD*` (path from `.cursorrules` `REPLACE:FEATURE_STANDARD_FILE`).
+Orchestrate **feature SPEC** artifacts under `{FEATURE_SPEC_ROOT}/<feature-slug>/` per `.work/standards/*FEATURE_STANDARD*` (path from `.cursorrules` `REPLACE:FEATURE_STANDARD_FILE`).
 
 **Tool-agnostic.** **Pairs with:** `concept-run` (§15 registry), `plan-foundation` P3, `code-implementation` (reads Approved SPECs).
 
@@ -53,7 +53,7 @@ Orchestrate **feature SPEC** artifacts under `{FEATURE_SPEC_ROOT}/<feature-slug>
 | **amend** | [Amend protocol](#amend-protocol) |
 | **status** | [Status protocol](#status-protocol) |
 | **approve** | Run **review** first; on pass, update `**Status:**` to `Approved` |
-| **document** | [Document protocol](#document-protocol) |
+| **document** | [Document protocol](#document-protocol-brownfield--existing-features) |
 
 ---
 
@@ -104,6 +104,7 @@ If the request is `underspecified` and the owner is not available to probe now, 
 
 ## Create protocol
 
+<a id="cr0---brownfield--readiness-gates"></a>
 ### CR0 - Brownfield + readiness gates
 
 1. **Brownfield check (hard stop):** if `{FEATURE_SPEC_ROOT}/<slug>/` already exists → **stop** with the [blocked-report shape](#blocked-report-shape):
@@ -131,7 +132,7 @@ Explicit kebab-case slug → skip this step.
 2. Confirm slug does not collide with existing bounded-context folder name alone (use verb phrase if needed).
 3. Check for related ADRs / foundation docs; list in SPEC header.
 4. Create `{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md` with all §3 H2 sections.
-5. Fill **§15 Concept / NFR registry** - one row per MOD-01…MOD-06 with Applies yes/no + reason (or run `@concept-run list` for trigger hints).
+5. Fill **§15 Concept / NFR registry** - one row per MOD-01…MOD-07 with Applies yes/no + reason (or run `@concept-run list` for trigger hints).
 6. Set `**Status:** Draft`.
 7. When creating for **brownfield catalog** or cross-cutting surfaces (shell, layout, analytics): add optional **§14 Implementation map** (FEATURE_STANDARD) with primary file paths from `@plan-verify coverage` or user inventory.
 8. Output create report with path and open questions (§13).
@@ -191,6 +192,7 @@ Read-only. Report: path, Status header, last modified, §15 present?, linked ADR
 
 ---
 
+<a id="document-protocol-brownfield--existing-features"></a>
 ## Document protocol (brownfield / existing features)
 
 Creates or updates `.work/docs/features/<slug>/README.md` — human-readable feature documentation without requiring formal SPEC lifecycle. Idempotent: updates existing doc in place (no amend system needed; this is not a binding SPEC).

@@ -11,7 +11,7 @@ description: >-
 
 Remediation layer for the implementation workflow. **Implements fixes**; does not replace detection (`code-verify`) or iteration planning (`code-implementation`).
 
-**Pairs with:** `code-verify` (findings source + mandatory re-verify), `code-implementation` (task gate + post-fix re-gate), `db-migration`, `feature-spec`, `concept-run`, `.cursorrules`, `standards/*CONVENTIONS*`, `standards/*FEATURE_STANDARD*`.
+**Pairs with:** `code-verify` (findings source + mandatory re-verify), `code-implementation` (task gate + post-fix re-gate), `db-migration`, `feature-spec`, `concept-run`, `.cursorrules`, `.work/standards/*CONVENTIONS*`, `.work/standards/*FEATURE_STANDARD*`.
 
 **Canonical path:** `.ai/skills/code-repair/skill.md` · **Invocation examples:** `reference.md`
 
@@ -107,8 +107,8 @@ Produce an **Implementation alignment map** before filing F* rows:
 |--------|---------------------|-------------------|--------|
 | <phrase from request> | SPEC rule | `.work/features/<slug>/*-SPEC.md` R{n} | Implement / test |
 | <…> | Iteration task | `NEXT.md` M{N}-T{n} | Scope / Notes |
-| <…> | CONVENTIONS | `standards/*CONVENTIONS*` | Naming / layout |
-| <…> | FEATURE_STANDARD | `standards/*FEATURE_STANDARD*` | Test plan shape |
+| <…> | CONVENTIONS | `.work/standards/*CONVENTIONS*` | Naming / layout |
+| <…> | FEATURE_STANDARD | `.work/standards/*FEATURE_STANDARD*` | Test plan shape |
 | <…> | Migration policy | `.cursorrules` § Database | `@db-migration create` if schema |
 | <…> | MOD-06 | `.ai/concepts/` | Required for agent-authored fix |
 | <…> | MOD-01 | `{BOUNDARY_MAP}` / DIRECTORY_MAP | Cross-boundary check |
@@ -142,8 +142,8 @@ Read before implementing fixes. Record `pass` only after reading.
 | 1 | `.cursorrules` | always |
 | 2 | `.work/context/HANDOFF.md` | always |
 | 3 | `.work/plans/NEXT.md` § Current iteration | iteration-scoped findings |
-| 4 | `standards/*CONVENTIONS*` | app code or tests touched |
-| 5 | `standards/*FEATURE_STANDARD*` | app code or tests touched |
+| 4 | `.work/standards/*CONVENTIONS*` | app code or tests touched |
+| 5 | `.work/standards/*FEATURE_STANDARD*` | app code or tests touched |
 | 6 | Relevant `.work/features/<slug>/*-SPEC.md` | per bounded context in F* paths |
 | 7 | `.ai/concepts/README.md` § Trigger table | architecture, boundaries, AI-assisted diff |
 | 8 | `.work/plans/UNKNOWNS.md` | open U* rows referenced by findings |
@@ -165,6 +165,7 @@ Output a **Repair plan** (≤15 lines): order of F* ids, files to touch, whether
 - **TODO/FIXME** - promote to `UNKNOWNS.md` or task `Notes` before claiming F* fixed.
 - **Stop** if a fix requires protected file edit without approval.
 
+<a id="r4--re-verify-mandatory"></a>
 ### R4 - Re-verify (mandatory)
 
 | Repair source (invocation) | Re-run after fixes |

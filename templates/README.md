@@ -57,7 +57,7 @@ Or: `@project-bootstrap init`
 |-------|---------|
 | `REPLACE:PROJECT_NAME` | Product / repo name |
 | `REPLACE:TECH_STACK_DOC` | Stack doc path |
-| `REPLACE:CONVENTIONS_FILE` | CONVENTIONS filename under project-root `standards/` |
+| `REPLACE:CONVENTIONS_FILE` | CONVENTIONS filename under `.work/standards/` |
 | `REPLACE:FEATURE_STANDARD_FILE` | FEATURE_STANDARD filename |
 | `REPLACE:DIRECTORY_MAP_FILE` | DIRECTORY_MAP filename |
 | `REPLACE:OBSERVABILITY_SPEC_PATH` | Observability standard path |
@@ -74,7 +74,7 @@ Full list also appears in `cursorrules.template` § Placeholder quick map.
 
 **Git / session-control:** `cursorrules.template` and `.ai/.cursorrules` (if present) must include the mandatory `@session-control close commit` rule under § Git - keep both files aligned when editing either one.
 
-Also, `@plan-foundation greenfield` generates this project's own dated files under project-root `standards/` (never under `.ai/`); point these tokens at them:
+Also, `@plan-foundation greenfield` generates this project's own dated files under `.work/standards/` (never under `.ai/`; always under `.work/standards/`); point these tokens at them:
 
 - `REPLACE:CONVENTIONS_FILE`
 - `REPLACE:FEATURE_STANDARD_FILE`

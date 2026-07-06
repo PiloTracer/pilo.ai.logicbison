@@ -1,7 +1,7 @@
 # Directory Map — template
 
 **Status:** Customize for your repo, then treat as binding before first application code.
-**Bootstrap:** Copy to project-root `standards/YYYYMMDD-DIRECTORY_MAP.md` (sibling of `.work/`, never under `.ai/`), replace `REPLACE:` tokens, align with foundation doc 04 and `.cursorrules`. (`@plan-foundation greenfield` P3 normally generates this directly — see [reference](../skills/plan-foundation/reference.md).)
+**Bootstrap:** Copy to `.work/standards/YYYYMMDD-DIRECTORY_MAP.md` (never under `.ai/`), replace `REPLACE:` tokens, align with foundation doc 04 and `.cursorrules`. (`@plan-foundation greenfield` P3 normally generates this directly — see [reference](../skills/plan-foundation/reference.md).)
 
 ---
 
@@ -10,9 +10,9 @@
 | Path | Purpose |
 |------|---------|
 | `.ai/` | **Agnostic:** skills, concepts, workflow guides, `START_HERE.md`, `PROCESS_ROUTER.md`, framework-wide standards contracts |
-| `.work/` | **Project:** plans, SPECs, ADRs, prompts, session `HANDOFF.md` |
-| `standards/` | **Project:** this repo's own binding engineering standards (generated, not vendored — this file's destination) |
-| `docs/integration/` | Optional vendor mirror + `MANIFEST.txt` (see `docs/integration/README.md`) |
+| `.work/` | **Project:** plans, SPECs, ADRs, prompts, session `HANDOFF.md`, binding standards, vendor docs |
+| `.work/standards/` | **Project:** this repo's own binding engineering standards (generated, not vendored — this file's destination) |
+| `.work/docs/integration/` | Optional vendor mirror + `MANIFEST.txt` (see `.ai/docs/integration/README.md`) |
 | `.work/plans/` | Foundation, full plan, registries, `NEXT.md` |
 | `.work/features/<slug>/` | Feature SPECs per FEATURE_STANDARD |
 | `.work/decisions/` | ADRs |
@@ -61,9 +61,9 @@ REPLACE:APP_ROOT/
 | Layout | This file |
 | Stack versions | `REPLACE:TECH_STACK_DOC` |
 | Feature work | `.work/features/<slug>/*-SPEC.md` |
-| API design | `standards/*-api-style-guide.md` (when present) |
-| Security | data-classification + threat-model standards (when present) |
-| External APIs | `.work/plans/foundation/*-02-*.md`, `docs/integration/MANIFEST.txt` |
+| API design | `.work/standards/*-api-style-guide.md` (when present) |
+| Security | `.work/standards/*data-classification*` + `*threat-model*` (when present) |
+| External APIs | `.work/plans/foundation/*-02-*.md`, `.work/docs/integration/MANIFEST.txt` |
 
 ---
 

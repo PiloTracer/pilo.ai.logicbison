@@ -3,7 +3,7 @@
 > **Agent OS ships this file as a template.** Copy/rename per `.cursorrules` `REPLACE:CONVENTIONS_FILE`, replace all `REPLACE:` tokens, then treat as binding.
 
 **Status:** Customize for your repo, then binding once code lands.
-**Bootstrap:** Copy to project-root `standards/YYYYMMDD-CONVENTIONS.md` (sibling of `.work/`, never under `.ai/`), replace `REPLACE:` tokens, link from `.cursorrules`. (`@plan-foundation greenfield` P3 normally generates this directly.)
+**Bootstrap:** Copy to `.work/standards/YYYYMMDD-CONVENTIONS.md` (never under `.ai/`), replace `REPLACE:` tokens, link from `.cursorrules`. (`@plan-foundation greenfield` P3 normally generates this directly.)
 
 Pairs with: foundation architecture doc, `REPLACE:TECH_STACK_DOC`, ADRs under `.work/decisions/`.
 

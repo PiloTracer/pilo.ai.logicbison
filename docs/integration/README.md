@@ -8,7 +8,7 @@ Agent OS ships **no vendor artifacts** in `.ai/` — each adopting project adds 
 
 ## Bootstrap
 
-1. Create this directory at the **application repo root** as `docs/integration/` (sibling of `.work/` - never nested under `.ai/`, in either fat- or thin-client mode; `bootstrap.sh` scaffolds it empty).
+1. Create this directory at the **application repo root** as `.work/docs/integration/` (under `.work/` - never nested under `.ai/`, in either fat- or thin-client mode; `bootstrap.sh` scaffolds it empty).
 2. Add a `MANIFEST.txt` — one line per artifact: `canonical_url<TAB>relative_path`.
 3. Record `download_batch_date=` and any audit notes at the top of the manifest.
 4. Reference the manifest from foundation doc 02, SPECs, and `@plan-master` / `@db-migration` when integration work is in scope.

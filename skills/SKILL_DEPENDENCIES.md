@@ -233,6 +233,8 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 
 ---
 
+<a id="blocked-report-shape"></a>
+
 ## Blocked report shape (every gate)
 
 When a gate stops execution, the skill emits a uniform block so users always see the same shape:
