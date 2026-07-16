@@ -9,8 +9,14 @@
 # Exit: 0 ok | 1 fail (blocking) | 2 warn only (--warn-exit-0)
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-[[ -n "${CHANGE_SAFETY_ROOT:-}" ]] && REPO_ROOT="${CHANGE_SAFETY_ROOT}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -n "${CHANGE_SAFETY_ROOT:-}" ]]; then
+  REPO_ROOT="${CHANGE_SAFETY_ROOT}"
+elif [[ -f "$(pwd)/.work/touch-scope" ]] || [[ -f "$(pwd)/.cursorrules" ]]; then
+  REPO_ROOT="$(pwd)"
+else
+  REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+fi
 cd "${REPO_ROOT}"
 
 SURFACES="${REPO_ROOT}/standards/PROTECTED_SURFACES.json"
@@ -53,7 +59,7 @@ if [[ "${DIFF_RANGE}" == "__SELFTEST__" ]]; then
     echo change >> skills/x.md
     echo change >> scripts/y.sh
     echo change >> templates/z.template
-    OUT="$(CHANGE_SAFETY_ROOT="${TMP}/r" bash "${REPO_ROOT}/scripts/blast-radius-check.sh" 2>&1 || true)"
+    OUT="$(CHANGE_SAFETY_ROOT="${TMP}/r" bash "${SCRIPT_DIR}/blast-radius-check.sh" 2>&1 || true)"
     echo "${OUT}"
     echo "${OUT}" | grep -q "areas_crossed=3" || { echo "FAIL: expected 3 areas" >&2; exit 1; }
     echo "${OUT}" | grep -q "risk: high" || { echo "FAIL: expected high risk" >&2; exit 1; }
@@ -176,8 +182,8 @@ fi
 echo "risk: ${RISK}"
 if [[ "${BLOCK}" -eq 1 ]]; then
   # When every changed file is in declared scope, downgrade blocking high risk to warn.
-  if [[ -x "${REPO_ROOT}/scripts/touch-scope-verify.sh" ]]; then
-    if bash "${REPO_ROOT}/scripts/touch-scope-verify.sh" >/dev/null 2>&1; then
+  if [[ -x "${SCRIPT_DIR}/touch-scope-verify.sh" ]]; then
+    if bash "${SCRIPT_DIR}/touch-scope-verify.sh" >/dev/null 2>&1; then
       BLOCK=0
       WARN=1
       echo "verdict: warn — high blast radius but all files in declared scope (touch-scope pass)"

@@ -11,8 +11,14 @@
 # Exit: 0 in-scope or no scope declared (non-strict) | 1 out-of-scope files | 2 undeclared scope (strict)
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-[[ -n "${CHANGE_SAFETY_ROOT:-}" ]] && REPO_ROOT="${CHANGE_SAFETY_ROOT}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -n "${CHANGE_SAFETY_ROOT:-}" ]]; then
+  REPO_ROOT="${CHANGE_SAFETY_ROOT}"
+elif [[ -f "$(pwd)/.work/touch-scope" ]] || [[ -f "$(pwd)/.cursorrules" ]]; then
+  REPO_ROOT="$(pwd)"
+else
+  REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+fi
 cd "${REPO_ROOT}"
 
 TOUCH_SCOPE="${REPO_ROOT}/.work/touch-scope"
@@ -44,13 +50,13 @@ if [[ "${1:-}" == "--self-test" ]]; then
     git add .
     git commit -q -m "init"
     echo x >> rogue.txt
-    if CHANGE_SAFETY_ROOT="${TMP}" bash "${REPO_ROOT}/scripts/touch-scope-verify.sh" >/dev/null 2>&1; then
+    if CHANGE_SAFETY_ROOT="${TMP}" bash "${SCRIPT_DIR}/touch-scope-verify.sh" >/dev/null 2>&1; then
       echo "FAIL: should reject out-of-scope rogue.txt" >&2
       exit 1
     fi
     git checkout -q rogue.txt 2>/dev/null || true
     echo y >> allowed.txt
-    CHANGE_SAFETY_ROOT="${TMP}" bash "${REPO_ROOT}/scripts/touch-scope-verify.sh" >/dev/null || {
+    CHANGE_SAFETY_ROOT="${TMP}" bash "${SCRIPT_DIR}/touch-scope-verify.sh" >/dev/null || {
       echo "FAIL: should accept in-scope allowed.txt" >&2
       exit 1
     }
