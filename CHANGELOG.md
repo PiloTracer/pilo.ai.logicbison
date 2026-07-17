@@ -4,6 +4,9 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+### Changed
+- **FS-safe docs templates** — renamed angle-bracket template paths (illegal on exFAT/Windows) to literal tokens: `templates/work/docs/{guides,tutorials,reference}/YYYYMMDD-slug.md.template` and `templates/work/docs/features/example-slug/README.md.template`. Updated `@docs`, `@feature-spec document`, and `templates/README.md` naming convention.
+
 ## [0.5.3] - 2026-07-07
 
 ### Fixed

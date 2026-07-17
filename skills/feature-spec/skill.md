@@ -212,7 +212,8 @@ Use `@plan-verify coverage` output if available. If the feature has an existing 
 
 ### D2 - Author
 
-Write (or update) `.work/docs/features/<slug>/README.md` with:
+1. Read scaffold from `.ai/templates/work/docs/features/example-slug/README.md.template` (self-hosted: `templates/work/docs/features/example-slug/README.md.template`).
+2. Write (or update) `.work/docs/features/<slug>/README.md` with:
 
 | Section | Content |
 |---------|---------|
@@ -230,6 +231,7 @@ If a formal SPEC exists at `.work/features/<slug>/`, link it as **Source SPEC**.
 ## @feature-spec document - <slug>
 
 **Path:** `.work/docs/features/<slug>/README.md`
+**Template:** `templates/work/docs/features/example-slug/README.md.template`
 **Status:** documented | updated
 **Source SPEC:** yes/no (link if yes)
 **Surface scanned:** <list of routes/modules checked>

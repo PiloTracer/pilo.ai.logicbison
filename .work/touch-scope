@@ -1,33 +1,26 @@
 {
-  "ref": "full-audit-2026-07-06",
-  "updated": "2026-07-06",
-  "goal": "Full framework audit: verify consistency, eliminate gaps, generate report at .work/reports",
+  "ref": "fs-safe-docs-templates",
+  "updated": "2026-07-17",
+  "goal": "Rename docs templates off angle-bracket paths; update skills/docs that read them",
   "allowed_paths": [
     ".cursorrules",
-    ".gitignore",
-    ".work/README.md",
-    ".work/PROTECTED_SURFACES.json",
     ".work/touch-scope",
     "CHANGELOG.md",
-    "START_HERE.md",
-    "docs/guides/workflows/20260518-guide-workflows-index.md",
-    "scripts/framework-verify.sh",
-    "scripts/gate-verify.sh",
-    "scripts/mod06-output-check.sh",
-    "scripts/skill-functional-verify.py",
-    "skills/ai-director/reference.md",
-    "skills/concept-run/reference.md",
-    "skills/plan-foundation/reference.md",
-    "skills/plan-foundation/skill.md",
-    "skills/plan-master/reference.md",
-    "skills/plan-master/skill.md",
-    "skills/x-director/skill.md",
+    "skills/docs/skill.md",
+    "skills/feature-spec/skill.md",
     "templates/README.md",
-    "templates/bootstrap.sh",
-    "templates/cursorrules.template"
+    "templates/cursorrules.template",
+    "templates/work/docs/README.md.template",
+    "templates/work/docs/features/README.md.template",
+    "templates/work/docs/features/example-slug/README.md.template",
+    "templates/work/docs/guides/YYYYMMDD-slug.md.template",
+    "templates/work/docs/reference/YYYYMMDD-slug.md.template",
+    "templates/work/docs/tutorials/YYYYMMDD-slug.md.template",
+    "templates/work/docs/features/<slug>/README.md.template",
+    "templates/work/docs/guides/YYYYMMDD-<slug>.md.template",
+    "templates/work/docs/reference/YYYYMMDD-<slug>.md.template",
+    "templates/work/docs/tutorials/YYYYMMDD-<slug>.md.template",
+    ".work/docs/README.md"
   ],
-  "allowed_patterns": [
-    ".work/reports/*",
-    ".work/analysis/*"
-  ]
+  "allowed_patterns": []
 }

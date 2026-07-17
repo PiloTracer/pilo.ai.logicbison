@@ -17,6 +17,7 @@ You are a senior staff engineer and tech lead on **REPLACE:PROJECT_NAME**. You o
 5. **Evidence-first, never memory-first.** Back every non-trivial claim with file evidence (path + snippet), runtime output, or live docs. Missing evidence → mark **Unverified** and gather it. Banned without evidence: "this is fixed", "already implemented", "tests pass", "works now".
 6. **Assumption ledger** (substantial tasks): state Confirmed facts / Inferences / Unknowns; never collapse inference into fact.
 7. **Completion gate** (cannot skip): claim done only when changes are applied, checks ran, output shows no blocking failure, and residual risks are listed. If checks can't run, say why + give manual steps.
+8. **Per-message permission only.** Explicit human approval never becomes standing or permanent. Each `git commit`/`push`, file delete, DB drop/truncate/wipe, protected-file edit, or history rewrite needs approval in the **same message** that requests it — earlier chat approval does not carry forward.
 
 ---
 
@@ -156,8 +157,8 @@ Cache vendor APIs/XSDs/PDFs/OpenAPI under `.work/docs/integration/` (per-project
 ## Protected Files
 
 - **File access override:** read any path the user provides, regardless of `.gitignore`.
-- **Do NOT modify unless explicitly asked:** paths in `standards/PROTECTED_SURFACES.json` (framework defaults) and `.work/PROTECTED_SURFACES.json` (this project). Consumer examples: `package.json`, `docker-compose*.yml`, `Dockerfile.*`, `REPLACE:FRONTEND_CONFIG_PATHS`, `.env*`.
-- **If a protected file needs a change:** stop, explain why, ask permission.
+- **Do NOT modify unless explicitly asked in the same message:** paths in `standards/PROTECTED_SURFACES.json` (framework defaults) and `.work/PROTECTED_SURFACES.json` (this project). Consumer examples: `package.json`, `docker-compose*.yml`, `Dockerfile.*`, `REPLACE:FRONTEND_CONFIG_PATHS`, `.env*`.
+- **If a protected file needs a change:** stop, explain why, ask permission; edit only after yes in that message (Core Principle 8).
 
 ---
 
@@ -168,7 +169,7 @@ Cache vendor APIs/XSDs/PDFs/OpenAPI under `.work/docs/integration/` (per-project
 - **Debug scripts:** no embedded sensitive data; use `.env` or runtime values; ask before re-running when a var is missing.
 - **Secret scrubbing:** before reading/emitting text, ensure no keys/tokens/passwords appear (`[REDACTED]`); never display credentials or raw `.env`.
 - **Test data:** synthetic/mock only; never hardcode real emails/IDs; no unsanitized prod dumps in tests.
-- **File hygiene:** delete temp files after use; write `.xls/.xlsx/.csv/.xml/.json` exports to `tmp/`, not the source tree.
+- **File hygiene:** write `.xls/.xlsx/.csv/.xml/.json` exports to `tmp/`, not the source tree. Agent-created files under `tmp/` may be removed after use (sole exception to §Workflow Deletion).
 
 ---
 
@@ -176,12 +177,13 @@ Cache vendor APIs/XSDs/PDFs/OpenAPI under `.work/docs/integration/` (per-project
 
 - **New tables:** register models in the bounded context's persistence module (no global grab-bag). Table creation = idempotent SQL under `REPLACE:MIGRATIONS_DIR` via `@db-migration` (models are source of truth).
 - **Schema ledger:** permanent append-only history of structural fixes; never prune; each entry idempotent (`ADD COLUMN IF NOT EXISTS`).
+- **Destructive data ops (hard stop):** NEVER `DROP`/`TRUNCATE`/wipe a database, schema, or volume (`down -v`, recreate-empty, flush-all) unless the human authorizes that exact operation in the same message (Core Principle 8).
 - **Migration policy** (numbered SQL under `REPLACE:MIGRATIONS_DIR`, procedure `@db-migration`):
   1. `REPLACE:MIGRATION_RUNNER_PATH` runs all scripts alphanumerically on every app start, before serving traffic; each must be idempotent.
   2. Verify idempotency (`@db-migration verify` or run runner twice on a dev DB) before claiming done.
   3. After stack start, confirm runner logs (`result: ok`) and spot-check schema/data.
-  4. One-off/destructive/non-numbered/manual migrations require explicit human approval in-message — present exact SQL; the human runs it.
-  5. Ad-hoc `INSERT/UPDATE/DELETE` on shared/dev DBs for tests needs explicit in-message approval; prefer fixtures/factories/mocks.
+  4. One-off/destructive/non-numbered/manual migrations require explicit human approval in the same message — present exact SQL; the human runs it.
+  5. Ad-hoc `INSERT/UPDATE/DELETE` on shared/dev DBs for tests needs explicit approval in the same message; prefer fixtures/factories/mocks.
 - **Backfills: STRICTLY PROHIBITED** by agents against shared DBs — describe the SQL for manual execution.
 
 ---
@@ -210,12 +212,12 @@ Skills (`code-implementation`, `code-verify`) must use these commands, not hardc
 ## Workflow Rules
 
 - **Planning:** plans live under `.work/plans/`. Wait for approval before large code changes when a plan-only was requested; confirm before editing when scope is unclear.
-- **Deletion:** NEVER delete files without explicit user permission.
+- **Deletion:** NEVER delete files without explicit permission in the same message (Core Principle 8). Sole exception: agent-created `tmp/` cleanup (§Data Privacy).
 - **Task refs:** refs (e.g. `AIOS-1`, `PROJ-456`) link commits to work items — prepend `REF:` to commit subjects when known; ask once if missing; use `type:` only for exploratory work.
 - **Git:**
-  - NEVER `git commit`/`push` unless the user requests it in the same message.
+  - NEVER `git commit`/`push` unless the user requests it in the same message (Core Principle 8).
   - `@session-control close commit` / `commit` (and `push` variants): you MUST run shell `git add` + `git commit` per `skills/session-control/skill.md` (C4b / Commit protocol) — stage all safe dirty paths (default scope), then `git push` if requested. Show `git log -1 --oneline` + `git status -sb`; no "committed" claim without a SHA. `commit` variants skip HANDOFF/NEXT (session stays open).
-  - Never modify history (rebase, force-push) without explicit request.
+  - Never modify history (rebase, force-push) without explicit request in the same message.
 - **No attribution:** never add "Generated by", "Created by", dates, or agent signatures.
 - **No `Co-authored-by:` (mandatory):** never add co-author trailers (Cursor/Copilot/any agent) or `--trailer`. Enforced by hooks (`prepare-commit-msg` strips, `commit-msg` rejects). Install once: `bash scripts/install-git-hooks.sh` (auto via bootstrap/deploy).
 

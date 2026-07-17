@@ -19,7 +19,8 @@ Create and manage human-readable project documentation under `{DOCS_ROOT}` (`.wo
 **Hard rules:**
 - Never write formal SPECs — route to `@feature-spec`.
 - Never edit archived or Approved SPECs — route to `@feature-spec amend`.
-- One file per doc; use `YYYYMMDD-<slug>.md` naming.
+- One file per doc; output naming `YYYYMMDD-<slug>.md` (substitute the real kebab-case slug).
+- Template files on disk use literal `slug` (never `<>` in repo paths): `YYYYMMDD-slug.md.template`.
 - Keep docs git-friendly — one sentence per line when possible.
 
 ---
@@ -47,15 +48,15 @@ If text after `-` is not a valid kebab-case slug, derive one from the free-text 
 
 ### G2 - Brownfield check
 
-If `.work/docs/guides/<slug>.md` already exists → **stop** with blocked report:
-- **Required:** file does not exist
+If any `.work/docs/guides/YYYYMMDD-<slug>.md` already exists for that slug → **stop** with blocked report:
+- **Required:** no dated guide for this slug
 - **Detected:** existing file at path
 - **Run first:** `@docs create guide - <different-slug>` or delete the existing file if stale
 
 ### G3 - Create
 
-1. Read template from `.ai/templates/work/docs/guides/YYYYMMDD-<slug>.md.template`.
-2. Write to `.work/docs/guides/YYYYMMDD-<slug>.md` with filled sections.
+1. Read template from `.ai/templates/work/docs/guides/YYYYMMDD-slug.md.template` (self-hosted: `templates/work/docs/guides/YYYYMMDD-slug.md.template`).
+2. Write to `.work/docs/guides/YYYYMMDD-<slug>.md` with filled sections (`YYYYMMDD` = today; `<slug>` = kebab-case slug).
 3. If user gave a free-text purpose, populate the goal section from it.
 
 ### G4 - Report
@@ -64,6 +65,7 @@ If `.work/docs/guides/<slug>.md` already exists → **stop** with blocked report
 ## @docs create guide - <slug>
 
 **Path:** `.work/docs/guides/YYYYMMDD-<slug>.md`
+**Template:** `templates/work/docs/guides/YYYYMMDD-slug.md.template`
 **Status:** created
 ```
 
@@ -71,13 +73,17 @@ If `.work/docs/guides/<slug>.md` already exists → **stop** with blocked report
 
 ## Create tutorial protocol
 
-Same as guide protocol but reads from `.ai/templates/work/docs/tutorials/` and writes to `.work/docs/tutorials/`.
+Same as guide protocol but:
+- **Template:** `.ai/templates/work/docs/tutorials/YYYYMMDD-slug.md.template`
+- **Output:** `.work/docs/tutorials/YYYYMMDD-<slug>.md`
 
 ---
 
 ## Create reference protocol
 
-Same as guide protocol but reads from `.ai/templates/work/docs/reference/` and writes to `.work/docs/reference/`.
+Same as guide protocol but:
+- **Template:** `.ai/templates/work/docs/reference/YYYYMMDD-slug.md.template`
+- **Output:** `.work/docs/reference/YYYYMMDD-<slug>.md`
 
 ---
 

@@ -11,6 +11,15 @@ Human-readable documentation: guides, tutorials, reference material, and feature
 | `.work/docs/reference/` | Reference / API docs (`YYYYMMDD-<slug>.md`) |
 | `.work/docs/features/<slug>/` | Per-feature user documentation — what it does, how to use it |
 
+## Scaffold templates (Agent OS)
+
+| Output | Template (literal `slug` / `example-slug` in the path — never `<>`) |
+|--------|---------------------------------------------------------------------|
+| `.work/docs/guides/YYYYMMDD-<slug>.md` | `templates/work/docs/guides/YYYYMMDD-slug.md.template` |
+| `.work/docs/tutorials/YYYYMMDD-<slug>.md` | `templates/work/docs/tutorials/YYYYMMDD-slug.md.template` |
+| `.work/docs/reference/YYYYMMDD-<slug>.md` | `templates/work/docs/reference/YYYYMMDD-slug.md.template` |
+| `.work/docs/features/<slug>/README.md` | `templates/work/docs/features/example-slug/README.md.template` |
+
 ## Feature docs vs SPECs
 
 - **`.work/features/<slug>/SPEC.md`** — formal behavioural SPEC per FEATURE_STANDARD (for planning & implementation)
