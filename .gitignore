@@ -484,5 +484,6 @@ htmlcov/
 
 # Reasonix ephemeral environment caches
 .reasonix/
+reasonix.toml
 
 **/commit-ref-pending/

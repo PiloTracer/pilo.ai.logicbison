@@ -1,33 +1,19 @@
 {
-  "ref": "full-audit-2026-07-06",
-  "updated": "2026-07-06",
-  "goal": "Full framework audit: verify consistency, eliminate gaps, generate report at .work/reports",
+  "ref": "session-scope-2026-08-06",
+  "updated": "2026-08-06",
+  "goal": "Scope session-control commits to the .work/ working directory (incl. new untracked files/dirs); verify commit/close/push parameter combinations; release v0.6.0",
   "allowed_paths": [
     ".cursorrules",
     ".gitignore",
-    ".work/README.md",
-    ".work/PROTECTED_SURFACES.json",
     ".work/touch-scope",
     "CHANGELOG.md",
-    "START_HERE.md",
-    "docs/guides/workflows/20260518-guide-workflows-index.md",
-    "scripts/framework-verify.sh",
-    "scripts/gate-verify.sh",
-    "scripts/mod06-output-check.sh",
-    "scripts/skill-functional-verify.py",
-    "skills/ai-director/reference.md",
-    "skills/concept-run/reference.md",
-    "skills/plan-foundation/reference.md",
-    "skills/plan-foundation/skill.md",
-    "skills/plan-master/reference.md",
-    "skills/plan-master/skill.md",
-    "skills/x-director/skill.md",
-    "templates/README.md",
-    "templates/bootstrap.sh",
+    "README.md",
+    "skills/README.md",
+    "skills/session-control/reference.md",
+    "skills/session-control/skill.md",
     "templates/cursorrules.template"
   ],
   "allowed_patterns": [
-    ".work/reports/*",
     ".work/analysis/*"
   ]
 }

@@ -2,14 +2,16 @@
 name: session-control
 description: >-
   Open or close an AI working session with verified context load, HANDOFF and NEXT
-  updates, and optional git commit/push. Also supports standalone commit/push
-  without closing (commit task ref, git add + git commit + git push, no
-  HANDOFF/NEXT update). `context` loads all mandatory context read-only and is
-  uncommitted-aware (surfaces dirty-tree status without writing HANDOFF). Use
-  when the user says session-control start, session-control close, @session-control
-  start, close commit, close commit push, commit, commit push, or session-control
-  context. Never commits unless the invocation includes commit. On commit, MUST
-  run git add + git commit in the shell for all safe dirty paths (not HANDOFF-only).
+  updates, and optional git commit/push scoped to the `.work/` working directory.
+  Also supports standalone commit/push without closing (commit task ref, git add
+  + git commit + git push, no HANDOFF/NEXT update). `context` loads all mandatory
+  context read-only and is uncommitted-aware (surfaces dirty-tree status without
+  writing HANDOFF). Use when the user says session-control start, session-control
+  close, @session-control start, close commit, close commit push, commit, commit
+  push, or session-control context. Never commits unless the invocation includes
+  commit. On commit, MUST run git add + git commit in the shell for all safe
+  changes under `.work/` — including new untracked files/dirs (not HANDOFF-only,
+  not full repo tree).
 ---
 
 # session-control
@@ -25,7 +27,7 @@ Bookend AI work sessions so the next chat (or human) can resume without guessing
 **Hard rules:**
 
 - **Default close / default commit:** never `git commit` or `git push`. Only when invocation includes **`commit`** and/or **`push`** (see [Parse invocation](#parse-invocation)).
-- **`close commit` / `close commit push` / `commit` / `commit push`:** **MUST** run `git add` + `git commit` in the shell (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b) / [Commit protocol](#commit-protocol)). A dirty tree after close with only a draft message is **fail**.
+- **`close commit` / `close commit push` / `commit` / `commit push`:** **MUST** run `git add` + `git commit` in the shell (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b) / [Commit protocol](#commit-protocol)), staging **`.work/` only** (default scope, incl. new untracked files/dirs). A dirty `.work/` tree after close with only a draft message is **fail**.
 - **Always** show the commit message - drafted, used for commit, or `none - working tree clean`.
 - **`commit` / `commit push` (standalone):** run git add + commit + push **without** updating HANDOFF or NEXT. Session stays open. Useful for mid-session checkpoints.
 - **Never commit with `type:` format when a task ref is known or could reasonably be asked for.** If the user provided a ref, or the branch/HANDOFF/github-registry contains one — use it. If no ref is known but the work clearly belongs to a task, ask the user once. Commits without refs are not linked to tasks/tickets and are invisible in the association UI.
@@ -58,11 +60,11 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 | `session-control` **start** - \<goal\> | start | - |
 | `@session-control` **close** | close | draft message only |
 | `session-control` **close** | close | draft message only |
-| `session-control` **close** **commit** | close | commit all **safe** dirty paths (default scope - [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b)) |
+| `session-control` **close** **commit** | close | commit all **safe** changes under `.work/` (default scope - [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b)) |
 | `session-control` **close** **commit** **scoped** | close | commit only HANDOFF + NEXT + paths listed in close report |
 | `session-control` **close** **commit** **push** | close | commit then push |
 | `session-control` **close** **push** | close | treat as **commit push** (`push` requires commit) |
-| `session-control` **commit** | commit | commit all safe dirty paths (default scope), NO close |
+| `session-control` **commit** | commit | commit all safe changes under `.work/` (default scope), NO close |
 | `session-control` **commit** **push** | commit | commit then push, NO close |
 | `@session-control` **context** | context | - |
 | `@session-control` **status** | status | - |
@@ -71,7 +73,7 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 
 **Goal text:** anything after `-` or on a new line after `start` (not the words `commit`/`push`/`scoped`).
 
-**Commit scope:** default is **full safe tree** (what humans expect from `git add` of their session work). Use **`commit scoped`** only when the user wants bookend files only.
+**Commit scope:** default is **`.work/` only** — the working directory at repo root (all safe changed + **new untracked files/dirs** under `.work/`; e.g. `git add .work/`). Nothing outside `.work/` is staged (`.ai/`, app dirs stay out of session commits). Use **`commit scoped`** only when the user wants bookend files only.
 
 **Standalone commit:** `commit` / `commit push` run the same git steps as `close commit` / `close commit push` but **skip** HANDOFF and NEXT updates. The session remains open.
 
@@ -321,7 +323,7 @@ Close report template and checklist: [reference.md § Close protocol (detailed)]
 |------|----------|
 | **Start** | Prior HANDOFF says `Closed` → treat as new session; do not assume prior chat memory |
 | **Start** | Missing HANDOFF → offer to run `plan-foundation` greenfield or create minimal HANDOFF |
-| **Close** | `close commit` / `close commit push` → run C4b in shell after HANDOFF/NEXT; stage **default scope** |
+| **Close** | `close commit` / `close commit push` → run C4b in shell after HANDOFF/NEXT; stage **`.work/` scope** |
 | **Commit** | User says `@session-control commit` → Run [Commit protocol](#commit-protocol); **do not** update HANDOFF or NEXT |
 
 Full table: [reference.md § Critical interactions](reference.md#critical-interactions).
@@ -333,6 +335,7 @@ Full table: [reference.md § Critical interactions](reference.md#critical-intera
 - Claiming "context loaded" without reading HANDOFF and NEXT
 - Closing session without updating HANDOFF and NEXT (on **close**)
 - **`close commit` without running `git commit`** or without a new SHA
+- **Staging outside `.work/`** (`.ai/`, app dirs) on a default commit — session commits are `.work/`-scoped
 - Omitting the commit message block from close/commit reports
 - Adding `Co-authored-by:` trailers
 
@@ -342,4 +345,4 @@ Full list: [reference.md § Anti-patterns](reference.md#anti-patterns).
 
 ## Project layout (convention)
 
-**`{WORK_ROOT}` = `.work/`** at repo root. See [reference.md § Project layout](reference.md#project-layout-convention).
+**`{WORK_ROOT}` = `.work/`** at repo root. See [reference.md § Project layout](reference.md#project-layout-convention). All session git commits are **scoped to `.work/`** (default scope).

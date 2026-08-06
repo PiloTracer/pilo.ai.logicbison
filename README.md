@@ -268,7 +268,7 @@ The bird's-eye flow above is the conceptual map. Below is the **literal command 
 
 # End session (or checkpoint)
 @session-control close                 # message only
-@session-control close commit          # add + commit safe dirty paths
+@session-control close commit          # stage + commit .work/ changes (incl. new files)
 @session-control close commit push     # also push
 @session-control commit                # checkpoint: commit, no close
 @session-control commit push           # checkpoint: commit + push, session stays open

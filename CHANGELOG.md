@@ -4,6 +4,15 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-06
+
+### Changed
+- **`session-control` commit scope** — default `close commit` / `commit` now stage **`.work/` only** (all safe changes under the working directory, **including new untracked files/dirs**); `.ai/` and app dirs are never staged by session commits. `commit scoped` (HANDOFF/NEXT only) unchanged. `.cursorrules` + `templates/cursorrules.template` git rule and Skills rows synced.
+
+### Fixed
+- **CHANGELOG link definitions** — added missing `[0.5.3]` reference link.
+- **`.gitignore`** — ignore leaked local-tool permission file `reasonix.toml` (alongside `.reasonix/`).
+
 ## [0.5.3] - 2026-07-07
 
 ### Fixed
@@ -235,7 +244,9 @@ First public-ready cut of Agent OS as a portable framework.
 ### Removed
 - All project-specific integration artifacts under `docs/integration/` (Costa Rica Hacienda, OIDC, XAdES bundles) - replaced with agnostic `MANIFEST.template.txt` + `README.md`.
 
-[Unreleased]: https://github.com/PiloTracer/.ai/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/PiloTracer/.ai/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/PiloTracer/.ai/compare/v0.5.3...v0.6.0
+[0.5.3]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.3
 [0.5.2]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.2
 [0.5.1]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.1
 [0.5.0]: https://github.com/PiloTracer/.ai/releases/tag/v0.5.0
