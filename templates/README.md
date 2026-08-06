@@ -51,9 +51,23 @@ Or: `@project-bootstrap init`
 | Foundation 01–04 | `work/plans/foundation/YYYYMMDD-*.template` | `@plan-foundation greenfield` |
 | Master plan | `work/plans/full/YYYYMMDD-full-plan.md.template` | `@plan-master greenfield` |
 | Feature SPEC | `work/features/example-slug/…` | `@feature-spec create` |
+| Feature user doc | `work/docs/features/example-slug/README.md.template` | `@feature-spec document` |
+| Guide / tutorial / reference | `work/docs/{guides,tutorials,reference}/YYYYMMDD-slug.md.template` | `@docs create …` |
 | ADR | `work/decisions/YYYYMMDD-NNN-slug.md.template` | plan-foundation / manual |
 | Ops proposal | `work/plans/operations/…` | plan-foundation P5 |
 
+### Filename placeholders (FS-safe)
+
+Repo template **paths** never use `<` / `>` (illegal on exFAT/Windows). Use a literal token in the filename:
+
+| Kind | Template on disk | Output after substitution |
+|------|------------------|---------------------------|
+| Docs | `YYYYMMDD-slug.md.template` | `.work/docs/…/YYYYMMDD-<slug>.md` |
+| Feature docs | `features/example-slug/README.md.template` | `.work/docs/features/<slug>/README.md` |
+| ADR | `YYYYMMDD-NNN-slug.md.template` | `.work/decisions/YYYYMMDD-NNN-<slug>.md` |
+| Feature SPEC | `features/example-slug/YYYYMMDD-SPEC.md.template` | `.work/features/<slug>/YYYYMMDD-SPEC.md` |
+
+Angle brackets in skill prose mean “substitute the real kebab-case slug” — they are **not** literal path characters.
 ---
 
 ## `REPLACE:` checklist (`.cursorrules`)
