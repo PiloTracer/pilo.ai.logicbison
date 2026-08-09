@@ -22,29 +22,80 @@
 #
 # Usage:
 #   bash scripts/deploy-files.sh <target-path>              # no-overwrite (skip existing)
-#   bash scripts/deploy-files.sh <target-path> --force      # overwrite existing (legacy)
-#   bash scripts/deploy-files.sh <target-path> --update     # no-overwrite + emit merge candidates
+#   bash scripts/deploy-files.sh [copy] [-] <target-path>   # same (explicit outbound copy)
+#   bash scripts/deploy-files.sh <target-path> [--force]    # overwrite existing (legacy)
+#   bash scripts/deploy-files.sh <target-path> [--update]   # no-overwrite + emit merge candidates + verify
+#   bash scripts/deploy-files.sh [status] [target-path]     # read-only report (+ .cursorrules verify)
 #   AI_SOURCE=/path/.ai bash scripts/deploy-files.sh <target-path>
+#
+# Argument forms are equivalent: verbs accept the '--' prefix or bare form
+# (`update` ≡ `--update`, `status` ≡ `--status`), '-' / '--' separators are
+# ignored, and the target path may appear in any position.
 #
 set -euo pipefail
 
-RAW_TARGET="${1:?Usage: $0 <target-path> [--force|--update]}"
-shift || true
-MODE="skip"
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --force)   MODE="force" ;;
-    --update)  MODE="update" ;;
-    *) echo "ERROR: unknown flag: $1" >&2; exit 1 ;;
+# ── Argument normalization ─────────────────────────────────────────────
+# Verbs with or without '--', in any position relative to the target path;
+# '-' and '--' (skill parse-table separators) are ignored.
+MODE=""
+RAW_TARGET=""
+for arg in "$@"; do
+  [[ "$arg" == "-" || "$arg" == "--" ]] && continue
+  tok="${arg#--}"
+  case "$tok" in
+    copy|skip) : ;;   # explicit copy verb = default copy mode
+    update|force|status) MODE="$tok" ;;
+    /*|./*|../*|~*|*/*|.)
+      if [[ -z "$RAW_TARGET" ]]; then RAW_TARGET="$arg"
+      else echo "ERROR: multiple target paths: '$RAW_TARGET' and '$arg'" >&2; exit 2; fi ;;
+    *) echo "ERROR: unknown argument: $arg" >&2
+       echo "Usage: $0 [status] [copy] [-] <target-path> [--force|--update] (path must contain '/'; use ./name for local dirs)" >&2
+       exit 2 ;;
   esac
-  shift
 done
+MODE="${MODE:-skip}"
+if [[ -z "$RAW_TARGET" ]]; then
+  if [[ "$MODE" == "status" ]]; then
+    RAW_TARGET="."
+  else
+    echo "Usage: $0 [status] [copy] [-] <target-path> [--force|--update]" >&2
+    exit 2
+  fi
+fi
 
 # Source .ai root: explicit override wins, else derive from script location.
 if [[ -n "${AI_SOURCE:-}" ]]; then
   AI_ROOT="$(cd "$AI_SOURCE" && pwd)"
 else
   AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
+
+# ── Status mode (read-only) ───────────────────────────────────────────
+if [[ "$MODE" == "status" ]]; then
+  if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
+    DEST_ROOT="$(pwd)"
+  else
+    DEST_ROOT="$(cd "$RAW_TARGET" && pwd)"
+  fi
+  echo "=== deploy-files status → $DEST_ROOT ==="
+  if [[ -d "${DEST_ROOT}/.ai/skills" ]]; then
+    skill_n="$(find "${DEST_ROOT}/.ai/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+    echo "  .ai/skills: present ($skill_n skill dirs — fat-client)"
+  else
+    echo "  .ai/skills: missing (no fat-client copy at this target)"
+  fi
+  status_rc=0
+  if [[ -f "${DEST_ROOT}/.cursorrules" ]]; then
+    AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/cursorrules-verify.sh" "$DEST_ROOT" || status_rc=$?
+  else
+    echo "  .cursorrules: absent (nothing to verify — run @project-bootstrap init there)"
+  fi
+  if [[ -f "${DEST_ROOT}/opencode.json" ]]; then
+    echo "  opencode.json: present"
+  else
+    echo "  opencode.json: missing"
+  fi
+  exit "$status_rc"
 fi
 
 # ── Resolve target ──────────────────────────────────────────────────
@@ -194,3 +245,29 @@ else
 fi
 echo "  3. Run @session-control start"
 echo "  4. Using opencode? Review opencode.json (created from template if missing) — paths must match fat (.ai/) or thin (\$AGENT_OS_SOURCE) layout"
+
+# ── Post-deploy .cursorrules verification ─────────────────────────────
+# Consumer root = parent of the deployed .ai dir (in-place: cwd). update
+# repairs via --fix (sister cells; thin-client only for source pointer/script
+# paths); default mode verifies read-only.
+CONSUMER_ROOT="$(cd "$PARENT" && pwd)"
+if [[ -f "${CONSUMER_ROOT}/.cursorrules" ]]; then
+  echo ""
+  echo "=== post-deploy verification ==="
+  vr_rc=0
+  if [[ "$MODE" == "update" ]]; then
+    AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/cursorrules-verify.sh" --fix "$CONSUMER_ROOT" || vr_rc=$?
+  else
+    AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/cursorrules-verify.sh" "$CONSUMER_ROOT" || vr_rc=$?
+  fi
+  if [[ "$vr_rc" -ne 0 ]]; then
+    if [[ "$MODE" == "update" ]]; then
+      echo "  update could not auto-repair all findings — review [FAIL] lines above"
+      exit "$vr_rc"
+    fi
+    echo "  (findings are pre-existing; run @deploy-files update to repair)"
+  fi
+else
+  echo ""
+  echo "  note: no .cursorrules at ${CONSUMER_ROOT} yet — verify after @project-bootstrap init (deploy-files status)"
+fi

@@ -35,10 +35,12 @@ Two-direction deploy of the `.ai` framework into a target project so the project
 | User says | Direction | Mode |
 |-----------|-----------|------|
 | `@deploy-files` | in-place (cwd is target) | copy no-overwrite + scaffold no-overwrite |
-| `@deploy-files update` | in-place (cwd is target) | copy no-overwrite + scaffold no-overwrite + **rules-aware merge** + **`opencode.json --sync-paths`** |
+| `@deploy-files update` | in-place (cwd is target) | copy no-overwrite + scaffold no-overwrite + **rules-aware merge** + **`opencode.json --sync-paths`** + **`cursorrules-verify.sh --fix`** (sister cells) |
 | `@deploy-files copy - /path/to/repo` | outbound (source = this repo) | copy no-overwrite to `/path/to/repo/.ai` |
 | `@deploy-files copy - /path/to/repo --force` | outbound | copy with idempotent overwrite of existing files (legacy) |
-| `@deploy-files status` | report | report whether `.ai/` exists at known deploy locations |
+| `@deploy-files status` | report | `.ai/skills` presence + `.cursorrules` verification (via `cursorrules-verify.sh`) + `opencode.json` presence |
+
+**Argument equivalence (script + this table):** verbs accept the `--` prefix or bare form — `update` ≡ `--update`, `status` ≡ `--status`, `force` ≡ `--force`. `copy` is the explicit form of the default copy mode. A `-` / `--` token is a separator and is dropped. The target path may appear in any position: `@deploy-files copy - /path` ≡ `@deploy-files /path` ≡ `@deploy-files -- /path copy`.
 
 **Default:** `status` if no verb matches; if invoked bare with no `.ai/` in cwd → in-place bootstrap (`copy` in-place per § I0).
 
@@ -109,7 +111,8 @@ After I1 (no-overwrite copy) the script:
 
 1. Prints a **merge candidate list** for differing files under `.ai/` (the vendored fat-client copy — never `.work/standards/` or `.work/docs/integration/`, which are project memory and never merge candidates).
 2. Runs **`install-opencode-config.sh --sync-paths`** on the consumer repo root (fat-client `.ai/skills` paths; preserves custom `mcp` entries).
-3. The **agent** performs rules-aware merge for each `.ai/` merge candidate (agent work, not script work).
+3. Runs **`cursorrules-verify.sh --fix`** on the consumer root when a `.cursorrules` exists — repairs sister-framework cells (fills installed-sister tokens, re-points stale baked absolutes) — and reports the verification verdict. (Thin-client source-pointer/script-path repair is `@deploy-basic update`'s domain.)
+4. The **agent** performs rules-aware merge for each `.ai/` merge candidate (agent work, not script work).
 
 **Framework-owned file classes** (all paths relative to `<target>/.ai/`; merge applies; preserve target customizations):
 

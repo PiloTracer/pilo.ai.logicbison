@@ -273,6 +273,76 @@ assert 'custom-block' not in c.get('mcp', {}), 'unexpected mcp mutation'
 ok "install-opencode-config --sync-paths preserves self-hosted sister paths"
 rm -rf "${SH_SMOKE}" "${DF_SMOKE}"
 
+# --- 2g. deploy arg normalization (bare verb ≡ --flag, '-' separator, any position) ---
+note "deploy arg-form equivalence"
+AV_SMOKE="$(mktemp -d)"
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" update >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" update "${AV_SMOKE}" >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" --update -- "${AV_SMOKE}" >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" status "${AV_SMOKE}" >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" --status "${AV_SMOKE}" >/dev/null
+if bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" bogus >/dev/null 2>&1; then
+  die "deploy-basic accepted an unknown argument"
+fi
+ok "deploy-basic: bare verbs ≡ --flags, '-'/'--' separators ignored, any arg position"
+
+bash "${REPO_ROOT}/scripts/deploy-repo.sh" status - "${AV_SMOKE}" >/dev/null
+(
+  cd "${AV_SMOKE}"
+  bash "${REPO_ROOT}/scripts/deploy-repo.sh" archive - ./rp-target >/dev/null
+)
+[[ -d "${AV_SMOKE}/rp-target/skills" && -f "${AV_SMOKE}/rp-target/.cursorrules" ]] \
+  || die "deploy-repo archive - <path> did not populate target"
+[[ ! -e "${AV_SMOKE}/-" ]] || die "deploy-repo created a directory literally named '-' (separator not dropped)"
+ok "deploy-repo: '-' separator dropped safely; relative archive target extracts correctly"
+
+FILES_SMOKE="$(mktemp -d)"
+bash "${REPO_ROOT}/scripts/deploy-files.sh" copy - "${FILES_SMOKE}" >/dev/null
+[[ -d "${FILES_SMOKE}/.ai/skills" ]] || die "deploy-files copy - <path> did not populate .ai/"
+bash "${REPO_ROOT}/scripts/deploy-files.sh" "${FILES_SMOKE}" update >/dev/null
+bash "${REPO_ROOT}/scripts/deploy-files.sh" status "${FILES_SMOKE}" >/dev/null
+ok "deploy-files: copy verb + bare update + status accepted"
+rm -rf "${FILES_SMOKE}"
+
+# --- 2h. cursorrules-verify detects + repairs stale thin-client state ---
+note "cursorrules-verify repair cycle"
+CV_SMOKE="$(mktemp -d)"
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${CV_SMOKE}" >/dev/null
+STALE="/tmp/agent-os-moved-away-$$"
+perl -i -pe "s{AGENT_OS_SOURCE=\Q${REPO_ROOT}\E}{AGENT_OS_SOURCE=${STALE}}g" "${CV_SMOKE}/.cursorrules"
+perl -i -pe "s{\Q${REPO_ROOT}\E/scripts/}{.ai/scripts/}g" "${CV_SMOKE}/.cursorrules"
+UI_DIR="$(cd "${REPO_ROOT}/.." && pwd)/.ai.ui"
+if [[ -f "${UI_DIR}/skills/README.md" ]]; then
+  perl -i -pe 's{/[^ |]+/\.ai\.ui \(discovered at deploy time\)}{REPLACE:AI_UI_PATH (default `../.ai.ui`)}' "${CV_SMOKE}/.cursorrules"
+  grep -q 'REPLACE:AI_UI_PATH' "${CV_SMOKE}/.cursorrules" || die "test setup: could not re-open sister token"
+fi
+if bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" "${CV_SMOKE}" >/dev/null 2>&1; then
+  die "cursorrules-verify passed a deliberately broken target"
+fi
+CV_OUT="$(bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" "${CV_SMOKE}" 2>&1 || true)"
+echo "${CV_OUT}" | grep -q "UNREACHABLE" \
+  || die "cursorrules-verify did not flag stale AGENT_OS_SOURCE"
+echo "${CV_OUT}" | grep -q "unbaked" \
+  || die "cursorrules-verify did not flag literal .ai/scripts/ paths"
+bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" --fix "${CV_SMOKE}" >/dev/null
+bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" "${CV_SMOKE}" >/dev/null \
+  || die "cursorrules-verify still failing after --fix"
+grep -q "^AGENT_OS_SOURCE=${REPO_ROOT}\$" "${CV_SMOKE}/.cursorrules" \
+  || die "--fix did not re-sync AGENT_OS_SOURCE"
+if grep -qE '(^|[^/])\.ai/scripts/' "${CV_SMOKE}/.cursorrules"; then
+  die "--fix left unbaked .ai/scripts/ literals"
+fi
+if [[ -f "${UI_DIR}/skills/README.md" ]] && grep -q 'REPLACE:AI_UI_PATH' "${CV_SMOKE}/.cursorrules"; then
+  die "--fix did not re-fill installed sister .ai.ui cell"
+fi
+# End-to-end through the deploy skill itself (the operator flow):
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${CV_SMOKE}" update >/dev/null
+bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" "${CV_SMOKE}" >/dev/null \
+  || die "post-update verification failed"
+ok "cursorrules-verify detects stale source/unbaked paths/open sister cells; --fix + deploy update repair them"
+rm -rf "${CV_SMOKE}" "${AV_SMOKE}"
+
 # --- 3. Removed vendor integration paths ---
 note "No stale vendor integration paths"
 if grep -rqE 'docs/integration/(hacienda|oidc|xades)' --include='*.md' . 2>/dev/null; then

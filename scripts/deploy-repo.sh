@@ -11,10 +11,13 @@
 # target exists and needs a partial update.
 #
 # Usage:
-#   bash scripts/deploy-repo.sh --status [target-path]
-#   bash scripts/deploy-repo.sh clone    /absolute/path/to/target
-#   bash scripts/deploy-repo.sh archive  /absolute/path/to/target
-#   AI_SOURCE=/path/.ai bash scripts/deploy-repo.sh clone /absolute/path/to/target
+#   bash scripts/deploy-repo.sh [--status [target-path]]
+#   bash scripts/deploy-repo.sh [clone|archive] [-] <target-path>
+#   AI_SOURCE=/path/.ai bash scripts/deploy-repo.sh clone <target-path>
+#
+# Argument forms are equivalent: verbs accept the '--' prefix or bare form
+# (`clone` ≡ `--clone`), '-' / '--' separators are ignored, and the target
+# path may appear in any position. Default (no verb) = status.
 #
 set -euo pipefail
 
@@ -24,10 +27,29 @@ else
   AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
+# ── Argument normalization ─────────────────────────────────────────────
+# Verbs with or without '--', in any position relative to the target path;
+# '-' and '--' (skill parse-table separators) are ignored — a '-' must never
+# become the target directory.
+MODE=""
+RAW_TARGET=""
+for arg in "$@"; do
+  [[ "$arg" == "-" || "$arg" == "--" ]] && continue
+  tok="${arg#--}"
+  case "$tok" in
+    status|clone|archive) MODE="$tok" ;;
+    /*|./*|../*|~*|*/*|.)
+      if [[ -z "$RAW_TARGET" ]]; then RAW_TARGET="$arg"
+      else echo "ERROR: multiple target paths: '$RAW_TARGET' and '$arg'" >&2; exit 2; fi ;;
+    *) echo "ERROR: unknown argument: $arg (verbs: status clone archive)" >&2
+       exit 2 ;;
+  esac
+done
+MODE="${MODE:-status}"
+
 # ── Status mode (read-only) ───────────────────────────────────────────
-if [[ "${1:-}" == "--status" || "${1:-}" == "status" ]]; then
-  shift || true
-  TARGET="${1:-}"
+if [[ "$MODE" == "status" ]]; then
+  TARGET="$RAW_TARGET"
   echo "=== deploy-repo status (Agent OS) ==="
   echo "  source: $AI_ROOT"
   REMOTE="$(cd "$AI_ROOT" && git remote get-url origin 2>/dev/null || true)"
@@ -60,8 +82,10 @@ if [[ "${1:-}" == "--status" || "${1:-}" == "status" ]]; then
   exit 0
 fi
 
-MODE="${1:?Usage: $0 --status [path] | <clone|archive> <target-path>}"
-RAW_TARGET="${2:?Usage: $0 <clone|archive> <target-path>}"
+if [[ -z "$RAW_TARGET" ]]; then
+  echo "Usage: $0 [--status [path]] | <clone|archive> [-] <target-path>" >&2
+  exit 2
+fi
 
 # ── Resolve target ──────────────────────────────────────────────────
 # Always use as-is (unlike deploy-files, this is a full repo deploy)
@@ -110,6 +134,9 @@ if [[ "$MODE" != "archive" ]]; then
 fi
 
 mkdir -p "$DEST_DIR"
+# Resolve to absolute BEFORE cd (a relative target would otherwise re-resolve
+# against $AI_ROOT after the cd, and tar would extract into a missing dir).
+DEST_DIR="$(cd "$DEST_DIR" && pwd)"
 cd "$AI_ROOT"
 
 git archive --format=tar HEAD | tar xf - -C "$DEST_DIR"

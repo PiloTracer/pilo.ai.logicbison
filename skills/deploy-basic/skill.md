@@ -33,8 +33,11 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 |-----------|-----------|------|
 | `@deploy-basic - /path/to/target` | outbound (invoked from source) | thin bootstrap no-overwrite |
 | `@deploy-basic` (from target, post-bootstrap) | in-place | re-runs no-overwrite bootstrap + source-pointer sync |
-| `@deploy-basic status` | report | read-only: `.cursorrules`, `AGENT_OS_SOURCE` reachability, `.work/`, fat-client leak, **`opencode.json` path drift** |
-| `@deploy-basic update` (from target) | in-place | no-overwrite + re-sync `AGENT_OS_SOURCE` + **`opencode.json --sync-paths`** + merge candidate list |
+| `@deploy-basic status` | report | read-only: `.cursorrules` verification (via `cursorrules-verify.sh`: `AGENT_OS_SOURCE`, gate-table script-path baking, sister-framework cells), `.work/`, fat-client leak, **`opencode.json` path drift** |
+| `@deploy-basic update` (from target) | in-place | no-overwrite + re-sync `AGENT_OS_SOURCE` + re-bake script paths + **repair sister-framework cells** (`cursorrules-verify.sh --fix`) + **`opencode.json --sync-paths`** + merge candidate list |
+| `@deploy-basic /path/to/target --update` | outbound | same as `update` — target path may appear in any position |
+
+**Argument equivalence (script + this table):** verbs accept the `--` prefix or bare form — `update` ≡ `--update`, `status` ≡ `--status`, `force` ≡ `--force`. A `-` / `--` token is a separator and is dropped. The target path may appear in any position relative to the verb: `@deploy-basic "/path" update` is 100% identical to `@deploy-basic /path --update`.
 
 **Default:** `status` if no verb matches. **Aliases:** `bootstrap-thin`, `thin` → bare `@deploy-basic`.
 
@@ -84,7 +87,7 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 
 After I1 (no-overwrite) the script:
 
-1. **Re-syncs the source pointer** if the target `.cursorrules` carries a stale `AGENT_OS_SOURCE` value (e.g. source moved). Performed in-place on the assignment line only — preserves all other target edits.
+1. **Repairs the source pointer + baked paths** via `cursorrules-verify.sh --fix --thin` (idempotent, in-place, preserves all other target edits and filled `REPLACE:` tokens): re-syncs a stale `AGENT_OS_SOURCE` (e.g. source moved), re-bakes gate-table script paths (literal `.ai/scripts/` or stale absolute prefix → current `$AGENT_OS_SOURCE/scripts/`), and **repairs sister-framework cells** — fills still-open `REPLACE:AI_*_PATH` tokens for sisters now installed on disk, re-points stale baked sister absolutes.
 2. **Syncs `opencode.json` framework paths** via `install-opencode-config.sh --sync-paths` (updates `instructions`, `references`, `skills.paths` when they point at the old source; **preserves** `mcp` blocks and operator-added entries). If paths remain stale → listed as merge candidate.
 3. **Lists merge candidates** among the local surface: existing-but-differing files vs the current source templates (substituted). Candidates:
    - `.cursorrules` (differs from current `template-with-source`)
@@ -113,20 +116,24 @@ After I1 (no-overwrite) the script:
 
 ## I3 — status (read-only)
 
-Shell: `bash <source>/scripts/deploy-basic.sh --status [target-path]`
+Shell: `bash <source>/scripts/deploy-basic.sh --status [target-path]` (bare `status` ≡ `--status`)
 
-Reports:
+The `.cursorrules` checks are delegated to `scripts/cursorrules-verify.sh` (single source of truth, also runs as post-deploy verification after every bootstrap/update). Reports:
 
 | Check | Output |
 |-------|--------|
 | `.cursorrules` present | pass / missing |
-| `AGENT_OS_SOURCE` value + reachable | value + `test -d` result |
-| Source-resolution section present | pass / missing |
-| `.work/` present | pass / missing (list present skeleton files) |
+| `AGENT_OS_SOURCE` value + reachable | value + `test -d` result (FAIL when unfilled or unreachable) |
+| Gate-table script paths baked | ok / FAIL when literal `.ai/scripts/` remains or a baked prefix is stale |
+| Sister-framework cells (`.ai.ui/.ai.biz/.ai.soc`) | reachable / unfilled-token (warn when installed) / STALE (FAIL) |
+| Source-resolution section present | pass / missing (warn → merge candidate) |
+| `.work/` present | pass / missing |
 | Local `.ai/skills/` exists (fat-client leak) | no (good, thin) / yes (warn — mixed) |
 | `REPLACE:` tokens remaining in `.cursorrules` | count (excludes `AGENT_OS_SOURCE` which is filled) |
 | **`opencode.json` present** | pass / missing |
 | **`opencode.json` path drift** | `skills.paths[0]` vs expected `$AGENT_OS_SOURCE/skills` → **ok** or **STALE** |
+
+Exit code: non-zero when any `[FAIL]` finding remains (stale source, unbaked paths, stale sister cell, missing `.cursorrules`). Repair verb: `@deploy-basic update` (runs `cursorrules-verify.sh --fix`).
 
 ---
 

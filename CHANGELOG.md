@@ -4,8 +4,20 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+### Added
+- **`scripts/cursorrules-verify.sh`** — shared read-only verifier (+ `--fix`) for a deployed target's `.cursorrules`: `AGENT_OS_SOURCE` reachability, gate-table script-path baking, sister-framework cells (`.ai.ui/.ai.biz/.ai.soc`) against the current source location and on-disk sisters. Wired into `@deploy-basic status`, post-deploy verification of `deploy-basic` / `deploy-files`, and `update` repair of both. Normalized arg parsing (`--fix` ≡ `fix`, path in any position).
+- **`deploy-files status` mode** — reports `.ai/skills` presence + `.cursorrules` verification + `opencode.json` presence (previously documented but unimplemented).
+- **framework-verify smokes 2g/2h** — regression coverage for deploy arg-form equivalence and the cursorrules-verify detect→repair cycle.
+
 ### Changed
+- **Unified deploy argument parsing** — all three deploy scripts (`deploy-basic`, `deploy-files`, `deploy-repo`) accept verbs with or without `--` (`update` ≡ `--update`), ignore `-`/`--` separators, and take the target path in any position: `deploy-basic /path update` is identical to `deploy-basic /path --update`. `deploy-files` accepts the documented `copy` verb. Skill parse tables updated to document the equivalence.
+- **`deploy-basic update` repair consolidation** — source-pointer re-sync, gate-table script-path re-bake, and sister-cell repair (fill installed-sister tokens, re-point stale baked absolutes) now run through `cursorrules-verify.sh --fix` (single source of truth); every deploy ends with a post-deploy verification verdict.
 - **FS-safe docs templates** — renamed angle-bracket template paths (illegal on exFAT/Windows) to literal tokens: `templates/work/docs/{guides,tutorials,reference}/YYYYMMDD-slug.md.template` and `templates/work/docs/features/example-slug/README.md.template`. Updated `@docs`, `@feature-spec document`, and `templates/README.md` naming convention.
+
+### Fixed
+- **Sister-framework cells never filled at bootstrap** — `deploy-basic.sh` printed "resolved REPLACE:AI_*_PATH → …" but the substitution pattern expected `default:` while the template cell reads `default`; substitution now matches (with a warning when the cell doesn't) and `--fix` repairs already-deployed targets.
+- **`deploy-repo archive - <path>` deployed into a directory literally named `-`** — the parse-table separator was treated as the target path; separators are now dropped in all three deploy scripts.
+- **`deploy-repo archive` relative targets** — extraction ran after `cd "$AI_ROOT"`, so a relative target re-resolved against the source and tar failed; target is now resolved to absolute first.
 
 ## [0.6.0] - 2026-08-06
 

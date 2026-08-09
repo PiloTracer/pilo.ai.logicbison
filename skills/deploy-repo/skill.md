@@ -30,6 +30,8 @@ Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.g
 | `@deploy-repo` **status** | Report source remote, HEAD, optional target deploy state |
 | `@deploy-repo` **status** - /path | Same with target path inspection |
 
+**Argument equivalence (script + this table):** verbs accept the `--` prefix or bare form — `clone` ≡ `--clone`, `archive` ≡ `--archive`, `status` ≡ `--status`. A `-` / `--` token is a separator and is **dropped** (never treated as the target directory). The target path may appear in any position: `archive - /path` ≡ `--archive /path` ≡ `/path archive`.
+
 **Shell (read-only):** `bash <source>/scripts/deploy-repo.sh --status [target-path]`
 
 **Default:** `status` if no verb matches.

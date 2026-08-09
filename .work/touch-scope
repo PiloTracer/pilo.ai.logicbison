@@ -1,17 +1,18 @@
 {
-  "ref": "session-scope-2026-08-06",
-  "updated": "2026-08-06",
-  "goal": "Scope session-control commits to the .work/ working directory (incl. new untracked files/dirs); verify commit/close/push parameter combinations; release v0.6.0",
+  "ref": "deploy-verify-2026-08-09",
+  "updated": "2026-08-09",
+  "goal": "Verify + fix all deploy skills: unified arg parsing (bare verbs = --flags, '-' separator dropped, path in any position), .cursorrules verification (AGENT_OS_SOURCE, script-path baking, sister framework cells) via new cursorrules-verify.sh wired into deploy-basic/deploy-files status+update; regression smokes in framework-verify",
   "allowed_paths": [
-    ".cursorrules",
-    ".gitignore",
     ".work/touch-scope",
     "CHANGELOG.md",
-    "README.md",
-    "skills/README.md",
-    "skills/session-control/reference.md",
-    "skills/session-control/skill.md",
-    "templates/cursorrules.template"
+    "scripts/deploy-basic.sh",
+    "scripts/deploy-files.sh",
+    "scripts/deploy-repo.sh",
+    "scripts/cursorrules-verify.sh",
+    "scripts/framework-verify.sh",
+    "skills/deploy-basic/skill.md",
+    "skills/deploy-files/skill.md",
+    "skills/deploy-repo/skill.md"
   ],
   "allowed_patterns": [
     ".work/analysis/*"

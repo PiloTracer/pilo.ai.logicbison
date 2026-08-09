@@ -24,17 +24,55 @@
 #
 # Usage:
 #   bash scripts/deploy-basic.sh <target-path>              # no-overwrite (skip existing)
-#   bash scripts/deploy-basic.sh --status [target-path]   # read-only report
-#   bash scripts/deploy-basic.sh <target-path> --update    # no-overwrite + merge candidate list
-#   bash scripts/deploy-basic.sh <target-path> --force     # overwrite local scaffold (legacy)
+#   bash scripts/deploy-basic.sh [status] [target-path]     # read-only report (+ verify)
+#   bash scripts/deploy-basic.sh <target-path> [--update]   # no-overwrite + repair + merge candidates
+#   bash scripts/deploy-basic.sh <target-path> [--force]    # overwrite local scaffold (legacy)
 #   AI_SOURCE=/path/.ai bash scripts/deploy-basic.sh <target-path>
+#
+# Argument forms are equivalent: verbs accept the '--' prefix or bare form
+# (`update` ≡ `--update`, `status` ≡ `--status`), '-' / '--' separators are
+# ignored, and the target path may appear in any position:
+#   deploy-basic.sh /path update   ≡   deploy-basic.sh /path --update
 #
 set -euo pipefail
 
+# ── Argument normalization ─────────────────────────────────────────────
+# Verbs with or without '--', in any position relative to the target path;
+# '-' and '--' (skill parse-table separators) are ignored.
+MODE=""
+RAW_TARGET=""
+for arg in "$@"; do
+  [[ "$arg" == "-" || "$arg" == "--" ]] && continue
+  tok="${arg#--}"
+  case "$tok" in
+    status|update|force|skip) MODE="$tok" ;;
+    /*|./*|../*|~*|*/*|.)
+      if [[ -z "$RAW_TARGET" ]]; then RAW_TARGET="$arg"
+      else echo "ERROR: multiple target paths: '$RAW_TARGET' and '$arg'" >&2; exit 2; fi ;;
+    *) echo "ERROR: unknown argument: $arg" >&2
+       echo "Usage: $0 [status] <target-path> [--force|--update] (path must contain '/'; use ./name for local dirs)" >&2
+       exit 2 ;;
+  esac
+done
+MODE="${MODE:-skip}"
+if [[ -z "$RAW_TARGET" ]]; then
+  if [[ "$MODE" == "status" ]]; then
+    RAW_TARGET="."
+  else
+    echo "Usage: $0 [status] <target-path> [--force|--update]" >&2
+    exit 2
+  fi
+fi
+
+# Source .ai root: explicit override wins, else derive from script location.
+if [[ -n "${AI_SOURCE:-}" ]]; then
+  AI_ROOT="$(cd "$AI_SOURCE" && pwd)"
+else
+  AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
+
 # ── Status mode (read-only) ───────────────────────────────────────────
-if [[ "${1:-}" == "--status" ]]; then
-  shift
-  RAW_TARGET="${1:-.}"
+if [[ "$MODE" == "status" ]]; then
   if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
     DEST_ROOT="$(pwd)"
   else
@@ -42,32 +80,22 @@ if [[ "${1:-}" == "--status" ]]; then
   fi
   CURS_DEST="${DEST_ROOT}/.cursorrules"
   OC_DEST="${DEST_ROOT}/opencode.json"
+  status_rc=0
 
   echo "=== deploy-basic status → $DEST_ROOT ==="
 
+  # .cursorrules checks are delegated to the shared verifier (single source of
+  # truth: AGENT_OS_SOURCE, gate-table script-path baking, sister cells).
   if [[ -f "$CURS_DEST" ]]; then
-    echo "  .cursorrules: present"
     src="$(grep -E '^AGENT_OS_SOURCE=' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || true)"
     if [[ -z "$src" ]]; then
       src="$(grep -oE 'AGENT_OS_SOURCE=[^[:space:]`]+' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || true)"
     fi
-    if [[ -n "$src" && "$src" != "REPLACE_BASICSOURCE" ]]; then
-      if [[ -d "$src" ]]; then
-        echo "  AGENT_OS_SOURCE: $src (reachable)"
-      else
-        echo "  AGENT_OS_SOURCE: $src (UNREACHABLE)"
-      fi
-    elif grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
-      echo "  AGENT_OS_SOURCE: <unset token>"
-    else
-      echo "  AGENT_OS_SOURCE: missing (fat-client template?)"
-    fi
-    replace_count="$(grep -c 'REPLACE:' "$CURS_DEST" 2>/dev/null || true)"
-    replace_count="${replace_count:-0}"
-    echo "  REPLACE: tokens in .cursorrules: $replace_count (excludes filled AGENT_OS_SOURCE)"
+    AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/cursorrules-verify.sh" "$DEST_ROOT" || status_rc=$?
   else
     echo "  .cursorrules: MISSING"
     src=""
+    status_rc=1
   fi
 
   if [[ -d "${DEST_ROOT}/.work/context" ]]; then
@@ -110,26 +138,7 @@ PYEOF
   else
     echo "  opencode.json: missing (run install-opencode-config.sh to create)"
   fi
-  exit 0
-fi
-
-RAW_TARGET="${1:?Usage: $0 [--status] <target-path> [--force|--update]}"
-shift || true
-MODE="skip"
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --force)  MODE="force" ;;
-    --update) MODE="update" ;;
-    *) echo "ERROR: unknown flag: $1" >&2; exit 1 ;;
-  esac
-  shift
-done
-
-# Source .ai root: explicit override wins, else derive from script location.
-if [[ -n "${AI_SOURCE:-}" ]]; then
-  AI_ROOT="$(cd "$AI_SOURCE" && pwd)"
-else
-  AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  exit "$status_rc"
 fi
 
 # Target = repo root of the consumer (the dir that will hold .cursorrules + .work/).
@@ -219,8 +228,12 @@ subst_cursorrules() {
     local token="REPLACE:AI_${token_upper}_PATH"
     if [[ -d "$fw_dir_abs" ]] && [[ -f "${fw_dir_abs}/skills/README.md" ]]; then
       local fw_esc="${fw_dir_abs//\//\\/}"
-      perl -i -pe "s{${token} \\(default: \\\`[^)]*\\)}{${fw_esc} (discovered at deploy time)}" "$tmpfile"
-      echo "  frameworks: resolved ${token} → ${fw_dir_abs}" >&2
+      perl -i -pe "s{${token} \\(default:? \\\`[^)]*\\)}{${fw_esc} (discovered at deploy time)}" "$tmpfile"
+      if grep -q "$token" "$tmpfile"; then
+        echo "  frameworks: WARN ${token} cell did not match expected template shape — left for runtime auto-discover" >&2
+      else
+        echo "  frameworks: resolved ${token} → ${fw_dir_abs}" >&2
+      fi
     else
       echo "  frameworks: ${token} not found on disk — leaving for runtime auto-discover" >&2
     fi
@@ -262,39 +275,16 @@ else
     write_cursorrules skip  # creates it (no existing → fallthrough to write)
   fi
 fi
-# Re-sync the source pointer when --update AND the existing .cursorrules had a
-# stale non-empty path. Skip when existing_source is empty (fresh write above).
-if [[ "$MODE" == "update" ]] && [[ -n "$existing_source" ]] && [[ "$existing_source" != "$AI_ROOT" ]]; then
-  if [[ -f "$CURS_DEST" ]] && grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
-    # Substitute just the source line in-place (preserve all other target edits).
-    AI_ROOT_ESC="${AI_ROOT//\//\\/}"
-    OLD_ESC="${existing_source//\//\\/}"
-    perl -i -pe "s{AGENT_OS_SOURCE=\Q${existing_source}\E}{AGENT_OS_SOURCE=${AI_ROOT_ESC}}" "$CURS_DEST" 2>/dev/null || \
-      perl -i -pe "s/AGENT_OS_SOURCE=[^\n]*/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$CURS_DEST"
-    echo "  cursorrules: re-synced AGENT_OS_SOURCE → $AI_ROOT (was: ${existing_source:-<unset>})"
-  fi
-fi
-# Re-bake script paths (Change-safety gate table + Co-authored-by hook install
-# line) whenever they're still unresolved or point at a since-moved source.
-# Handles two cases: (a) baked to a source that has since moved — replace the
-# OLD absolute prefix first, so case (b) below can't re-match inside it; (b)
-# never baked — target bootstrapped before this fix, still shows literal
-# `.ai/scripts/...` (lookbehind excludes any occurrence already prefixed by a
-# real path, e.g. inside an old source's own `.../.ai/scripts/` — without it,
-# case (b) would wrongly re-match text that case (a) just fixed, or an old
-# source path ending in `.ai`, and double-prefix it). No-op if already correct.
+# --update: re-sync the source pointer, re-bake gate-table script paths, and
+# repair sister-framework cells (fill open tokens for installed sisters;
+# re-point stale baked absolutes). Single source of truth: cursorrules-verify.sh
+# --fix — idempotent, in-place, preserves all other target edits and tokens.
 if [[ "$MODE" == "update" ]] && [[ -f "$CURS_DEST" ]] && grep -q 'AGENT_OS_SOURCE=' "$CURS_DEST"; then
-  AI_ROOT_ESC="${AI_ROOT//\//\\/}"
-  tmp_before_bake="$(mktemp)"
-  cp "$CURS_DEST" "$tmp_before_bake"
-  if [[ -n "$existing_source" ]] && [[ "$existing_source" != "$AI_ROOT" ]]; then
-    perl -i -pe "s{\Q${existing_source}\E/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$CURS_DEST"
+  fix_rc=0
+  AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/cursorrules-verify.sh" --fix --thin "$DEST_ROOT" || fix_rc=$?
+  if [[ "$fix_rc" -ne 0 ]]; then
+    echo "  cursorrules: $fix_rc verification finding(s) not auto-repairable (see [FAIL] above)"
   fi
-  perl -i -pe "s{(?<!/)\.ai/scripts/}{${AI_ROOT_ESC}/scripts/}g" "$CURS_DEST"
-  if ! cmp -s "$tmp_before_bake" "$CURS_DEST"; then
-    echo "  cursorrules: re-baked script paths → $AI_ROOT/scripts/ (Change-safety gate table + hook install line)"
-  fi
-  rm -f "$tmp_before_bake"
 fi
 # If --update AND existing .cursorrules came from a fat-client template (no
 # AGENT_OS_SOURCE line at all), flag it — the source-resolution section is a
@@ -425,3 +415,18 @@ echo "  2. Verify source is reachable:  test -d \"\$(grep -oE 'AGENT_OS_SOURCE=[
 echo "  3. Run @session-control start  (skill loads from \$AGENT_OS_SOURCE/skills/session-control/skill.md)"
 echo "  4. First skill besides session-control? Just invoke it — e.g. @plan-foundation status"
 echo "  5. Using opencode? Review opencode.json (created from template if missing) — paths must match thin-client (\$AGENT_OS_SOURCE) layout"
+
+# ── Post-deploy verification: every deploy proves the target .cursorrules ──
+# update already repaired via --fix above; skip/force verifies read-only
+# (repair is update's job — no-overwrite mode must not edit an existing file).
+echo ""
+echo "=== post-deploy verification ==="
+final_rc=0
+AI_SOURCE="$AI_ROOT" bash "$AI_ROOT/scripts/cursorrules-verify.sh" "$DEST_ROOT" || final_rc=$?
+if [[ "$final_rc" -ne 0 ]]; then
+  if [[ "$MODE" == "update" ]]; then
+    echo "  update could not auto-repair all findings — review [FAIL] lines above"
+    exit "$final_rc"
+  fi
+  echo "  (findings are pre-existing; run @deploy-basic update to repair)"
+fi
