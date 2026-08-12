@@ -176,7 +176,7 @@ Do **not** create `*-full-plan.md` in certify mode - that is **plan-master**'s j
 
 **Certification report template and steps:** [`reference.md` § Certify protocol (detailed)](reference.md#certify-protocol-detailed).
 
-**Binding:** Each phase has **Artifacts**, **GATE** checklist, and shared gate integrity. Greenfield INTERACTION ids (`p0-name`, `p0-intent`, `p0-probe`, `p1-integrations`, …) live in **`reference.md` § Greenfield walkthrough**. **Order is binding:** name → initial prompt → product probe → **then** integrations and other technical questions.
+**Binding:** Each phase has **Artifacts**, **GATE** checklist, and shared gate integrity. Greenfield INTERACTION ids (`p0-name`, `p0-intent`, `p0-probe`, `p1-nfr`, `p1-data-model`, `p1-integrations`, `p2-backend`, `p2-database`, `p2-data-services`, `p2-hosting`, `p2-tenancy`, `p5-local-dev`, …) live in **`reference.md` § Greenfield walkthrough**. **Order is binding:** name → initial prompt → product probe → then NFR + data-model grills (informed recommendations) → then integrations → then technical/stack interactions, each with an evidence-derived recommendation per the [Recommendation protocol](reference.md#recommendation-protocol).
 
 **Phase headers, artifact paths, and GATE checklists (P0–P6):** [`reference.md` § Phase gates P0–P6 (detailed)](reference.md#phase-gates-p0-p6-detailed).
 
@@ -204,12 +204,15 @@ At P6 pass: evaluate [Plan-master readiness](reference.md#s4-plan-master-readine
 - Expanding `{PLANS_ROOT}/foundation/` into a substitute for `*-full-plan.md`
 - Calling foundation doc 04 "the full plan" in reports (say **architecture foundation** or **foundation doc 04**)
 - **Skipping `p0-intent` / `p0-probe` and jumping to `p1-integrations` or stack questions** (product understanding must precede technical choices)
+- **Skipping `p1-nfr` / `p1-data-model` before `p2-database` / `p2-data-services`** (stack and DB recommendations without NFR/data evidence are invented defaults — see Recommendation protocol, which is mandatory for every stack interaction)
+- **Accepting a stack/service option the operator never chose, or a choice that contradicts their stated requirements, without recording the divergence** in `RISK_REGISTRY.md` + `UNKNOWNS.md` (Recommendation protocol rules 2, 4)
+- **Defaulting every data service to `none`** (cache/queue/search/object-storage) while D4/D5/D8 or `p1-integrations` evidence implies the workload (Recommendation protocol rule 5)
 
 ---
 
 ## Greenfield protocol
 
-0. [GF0](#gf0---bootstrap-artifacts) → `p0-name` → `p0-intent` → `p0-probe` (product grill; no tech yet) → P0 doc 01 + registries → `p1-integrations` (agent-inferred + grill) → walk P1→P6 gates → sync assumption ledger → no broad code until plan-master **Approved**.
+0. [GF0](#gf0---bootstrap-artifacts) → `p0-name` → `p0-intent` → `p0-probe` (product grill; no tech yet) → P0 doc 01 + registries → `p1-nfr` + `p1-data-model` (NFR + data-model grills; no tech yet) → `p1-integrations` (agent-inferred + grill) → P2 stack interactions with evidence-derived recommendations (`p2-backend`, `p2-database`, `p2-data-services`, …) → walk P1→P6 gates → sync assumption ledger → no broad code until plan-master **Approved**.
 
 **Full step list:** [`reference.md` § Greenfield protocol (detailed)](reference.md#greenfield-protocol-detailed).
 

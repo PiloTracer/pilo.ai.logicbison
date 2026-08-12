@@ -1,18 +1,12 @@
 {
-  "ref": "deploy-verify-2026-08-09",
-  "updated": "2026-08-09",
-  "goal": "Verify + fix all deploy skills: unified arg parsing (bare verbs = --flags, '-' separator dropped, path in any position), .cursorrules verification (AGENT_OS_SOURCE, script-path baking, sister framework cells) via new cursorrules-verify.sh wired into deploy-basic/deploy-files status+update; regression smokes in framework-verify",
+  "ref": "plan-foundation-grill-gaps-2026-08-12",
+  "updated": "2026-08-12",
+  "goal": "Fix plan-foundation grill gaps: Recommendation protocol (evidence-derived stack recommendations); p1-nfr (D5) + p1-data-model (D7) interactions so deferred dimensions have a real destination; p2-database + p2-data-services interactions (DB engine, cache/queue/search/object-storage); GATE p1/p2/p5 checklist additions; binding-order + anti-pattern updates in skill.md; MOD-06 output",
   "allowed_paths": [
     ".work/touch-scope",
-    "CHANGELOG.md",
-    "scripts/deploy-basic.sh",
-    "scripts/deploy-files.sh",
-    "scripts/deploy-repo.sh",
-    "scripts/cursorrules-verify.sh",
-    "scripts/framework-verify.sh",
-    "skills/deploy-basic/skill.md",
-    "skills/deploy-files/skill.md",
-    "skills/deploy-repo/skill.md"
+    ".work/analysis/20260812-mod06-plan-foundation-stack-grill-gaps.md",
+    "skills/plan-foundation/skill.md",
+    "skills/plan-foundation/reference.md"
   ],
   "allowed_patterns": [
     ".work/analysis/*"

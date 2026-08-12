@@ -374,6 +374,17 @@ Used by `@plan-foundation greenfield`. Skill body holds **Phase headers, Artifac
 
 Branch with `## IF: <id> = <value>`.
 
+### Recommendation protocol
+
+Every technical choice interaction (`p2-backend`, `p2-database`, `p2-data-services`, `p2-hosting`, `p2-frontend`, `p5-local-dev`, and any follow-up grill) follows this contract. The framework must be able to **fill infrastructure gaps with professional recommendations derived from operator evidence** — never from the agent's private preferences.
+
+1. **Derive, do not invent.** Before asking, the agent rebuilds the evidence base from operator answers already on record: doc 01 (§Founder intent, §Scope, capabilities), `p0-probe` ledger rows (D1–D4, D8), earlier phase interactions, and `PROBE_LEDGER.md`. Every recommended option MUST cite the operator statement or dimension that supports it. No evidence → the recommendation is labeled **assumption** and surfaced as a risk entry.
+2. **Present the recommendation first.** `**Recommendation:** <option> — <one-line rationale tied to operator answers>`; then the grill. The operator may accept, adjust, or reject; their explicit choice always wins (record in ADR).
+3. **Label every inference.** Rationale cites either `stated` (operator said it) or `assumed` (agent inferred it). Never collapse an inference into a fact (`.cursorrules` Core Principle 6).
+4. **Conflicts surface, never silently override.** If operator picks an option that contradicts stated requirements or their own earlier answers (e.g. single-tenant hosting with schema-per-tenant tenancy, or `none` for caching while D5 latency targets or D4 read-heavy flows imply it): flag the contradiction, ask once, then record the divergence in `RISK_REGISTRY.md` (with mitigation) and `UNKNOWNS.md` (what it blocks) — the choice stands, the conflict is recorded.
+5. **"None" is a real option, but must be earned.** `none` / defer is valid only when the requirement signals are absent, or the operator explicitly defers; a silent default of `none` for every service (cache, queue, search, object storage) is an anti-pattern when D4/D5/D8 or `p1-integrations` imply the workload.
+6. **Unknown → ask or defer, never default silently.** If a requirement dimension that a choice depends on is `unknown` (ledger), ask the focused question or defer to `UNKNOWNS.md` with owner — do not pick a default for it without ceremony.
+
 ### Owner decision questionnaires (any phase)
 
 When a product choice blocks SPECs (UX mode, vertical, compliance wording):
@@ -406,7 +417,7 @@ When a product choice blocks SPECs (UX mode, vertical, compliance wording):
 **Type:** probe_loop (engine: [`.ai/skills/probe-protocol.md`](../probe-protocol.md))
 **Depends on:** `p0-intent` answered (or skipped with substantive founder intent already in doc 01)
 **Coverage subset (product only — no tech yet):** D1 (product intent & success), D2 (audience/personas), D3 (scope in/out), D4 (functional capabilities), D8 (constraints: budget, timeline, team, ops)
-**Exclude until Phase 1:** D5 (quantified NFRs), D6 (integrations), D7 (data model), D9 (deploy/hosting/tenancy), D10 (risks — capture obvious ones inline, formal registry sync at GATE p0)
+**Exclude until Phase 1:** D5 (quantified NFRs → grill in `p1-nfr`), D6 (integrations → grill in `p1-integrations`), D7 (data model & sensitivity → grill in `p1-data-model`), D9 (deploy/hosting/tenancy → choose in `p2-hosting`/`p2-tenancy`), D10 (risks — capture obvious ones inline, formal registry sync at GATE p0)
 **Target:** D1 and D3 at least **partial**; D2 and D4 addressed (not **unknown**); user had opportunity to defer remaining gaps
 **Batch size:** ≤5 targeted questions per iteration (probe-protocol default)
 **Record into:** doc 01 (audience, scope, capabilities sections), `ASSUMPTIONS.md`, `UNKNOWNS.md`, `RISK_REGISTRY.md`, `{PLANS_ROOT}/foundation/PROBE_LEDGER.md` (create registry files from templates on first write if missing — see greenfield step 3)
@@ -415,7 +426,27 @@ When a product choice blocks SPECs (UX mode, vertical, compliance wording):
 
 ### Phase 1 - Exploration (interactions)
 
-**Prerequisite:** `p0-probe` exited. Phase 1 starts with **inferred** integrations, not a blank checklist.
+**Prerequisite:** `p0-probe` exited. Phase 1 runs `p1-nfr` and `p1-data-model` **before** `p1-integrations`: quantified NFRs (D5) and data-model/sensitivity (D7) are the evidence base the integration grill and every P2 stack recommendation (per [Recommendation protocol](#recommendation-protocol)) derive from.
+
+#### INTERACTION: p1-nfr
+
+**Type:** probe_loop (engine: `probe-protocol.md`; coverage dimension **D5 ★**)
+**Depends on:** `p0-probe` exited
+**Target:** Quantified targets for: performance (latency p50/p95/p99 budgets per journey, throughput, concurrency), availability (RPO/RTO, uptime), security (auth model, data protection), privacy (retention, export/erasure), i18n/l10n, a11y, cost ceiling. Each target: a number/level, not prose.
+**Pre-step (agent — before asking):** For each NFR, propose a **default target derived from evidence**: doc 01 scope/capabilities (`stated`) or, where absent, a professional baseline for the workload class labeled `assumed` (e.g. internal tool → p95 < 2s, 99.5% availability; customer-facing transactional → p95 < 500ms, 99.9%+). Present defaults with rationale; operator confirms or adjusts; every adjusted target is `stated` and recorded verbatim.
+**Record into:** doc 04 §NFRs, `PROBE_LEDGER.md` (D5 row), `ASSUMPTIONS.md` (assumed baselines), `RISK_REGISTRY.md` (targets at risk), deferred items → `UNKNOWNS.md`
+**Exit when:** all NFRs have quantified targets (stated or assumed-with-consent) **or** user defers (deferred becomes UNKNOWNS with owner)
+**Feeds:** P2 ADRs (hosting, tenancy, stack sizing), P4 observability + threat-model, plan-master NFR section
+
+#### INTERACTION: p1-data-model
+
+**Type:** probe_loop (engine: `probe-protocol.md`; coverage dimension **D7**)
+**Depends on:** `p0-probe` exited
+**Target:** Key entities for v1 (per bounded context from D4), their relationships (one-to-many / many-to-many), expected volume class (K rows / M rows / G rows / unknown), write frequency, and **PII/sensitive fields** (names, emails, gov IDs, amounts, biometrics) with a draft data-classification per entity.
+**Pre-step (agent — before asking):** From D4 capabilities + doc 01, infer candidate entities (label `assumed` when not explicitly stated); ask ≤5 questions per batch — entity list confirmation, volume class, relationship shape, PII fields, retention needs.
+**Record into:** doc 01 §Data model (provisional), `PROBE_LEDGER.md` (D7 row), `UNKNOWNS.md` (unresolved entities); PII findings feed the P4 `data-classification` standard and D7's "what good looks like"
+**Exit when:** entities + volume class + PII draft identified **or** user defers (deferred → UNKNOWNS)
+**Feeds:** `p1-integrations` (data sensitivity of exchanges), `p2-database` (engine + sizing), `p2-data-services` (cache/queue/search need), P4 data-classification, feature SPEC §Data model
 
 #### INTERACTION: p1-integrations
 
@@ -460,13 +491,59 @@ Mirror vendor artifacts under `.work/docs/integration/<vendor>-<version>/` + `MA
 
 **Q:** Backend stack?
 **Type:** single_select
+**Pre-step (agent — before asking, per [Recommendation protocol](#recommendation-protocol)):** derive the recommendation from evidence — D4 capabilities (workload shape: CRUD vs compute-heavy vs real-time), D8 constraints (team skills/provenance stated in probe), D5 targets (concurrency, latency, throughput), `p1-integrations` (SDK maturity per vendor). Present `**Recommendation:** <option> — <rationale cited at operator answers>` before the options; the default below is a fallback only when evidence is neutral (label it `assumed`).
 **Options:**
 - `python-fastapi` | Python + FastAPI
 - `ts-node` | TypeScript + Node.js
 - `go` | Go
 - `rust` | Rust
 - `csharp` | C# + .NET
-**Default:** python-fastapi
+**Default:** python-fastapi (fallback when evidence-neutral)
+
+#### INTERACTION: p2-database
+
+**Q:** Database engine for the primary store?
+**Type:** single_select + free_text follow-up
+**Pre-step (agent — before asking, per [Recommendation protocol](#recommendation-protocol)):** derive the recommendation from `p1-data-model` (D7: entities, volume class, relationships, PII) + `p1-nfr` (D5: latency, consistency, availability) + tenancy intent:
+- Relational + transactional + structured relationships → `postgres`
+- Read-heavy analytics / flexible documents / schema drift → consider `mongodb`
+- Small embedded single-user / local tool → `sqlite`
+- Existing org standard (stated in D8 or probe) → that engine, cite it
+- **Default recommendation:** `postgres` unless the evidence above points elsewhere (state *why* in the recommendation line; label `stated` vs `assumed`)
+**Options:**
+- `postgres` | PostgreSQL | Relational, transactional, RLS friendly; default for most SaaS/CRUD + analytics workloads
+- `mysql` | MySQL | Relational; existing-org-standard or managed-vendor preference
+- `sqlite` | SQLite | Embedded single-node; low-volume, local/CLI, prototype
+- `mongodb` | MongoDB | Document store; flexible schema, read-heavy analytical shapes
+- `<other>` | free_text | Operator names the engine (cite their reason)
+
+**Follow-up (mandatory ≤5 questions, only the gaps):** expected volume/size now vs 3y (from D7 class), read:write ratio, transactionality (bank-like vs log-like), managed vs self-hosted preference, existing team experience with the engine (unknown → guidance offered).
+**Depends on:** `p1-data-model` + `p1-nfr` exited
+**Record into:** ADR (backend-stack or its own `-database` ADR), `UNKNOWNS.md` when deferred
+**Conflict rule:** operator picks an engine that contradicts volume/consistency evidence → ask once, then record divergence in `RISK_REGISTRY.md` + `UNKNOWNS.md` (Recommendation protocol rule 4).
+
+#### INTERACTION: p2-data-services
+
+**Q:** Supporting data services beyond the primary store (cache / queue / search / object storage)?
+**Type:** multi_select
+**Pre-step (agent — before asking, per [Recommendation protocol](#recommendation-protocol)):** for each service class, decide **recommend | none** from evidence, then present one combined recommendation line per class:
+- **Cache** — recommend `redis` when: D5 latency budget that a hot-read path cannot meet from the DB alone (e.g. p95 target below DB round-trip), read-heavy repeatable queries (catalog/dashboard per D4), or rate-limited third-party calls (`p1-integrations`). Else `none`.
+- **Queue / async** — recommend when: `p1-integrations` includes webhooks/event-driven partners, or D4 capabilities include background jobs / deferred work / email / imports. `redis-streams` (same infra, small) vs a dedicated broker (rabbitmq / SQS / PubSub — large volume, durability SLAs).
+- **Search** — recommend when: D4 includes free-text search over large collections, or D7 volume class is G+ rows with search UX. `postgres-fulltext` (small, zero new infra) vs `meilisearch`/`typesense` (fast starter) vs `elasticsearch`/`opensearch` (large/analytical). Else `none`.
+- **Object storage** — recommend when: `p1-integrations` = file-exchange, or D4 includes file/image upload, exports, or backups. `s3` / `gcs` / `local-minio` per `p2-hosting`. Else `none`.
+**Options:**
+- `cache-redis` | Redis cache | Hot-read offload, rate-limit buffering, session store
+- `queue-redis-streams` | Redis Streams | Lightweight async/jobs when Redis already chosen
+- `queue-broker` | Dedicated broker (RabbitMQ / SQS / PubSub) | Durable high-volume async; pick per `p2-hosting`
+- `search-postgres` | Postgres full-text | Small collections, zero new infra
+- `search-standalone` | Meilisearch / Typesense / Opensearch | Dedicated search engine; elaborate in follow-up
+- `storage-s3` / `storage-gcs` | Object storage | Files, exports, uploads (cloud per `p2-hosting`)
+- `storage-minio` | MinIO (self-hosted) | Object storage on bare/VPS
+- `none` | None | No supporting services in v1 (only when evidence implies none — Recommendation protocol rule 5)
+**Follow-up (≤5 questions, per selected class):** expected volume/rate, durability vs speed preference, retention/lifecycle needs, any org standard (`stated` vs `assumed`).
+**Depends on:** `p1-data-model`, `p1-nfr`, `p1-integrations`, `p2-database` exited
+**Record into:** ADR (`-data-services` ADR), `UNKNOWNS.md` when deferred; selected services also feed P5 compose proposal and P4 observability
+**Default:** `none` per class only when the pre-step finds no evidence (rule 5); otherwise the recommended option is presented for confirmation.
 
 #### INTERACTION: p2-frontend
 
@@ -595,12 +672,14 @@ Create the files per the proposal. Update HANDOFF and NEXT to reflect approval.
 
 Doc 01 sections: Audience, Assumption ledger, Scope, Risks; heading **Architecture directions (non-prescriptive - architecture foundation in doc 04)** per [Terminology](#terminology-required--prevents-confusion-with-plan-master). Doc 04: Bounded contexts, decisions register §13, foundation-ready gate §14 - title may say "plan" but role is **architecture foundation**, not `*-full-plan.md`.
 
-**Greenfield questions:** `p1-integrations`, `p1-adjacent` and IF branch for gov-api / file-exchange - see `reference.md` § Phase 1.
+**Greenfield questions:** `p1-nfr`, `p1-data-model`, `p1-integrations`, `p1-adjacent` and IF branch for gov-api / file-exchange - see `reference.md` § Phase 1.
 
 ### GATE: p1
 
 - [ ] Scope doc (01) exists; uses **architecture foundation in doc 04** wording (not "full plan in doc 04")
 - [ ] Architecture foundation doc (04) exists with bounded contexts + dependency direction
+- [ ] **NFR grill (`p1-nfr`, D5) run:** quantified targets recorded in doc 04 (or each target deferred with UNKNOWNS entry + owner)
+- [ ] **Data-model grill (`p1-data-model`, D7) run:** v1 entities + volume class + PII draft recorded (or deferred with UNKNOWNS entry + owner)
 - [ ] 01↔02↔03↔04 cross-linked
 - [ ] Integration mirror + manifest (if applicable)
 - [ ] Open questions explicit in `UNKNOWNS.md` (synced from doc 01 assumption ledger)
@@ -617,17 +696,18 @@ Doc 01 sections: Audience, Assumption ledger, Scope, Risks; heading **Architectu
 ```
 {DECISIONS_ROOT}/README.md
 {DECISIONS_ROOT}/YYYYMMDD-001-backend-stack.md
-{DECISIONS_ROOT}/YYYYMMDD-002-*.md …
+{DECISIONS_ROOT}/YYYYMMDD-002-*.md …           ← database + data-services ADRs included when chosen
 ```
 
 ADR: Context → Decision → Consequences → Alternatives → References. Status: `Proposed | Decided | Deferred | Superseded`.
 
-**Greenfield questions:** `p2-backend`, `p2-frontend`, `p2-hosting`, `p2-tenancy`, `p2-locales` - see `reference.md` § Phase 2.
+**Greenfield questions:** `p2-backend`, `p2-database`, `p2-data-services`, `p2-frontend`, `p2-hosting`, `p2-tenancy`, `p2-locales` - see `reference.md` § Phase 2.
 
 ### GATE: p2
 
 - [ ] ADR index current
 - [ ] Stack, hosting, tenancy ADRs **Decided**
+- [ ] Database + data-services ADRs **Decided** or **Deferred** (deferred entries in `UNKNOWNS.md` with what they block)
 - [ ] Deferred ADRs document what they block (entries in `UNKNOWNS.md`)
 - [ ] Major ADRs trace to business goals / foundation scope
 
@@ -707,6 +787,7 @@ Optional: `{PLANS_ROOT}/operations/YYYYMMDD-cpa-shortlist.md`, `YYYYMMDD-regulat
 ### GATE: p5
 
 - [ ] Docker approved + files created, OR bare-metal documented, OR approval pending in HANDOFF
+- [ ] Compose/bare-metal plan covers primary store + any `p2-data-services` selections (cache/queue/search/storage)
 - [ ] Sandbox runbook if external integration
 - [ ] Ports chosen, .env.example committed
 - [ ] Operational/deployment risks in `RISK_REGISTRY.md`
@@ -962,7 +1043,7 @@ Use when the user asks to **certify**, **verify for plan-master**, or **plan-mas
 3. **Planning registries third** — create empty `{PLANS_ROOT}/ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` from templates in [Planning registry templates](#planning-registry-templates) (idempotent if already present). **Required before `p0-probe`** — probe records into these files.
 4. **Product grill fourth** — run `p0-probe` (probe-protocol loop on D1–D4 + D8 only). Ask until product intent, audience, scope, and core capabilities are understood well enough to infer integrations — or the user defers. **Hard stop:** no `p1-integrations` or `p2-*` until `p0-probe` exits.
 5. Create the **P0 initial scope** mini-plan at `{PLANS_ROOT}/foundation/YYYYMMDD-01-<project-slug>-initial-scope.md` (foundation doc 01) after `p0-intent` (update through `p0-probe`). Add placeholder sections for architecture directions (filled in later phases). **Do not** write `{PROMPTS_ROOT}/initial.md` — that path is user-owned scratch; skills read doc 01 instead.
-6. **Phase 1 integrations fifth** — run `p1-integrations` only after step 4: agent **infers** likely integrations from product answers, presents the list with rationale, then grills the user on each selected integration.
+6. **Phase 1 grills sixth** — after step 4, run `p1-nfr` (D5) and `p1-data-model` (D7) first (no tech yet): quantified NFR targets + key entities/sensitivity become the evidence base for every later recommendation. Then run `p1-integrations` (agent **infers** likely integrations from product answers, presents the list with rationale, then grills the user on each selected integration).
 7. Walk remaining phases P1→P6; at each **GATE**, present checklist + shared integrity; wait for approval before the next phase.
 8. Use **Assumption ledger** in foundation doc 01; sync to `ASSUMPTIONS.md` at GATE p1.
 9. Apply [Hallucination prevention](#hallucination-prevention) and [Traceability requirement](#traceability-requirement) throughout.
