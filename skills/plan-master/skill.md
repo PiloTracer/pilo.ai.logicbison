@@ -330,6 +330,8 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 4. Do not mark **Approved** until P5 **pass** (or documented waivers).
 5. Update HANDOFF **Repository state** only if user asks or `session-control` **close** runs.
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Probe protocol

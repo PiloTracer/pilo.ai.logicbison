@@ -1,6 +1,7 @@
 # REPLACE:FEATURE_NAME - Feature SPEC
 
 **Status:** Draft  
+**Needs:** REPLACE:NEEDS or "nothing"  
 **Owner:** REPLACE:OWNER_ROLE  
 **ADRs referenced:** REPLACE:ADR_LIST or -  
 **Related plans:** REPLACE:PLAN_LINKS
@@ -114,3 +115,9 @@ REPLACE:OPEN_QUESTIONS
 | Concept id | Applies | Notes |
 |------------|---------|-------|
 | MOD-06 | yes | AI-assisted implementation |
+
+---
+
+## Next action
+
+<exactly one action — typically `@feature-spec review - <this SPEC path>` while in review, or: none — approved and scheduled for implementation>

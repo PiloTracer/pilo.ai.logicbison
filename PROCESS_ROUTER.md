@@ -97,7 +97,7 @@ The verb is optional - `@process-router - <question>` is enough. Aliases: `ask`,
 | `concept-run` | Run MOD-01…07 prompts |
 | `db-migration` | Idempotent SQL scripts |
 | `dev-stack` | Local Docker helper |
-| `deploy-basic` / `deploy-files` / `deploy-repo` | Thin-client / fat-client / full-repo deploy into target projects |
+| `deploy-basic` / `deploy-files` | Thin-client / fat-client deploy into target projects |
 
 Full registry: [`.ai/skills/README.md`](skills/README.md)
 

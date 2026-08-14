@@ -1,7 +1,7 @@
 # Local development stack - proposal
 
 **Status:** Draft · **Created:** YYYY-MM-DD  
-**Requires:** owner approval before creating `docker-compose.yml`, `Dockerfile.*`, `.env.example` (`.cursorrules` §Protected Files)
+**Needs:** owner approval before creating `docker-compose.yml`, `Dockerfile.*`, `.env.example` (`.cursorrules` §Protected Files)
 
 ---
 
@@ -44,3 +44,9 @@
 | Owner | pending | |
 
 After approval: create protected files; record in HANDOFF; run `@dev-stack` if script missing.
+
+---
+
+## Next action
+
+<exactly one action — typically `@dev-stack` after owner approval, or: none — awaiting owner approval>

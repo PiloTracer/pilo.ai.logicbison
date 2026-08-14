@@ -1,5 +1,9 @@
 # Response Clarity Protocol
 
+**Status:** Approved · 2026-08-14 · **Enforced by:** `skills/SKILL_DEPENDENCIES.md` § Operator handoff contract + `scripts/skill-functional-verify.py`
+
+Sibling protocol: `improve-clarity-of-documentation.md` (generated documents). This file is the equivalent for **chat responses**.
+
 ## Purpose
 After completing any task, the response must make it immediately obvious what — if anything — the user needs to do next. The user should never have to ask "what do you need from me?"
 
@@ -23,7 +27,10 @@ If the user must answer questions, number them in their own list, separate from 
 ## Rule 5 — Next Action Goes in Its Own Section
 If a specific command or action is required to proceed, isolate it visually at the end of the response, in the exact syntax to run/type. Do not bury it in prose.
 
-## Output Template
+## Rule 6 — Report Sections Do Not Replace the Close
+A report template's internal sections ("Follow-ups", "Remaining", "Recommended next") are report content. Any operator-required approval or question inside them must ALSO appear in the closing labeled sections below. The close is the contract; report sections never substitute for it.
+
+## Output Template — Form B (input needed)
 Use this skeleton whenever completing a task that requires further user input:
 
 ```
@@ -41,8 +48,8 @@ Use this skeleton whenever completing a task that requires further user input:
 `[exact command or action to run]`
 ```
 
-## When Nothing Is Needed
-If the task is fully complete and no user input is required, say so in a single line. Do not render empty sections.
+## When Nothing Is Needed — Form A
+If the task is fully complete and no user input is required, say so in a single line (e.g. `Next: nothing - work complete`). Do not render empty sections.
 
 ## Non-Negotiables
 - Never mix decisions and questions in the same list.

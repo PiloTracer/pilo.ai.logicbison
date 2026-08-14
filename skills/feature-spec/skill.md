@@ -190,6 +190,8 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 4. Do **not** edit the original SPEC file.
 5. Cross-link from amendment to base SPEC and any ADR.
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Status protocol

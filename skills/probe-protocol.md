@@ -6,6 +6,8 @@
 
 **Tool-agnostic** (Cursor, Claude Code, opencode, Codex). **Read+write planning artifacts only** - never application code, migrations, or docker.
 
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+
 ---
 
 ## What probe is / is not
@@ -142,7 +144,9 @@ A dimension reaching **confirmed/high** must cite the evidence that justifies it
 - Updated <ledger path> · dimensions touched: D5, D8
 
 ### Next
-- <continue (run probe again) | gate reachable: run @<skill> certify/status | owner blockers: U9>
+- continue (run probe again) | gate reachable: run @<skill> certify/status | owner blockers: U9
+
+**Next step:** @<skill> probe
 ```
 
 ---

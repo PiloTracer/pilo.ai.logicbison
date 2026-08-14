@@ -57,6 +57,8 @@ Execute **concept pack** procedures under `.ai/concepts/<name>/prompt.md`. Regis
 2. Output compact table: **If you are about to…** | **MOD id** | **Output goes to** | **Required?**
 3. Point to `@process-router` for "which one do I need?" without a specific MOD id.
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Status protocol
@@ -64,6 +66,8 @@ Execute **concept pack** procedures under `.ai/concepts/<name>/prompt.md`. Regis
 1. Read `NEXT.md` § `### Concept / NFR registry (this iteration)` if present.
 2. List rows where `Applies` ≠ n/a and `Status` = pending.
 3. If no iteration block, report "no active iteration registry" and suggest `@concept-run list`.
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 

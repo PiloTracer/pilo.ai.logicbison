@@ -71,3 +71,9 @@ Map global rules to this project. List any **project overrides** in HANDOFF or a
 | Next foundation doc | `*-02-*` integration (if external APIs) |
 | Architecture proposal | `*-04-foundation-architecture.md` |
 | Registries | `ASSUMPTIONS.md`, `RISK_REGISTRY.md`, `UNKNOWNS.md` |
+
+---
+
+## Next action
+
+`@plan-foundation continue` (foundation doc 02 - integration resources) — or: none — awaiting owner review

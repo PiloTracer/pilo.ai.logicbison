@@ -1,6 +1,7 @@
 # ADR REPLACE:NNN - REPLACE:SHORT_TITLE
 
 **Status:** Proposed · YYYY-MM-DD  
+**Needs:** REPLACE:NEEDS or "nothing"  
 **Owner:** REPLACE:OWNER  
 **Supersedes:** -
 
@@ -32,3 +33,7 @@ We will REPLACE:DECISION_STATEMENT.
 
 - Foundation doc 04 §REPLACE:SECTION
 - `.work/features/<slug>/…-SPEC.md` (if applicable)
+
+## Next action
+
+<exactly one action — typically: reference this ADR from the active plan / foundation doc 04 §ADR register, or: none — decision accepted and recorded>

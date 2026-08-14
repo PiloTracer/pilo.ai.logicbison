@@ -26,7 +26,7 @@ Two-direction deploy of the `.ai` framework into a target project so the project
 
 **Source not modified.** deploy-files only writes to the **target**. The source `.ai` is read-only (script enumerates it via `git ls-files`).
 
-**Contrast with `deploy-repo`:** `deploy-files` copies only the `.ai/` directory (no VCS artifacts). Use `@deploy-repo clone` when you need the full repo including `.git` and `.github/`.
+**Scope:** `deploy-files` copies only the `.ai/` directory content (no VCS artifacts, no `.github/`). There is no full-repo deploy mode — mirror the repo via plain `git clone` out-of-band if needed.
 
 - **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
@@ -80,7 +80,7 @@ When invoked from a **target** project (cwd has no `.ai/scripts/deploy-files.sh`
 
 1. `bash <source>/.ai/scripts/deploy-files.sh "<resolved-target>"` (default) — or `--force` / `--update` per parse-invocation.
 2. **File set:** `git ls-files --cached --others --exclude-standard` from the source repo root — i.e. every file **not** excluded by `.gitignore`. Anything gitignored (`.credentials/`, `.private/`, `tmp/`, …) is never copied.
-3. **Skill-level omissions** (intentional, on top of the git-based set): `.github/`, `.gitignore`, `.gitattributes`, `.cursorrules`, `scripts/deploy-files.sh`, `scripts/deploy-repo.sh` (the deploy scripts themselves — run from source repo, not consumer concern).
+3. **Skill-level omissions** (intentional, on top of the git-based set): `.github/`, `.gitignore`, `.gitattributes`, `.cursorrules`, `scripts/deploy-files.sh` (the deploy script itself — run from source repo, not consumer concern), `agent.os.framework.md` (**framework source marker — never deployed**; a consumer carrying it would be misdetected as framework source by session-control repo-mode detection).
 4. **No-overwrite default:** `rsync --ignore-existing` skips any file already present in the target. Target-side customizations are preserved by construction. `--force` drops that flag (legacy idempotent overwrite; still no `--delete`). `--update` keeps no-overwrite and additionally emits the **merge candidate list** (existing-but-differing files) for § I3.
 
 ---

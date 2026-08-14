@@ -13,7 +13,7 @@
 | Language (primary) | Bash, Python 3 | 3.x | Shell verifiers + skill-functional-verify |
 | Framework | Agent OS | self-hosted | Skills, standards, scripts at repo root |
 | CI | GitHub Actions | ubuntu-latest | `framework-verify.yml` |
-| Hosting | Git mirror / archive | — | `deploy-repo` |
+| Hosting | Git (clone from origin) | — | out-of-band; no deploy skill (deploy-repo removed 2026-08-14) |
 
 ---
 

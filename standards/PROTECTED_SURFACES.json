@@ -3,12 +3,12 @@
   "description": "Machine-readable high-blast paths. code-verify and blast-radius-check.sh read this file. Extend per consumer repo; framework defaults below.",
   "rule": "fail_verify_without_owner_approval",
   "paths": [
+    "agent.os.framework.md",
     "templates/cursorrules.template",
     "templates/bootstrap.sh",
     "skills/SKILL_DEPENDENCIES.md",
     "scripts/deploy-files.sh",
     "scripts/deploy-basic.sh",
-    "scripts/deploy-repo.sh",
     "scripts/install-opencode-config.sh",
     "scripts/framework-verify.sh",
     "scripts/install-git-hooks.sh",

@@ -58,7 +58,7 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 | `opencode.json` | `opencode.json.template` via `install-opencode-config.sh` | **Bootstrap:** create if missing. **Update:** `--sync-paths` only (framework paths); never `--force` unless operator requests. **`.opencode/` MCP dir:** never touched — use `@project-query-setup`. |
 | **Local `.ai/` directory** | **never created** | n/a — thin-client only; skills resolve from `$AGENT_OS_SOURCE` |
 
-**Explicitly NOT copied (stay in source, loaded at runtime):** `skills/**`, source `standards/**` (the framework's template/example docs), `concepts/**`, `docs/guides/**` (workflow guides), `scripts/**`, `templates/**`, `SKILL_DEPENDENCIES.md`, root `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `.github/`, `.gitignore`, `.gitattributes`. Do not confuse framework source `standards/` with `.work/standards/` — the latter is the target's **own** future deliverables under project memory, never sourced from or synced with the framework.
+**Explicitly NOT copied (stay in source, loaded at runtime):** `skills/**`, source `standards/**` (the framework's template/example docs), `concepts/**`, `docs/guides/**` (workflow guides), `scripts/**`, `templates/**`, `SKILL_DEPENDENCIES.md`, root `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `.github/`, `.gitignore`, `.gitattributes`, and `agent.os.framework.md` (the **framework source marker** — never written to a target; a consumer carrying it would be misdetected as framework source). Do not confuse framework source `standards/` with `.work/standards/` — the latter is the target's **own** future deliverables under project memory, never sourced from or synced with the framework.
 
 ---
 
@@ -66,7 +66,7 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 
 | Condition | Action |
 |-----------|--------|
-| Source `templates/cursorrules.template` missing | **Block**: source is not a valid `.ai` framework root |
+| Source `agent.os.framework.md` or `templates/cursorrules.template` missing | **Block**: source is not a valid `.ai` framework root (the marker file identifies framework source; the template is needed functionally to write the target `.cursorrules`) |
 | Target dir does not exist | **Block**: report missing path |
 | Target already has local `.ai/skills/` | **Warn** fat-client leak: target was previously bootstrapped fat; thin-client would duplicate. Ask user to confirm intent (proceed leaves the local `.ai/` in place — deploy-basic does not delete it). |
 | Target `.cursorrules` exists + lacks `AGENT_OS_SOURCE=` line | In `update` mode → flag as **MERGE CANDIDATE** (the Source-resolution section is missing); in default mode → skip (preserve) and report that source-resolution is not wired. |
@@ -75,7 +75,7 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 
 ## I1 — Bootstrap protocol
 
-1. Resolve source `AI_ROOT` (explicit `AI_SOURCE` env, else script's parent). Validate `templates/cursorrules.template` exists.
+1. Resolve source `AI_ROOT` (explicit `AI_SOURCE` env, else script's parent). Validate `agent.os.framework.md` (framework source marker) and `templates/cursorrules.template` exist.
 2. Resolve target = `REPO_ROOT` of the consumer (cwd for in-place, or the named path for outbound).
 3. Write `.cursorrules` into the target from the template, substituting `AGENT_OS_SOURCE=REPLACE_BASICSOURCE` → `AGENT_OS_SOURCE=<absolute AI_ROOT>`. **No-overwrite** if `.cursorrules` exists; `--force` overwrites.
 4. Run the `.work/` + `DOCS_TECH_STACK.md` scaffold via `BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT=<target> bash <source>/templates/bootstrap.sh` (bootstrap's `copy_if_missing` enforces no-overwrite; the env flag keeps it from re-writing `.cursorrules` that we just wrote with the substituted pointer).

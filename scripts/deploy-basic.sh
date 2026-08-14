@@ -154,6 +154,11 @@ if [[ ! -d "$DEST_ROOT" ]]; then
 fi
 
 # .cursorrules template + .work/ skeleton templates come from source.
+# The framework source marker identifies a valid .ai framework root.
+if [[ ! -f "${AI_ROOT}/agent.os.framework.md" ]]; then
+  echo "ERROR: source .ai missing agent.os.framework.md (framework source marker) at $AI_ROOT" >&2
+  exit 1
+fi
 TPL_CURS="${AI_ROOT}/templates/cursorrules.template"
 if [[ ! -f "$TPL_CURS" ]]; then
   echo "ERROR: source .ai missing templates/cursorrules.template at $AI_ROOT" >&2

@@ -1,5 +1,7 @@
 # Documentation Clarity Protocol
 
+**Status:** Approved · 2026-08-14 · **Enforced by:** `skills/SKILL_DEPENDENCIES.md` § Document clarity contract + `scripts/skill-functional-verify.py` (`DOC_GENERATING` set)
+
 ## Purpose
 Every generated document (plan, proposal, tutorial, guide, reference, SPEC, ADR) must make it immediately obvious what it is, what state it is in, and what — if anything — the reader must do next. The reader should never have to ask "what is this for, and what do you need from me?"
 

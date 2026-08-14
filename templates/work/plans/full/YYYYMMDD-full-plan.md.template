@@ -206,3 +206,9 @@ Large matrices MAY move to `{PLANS_ROOT}/full/YYYYMMDD-full-plan-trace.md` with 
 ## Appendix - Registries reference
 
 Link only - do not fork content: `{PLANS_ROOT}/ASSUMPTIONS.md`, `{PLANS_ROOT}/RISK_REGISTRY.md`, `{PLANS_ROOT}/UNKNOWNS.md`.
+
+---
+
+## Next action
+
+`@code-implementation plan - M1` (after owner approval) — or: none — awaiting owner approval

@@ -68,28 +68,11 @@ If the path already includes `.ai`:
 @deploy-files copy - /absolute/path/to/my-project/.ai
 ```
 
-## Full repo — with .git and .github
-
-### Clone (full git mirror — requires origin remote)
-
-```text
-@deploy-repo clone - /absolute/path/to/destination
-# Full git clone preserving history, branches, tags
-```
-
-### Archive (snapshot — no remote needed, includes .github/ and .cursorrules)
-
-```text
-@deploy-repo archive - /absolute/path/to/destination
-# git archive extract — everything except .git directory
-```
-
 ## Check deploy status
 
 ```text
 @deploy-basic status
 @deploy-files status
-@deploy-repo status
 ```
 
 ## Next steps in the target project
@@ -145,6 +128,4 @@ Sister frameworks (`.ai.ui`, `.ai.biz`, `.ai.soc`) are added to `opencode.json` 
 # Fat-client outbound (from source):
 @deploy-files copy - /home/user/work/ecommerce-platform
 @deploy-files copy - /home/user/work/ecommerce-platform/.ai
-@deploy-repo clone - /home/user/work/mirror
-@deploy-repo archive - /home/user/work/internal-admin
 ```

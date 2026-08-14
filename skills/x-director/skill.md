@@ -65,6 +65,8 @@ The x-director knows about every framework in the workspace. **Path resolution i
 | `status` | Report state of all installed frameworks: bootstrap, readiness gates, active iterations; mark uninstalled frameworks |
 | `help` | Display this skill's purpose, framework registry, and invocation examples |
 
+End the `status` report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Free-text intake contract

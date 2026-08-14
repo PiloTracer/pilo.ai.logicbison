@@ -7,8 +7,9 @@
 # by construction, not a hand-maintained exclude list.
 #
 # Then strips skill-level intentional omissions (.github/, .gitignore,
-# .gitattributes, .cursorrules, deploy scripts) — these ARE tracked but are
-# omitted from files-only deploy; deploy-repo covers the full-repo case.
+# .gitattributes, .cursorrules, deploy scripts, agent.os.framework.md) — these
+# ARE tracked but are omitted from files-only deploy. The framework source
+# marker agent.os.framework.md must never reach a consumer project.
 #
 # Default = NO-OVERWRITE: existing files in the target are skipped (target-side
 # customizations are preserved by construction). Use --force for the legacy
@@ -145,13 +146,15 @@ fi
 # --exclude-standard  : skip untracked files that .gitignore excludes
 # Net set = every file not excluded by .git → enforces the invariant.
 # Skill-level excludes are intentional omissions of otherwise-tracked files:
-#   .github/      — CI/VCS, shipped via @deploy-repo (full-repo mode) only
+#   .github/      — CI/VCS, not consumer concern
 #   .gitignore    — framework-repo hygiene, not consumer concern
 #   .gitattributes — same
 #   .cursorrules  — created in target by @project-bootstrap init from template
-#   scripts/deploy-files.sh, scripts/deploy-repo.sh — the deploy scripts
-#                   themselves (run from source repo, not consumer concern)
-SKILL_EXCLUDE_REGEX='^(\.github/|\.gitignore$|\.gitattributes$|\.cursorrules$|scripts/deploy-files\.sh$|scripts/deploy-repo\.sh$)'
+#   scripts/deploy-files.sh — the deploy script itself (run from source repo,
+#                   not consumer concern)
+#   agent.os.framework.md — framework source marker; never deployed (a consumer
+#                   carrying it would be misdetected as framework source)
+SKILL_EXCLUDE_REGEX='^(\.github/|\.gitignore$|\.gitattributes$|\.cursorrules$|scripts/deploy-files\.sh$|agent\.os\.framework\.md$)'
 
 TMP_LIST="$(mktemp)"
 MERGE_CANDS="$(mktemp)"

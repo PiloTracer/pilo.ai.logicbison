@@ -166,12 +166,6 @@ mkdir -p "${DF_SMOKE}"
 )
 ok "deploy-files in-place creates .cursorrules + .work/"
 
-# --- 2b2. deploy-repo --status (read-only) ---
-note "deploy-repo --status"
-bash "${REPO_ROOT}/scripts/deploy-repo.sh" --status >/dev/null
-bash "${REPO_ROOT}/scripts/deploy-repo.sh" --status "${DF_SMOKE}" >/dev/null
-ok "deploy-repo --status reports source + optional target"
-
 # --- 2c. install-opencode-config via deploy-basic (thin-client) ---
 note "install-opencode-config (thin-client via deploy-basic)"
 OC_SMOKE="$(mktemp -d)"
@@ -287,22 +281,14 @@ if bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" bogus >/dev/null 2>
 fi
 ok "deploy-basic: bare verbs ≡ --flags, '-'/'--' separators ignored, any arg position"
 
-bash "${REPO_ROOT}/scripts/deploy-repo.sh" status - "${AV_SMOKE}" >/dev/null
-(
-  cd "${AV_SMOKE}"
-  bash "${REPO_ROOT}/scripts/deploy-repo.sh" archive - ./rp-target >/dev/null
-)
-[[ -d "${AV_SMOKE}/rp-target/skills" && -f "${AV_SMOKE}/rp-target/.cursorrules" ]] \
-  || die "deploy-repo archive - <path> did not populate target"
-[[ ! -e "${AV_SMOKE}/-" ]] || die "deploy-repo created a directory literally named '-' (separator not dropped)"
-ok "deploy-repo: '-' separator dropped safely; relative archive target extracts correctly"
-
 FILES_SMOKE="$(mktemp -d)"
 bash "${REPO_ROOT}/scripts/deploy-files.sh" copy - "${FILES_SMOKE}" >/dev/null
 [[ -d "${FILES_SMOKE}/.ai/skills" ]] || die "deploy-files copy - <path> did not populate .ai/"
+[[ ! -e "${FILES_SMOKE}/.ai/agent.os.framework.md" && ! -e "${FILES_SMOKE}/agent.os.framework.md" ]] \
+  || die "deploy-files deployed the framework source marker (agent.os.framework.md) — forbidden"
 bash "${REPO_ROOT}/scripts/deploy-files.sh" "${FILES_SMOKE}" update >/dev/null
 bash "${REPO_ROOT}/scripts/deploy-files.sh" status "${FILES_SMOKE}" >/dev/null
-ok "deploy-files: copy verb + bare update + status accepted"
+ok "deploy-files: copy verb + bare update + status accepted; framework marker excluded"
 rm -rf "${FILES_SMOKE}"
 
 # --- 2h. cursorrules-verify detects + repairs stale thin-client state ---

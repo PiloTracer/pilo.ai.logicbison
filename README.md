@@ -30,7 +30,7 @@ Then in chat:
 
 ## What you get
 
-- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (22 skills in total).
+- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (21 skills in total).
 - **Standards** - binding contracts (CONVENTIONS, FEATURE_STANDARD, observability, security) keep agent output honest.
 - **`.work/`** - the project's memory: plans, SPECs, ADRs, `HANDOFF.md`, `NEXT.md`. Survives session boundaries.
 - **Gates** - `plan-master-ready`, `implementation-ready`, milestone verify; skip a step and the agent **stops** with a redirect.
@@ -174,7 +174,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
 ### Skills at a glance
 
-All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
+All **21** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
 
 | Skill | One line | Typical invoke |
 |-------|----------|----------------|
@@ -195,7 +195,6 @@ All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |
 | **deploy-files** | Fat-client deploy: full `.ai/` copy or in-place bootstrap | `copy - <path>` · `update` · `status` |
 | **deploy-basic** | Thin-client deploy: `.cursorrules` + `.work/` + stack doc; opencode sync on `update` | `update` · `status` · `- <path>` |
-| **deploy-repo** | Full repo deploy via git clone or archive | `clone` · `archive` · `status` |
 | **project-query-setup** | Optional tools-project API key + MCP registration | `install` · `status` · `test` |
 | **tauri-development** | Domain guidance for Tauri desktop apps | *(read skill for IPC, shell, Rust conventions)* |
 | **ai-director** | Free-text orchestrator: routes to correct `.ai` skill chain | `- <free-text>` · `- <free-text> -y` (skip confirm) · `- <free-text> --dry-run` · `status` · `review-routing` · `help` |

@@ -349,10 +349,10 @@ Example: `Batch 3/5: M4-T4 done`
 **Completed:** M4-T2, M4-T3 (2 tasks)
 **Stopped because:** task gate fail on M4-T4 | blocked on M4-T5 | batch limit reached | all queued tasks done
 **Sweep verdict:** pass | fail | skip - no files changed   (see Batch-end sweep)
-**Next:** @code-implementation continue | @code-implementation continue - 3 | fix M4-T4 and re-run continue
+**Next step:** @code-implementation continue
 ```
 
-End the report with the Operator handoff close per SKILL_DEPENDENCIES.md. The `**Next:**` line is the Form A close; when the batch stopped on a blocker, gate fail, or protected file needing operator input, replace it with Form B (`**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) and enumerate the action there with `path:line`.
+End the report with the Operator handoff close per SKILL_DEPENDENCIES.md. The `**Next step:**` line is the Form B close - exactly one command; alternatives (e.g. `continue - 3`, fix-and-re-run) may be stated as report content above it, never as extra commands on the close line. When the batch stopped on a blocker, gate fail, or protected file needing operator input, add `**Needs your approval:**` / `**Needs your answer:**` above the close and enumerate the action there with `path:line`; the single `**Next step:**` still applies.
 
 ### Batch-end sweep
 

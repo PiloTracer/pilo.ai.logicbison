@@ -126,7 +126,7 @@ Read `{HANDOFF}` and `{ITERATION_CARRIER}` for context. Classify the request int
 | `dev-stack` | "Docker setup", "dev environment", "compose config" | `dev-stack` |
 | `tauri-development` | "Tauri", "desktop app", "IPC setup", "shell strategy", "webview config", "bridge server" | `tauri-development` |
 | `process-router` | "how do I...?", "where is...?", "what skill...?" | `process-router` |
-| `deploy` | "deploy framework to another project", "copy to repo", "clone to path" | `deploy-files` / `deploy-repo` |
+| `deploy` | "deploy framework to another project", "copy to repo" | `deploy-files` / `deploy-basic` |
 | `docs` | "document", "guide", "tutorial", "how-to", "write docs", "user guide", "create docs" | `@docs` |
 | `feature-doc` | "document this feature", "brownfield feature doc", "existing feature docs", "catalog feature" | `@feature-spec document - <slug>` |
 | `not-.ai` | Belongs to another framework: UI, design, frontend, business, strategy, social, community, etc. | Route to `@x-director` — it resolves sibling frameworks and channels to the correct director |
@@ -170,7 +170,7 @@ Map the classified bucket to the correct skill chain. Respect the dependency gra
 | "Run the architecture prompts" | `@concept-run list` → recommended MOD prompts → run |
 | "Tauri development guidance" | `@tauri-development` |
 | "How do I start an iteration?" | `@process-router - how do I start an iteration?` |
-| "Deploy Agent OS to my other project" | `@deploy-files copy - <path>` or `@deploy-repo clone - <path>` |
+| "Deploy Agent OS to my other project" | `@deploy-files copy - <path>` (fat-client) or `@deploy-basic - <path>` (thin-client) |
 | "Write a guide / tutorial / reference doc" | `@docs create guide - <slug>` or `@docs create tutorial - <slug>` or `@docs create reference - <slug>` |
 | "Document features, guides, and tutorials" | `@feature-spec status` → `@feature-spec document - <slug>` per feature + `@docs create guide - <slug>` per guide + `@docs create tutorial - <slug>` per tutorial |
 | "Complete feature definitions (brownfield)" | `@feature-spec status` → `@feature-spec document - <slug>` for each undocumented feature |
@@ -251,6 +251,8 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 | 4 | No file writes |
 | 5 | Suggested bucket-table changes listed, not applied |
 
+End the checklist response with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## New skill protocol
@@ -262,6 +264,8 @@ If the user request genuinely cannot be fulfilled by any registered `.ai` skill,
 3. **Create** the new skill folder and `skill.md` following the established pattern (YAML frontmatter with `name` and `description`, Modes table, Prerequisites, Hard rules, Completion checklist).
 4. **Register** the skill in `skills/README.md` table, `SKILL_DEPENDENCIES.md` dependency matrix, and `.cursorrules` § Skills table.
 5. **Verify** the registration consistency.
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 **Do not create a new skill when:**
 - The request maps to an existing skill or standard
@@ -287,6 +291,8 @@ If the user request genuinely cannot be fulfilled by any registered `.ai` skill,
 | 7 | `{HANDOFF}` updated with action summary including `Routing confidence` + `User correction` |
 | 8 | `{ITERATION_CARRIER}` § Recommended next updated if applicable |
 | 9 | New skill registered properly (if created) |
+
+End the checklist response with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ## See also
 

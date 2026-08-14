@@ -1050,6 +1050,8 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 8. Use **Assumption ledger** in foundation doc 01; sync to `ASSUMPTIONS.md` at GATE p1.
 9. Apply [Hallucination prevention](#hallucination-prevention) and [Traceability requirement](#traceability-requirement) throughout.
 10. Never write broad implementation code until **plan-master** master plan is **Approved** (foundation ends at plan-master-ready).
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 ---
 
 ## Foundation concepts (detailed)

@@ -101,7 +101,7 @@ and writes idempotent `commit_subject_refs` rows. So a commit authored with the 
 is automatically linked back to its task/ticket — no manual step required. Re-syncs never
 duplicate rows (`ON CONFLICT DO NOTHING`); linking failures never break the sync.
 
-**`close commit` / `commit` default scope (repo-mode dependent):** first detect mode — **framework source repo** ⇔ repo root contains both `templates/cursorrules.template` and `skills/session-control/skill.md`; anything else is a **consumer repo**. Framework source: stage all **safe** changes in the **whole repo** from `git status --porcelain` (e.g. `git add -A` minus exclusions), **including new untracked files/dirs**. Consumer: stage all safe changes under **`.work/`** (e.g. `git add .work/`) **plus** root-level `PROCESS_ROUTER.md`, `DOCS_TECH_STACK.md`, `CHANGELOG.md` **if present**. Either way: **not** HANDOFF/NEXT only; secrets/`tmp/`/protected files never staged. Agent **must** run shell `git add` + `git commit` and show SHA + post-commit `git status -sb`. See `skill.md` § C4b.
+**`close commit` / `commit` default scope (repo-mode dependent):** first detect mode — **framework source repo** ⇔ repo root contains `agent.os.framework.md` (the framework source marker); anything else is a **consumer repo**. Framework source: stage all **safe** changes in the **whole repo** from `git status --porcelain` (e.g. `git add -A` minus exclusions), **including new untracked files/dirs**. Consumer: stage all safe changes under **`.work/`** (e.g. `git add .work/`) **plus** root-level `PROCESS_ROUTER.md`, `DOCS_TECH_STACK.md`, `CHANGELOG.md` **if present**. Either way: **not** HANDOFF/NEXT only; secrets/`tmp/`/protected files never staged. Agent **must** run shell `git add` + `git commit` and show SHA + post-commit `git status -sb`. See `skill.md` § C4b.
 
 **Standalone `commit` / `commit push`:** same git behavior as `close commit` / `close commit push` but **skips** HANDOFF and NEXT updates. Session stays open.
 
@@ -566,7 +566,7 @@ Keep subject ≤72 chars (including ref prefix), imperative mood (`add`, `fix`, 
 
 **Default commit scope** (when modifier is `commit` or `commit push`, not `scoped`):
 
-0. **Detect repo mode:** framework source ⇔ repo root contains both `templates/cursorrules.template` and `skills/session-control/skill.md`; else consumer.
+0. **Detect repo mode:** framework source ⇔ repo root contains `agent.os.framework.md`; else consumer.
 1. Run `git status --porcelain` (from C1).
 2. Build the stage list:
    - **Framework source:** every path in the repo with status `M`, `A`, `D`, `R`, `C`, or `??` (untracked — includes **new untracked files/dirs**).

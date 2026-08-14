@@ -8,7 +8,7 @@
 
 <a id="operator-handoff-contract"></a>
 
-Implements the operator-provided **Response Clarity Protocol**. Every skill response that ends a turn must be **terse** and close with exactly one of two forms. No skill may invent a third.
+Implements the operator-provided **Response Clarity Protocol** (origin: `.work/prompts/improve-clarity-of-responses.md`). Every skill response that ends a turn must be **terse** and close with exactly one of two forms. No skill may invent a third.
 
 **Form A — nothing needed:** a single line stating no user input is required (e.g. `Next: nothing - work complete`). Do not render empty sections.
 
@@ -165,9 +165,6 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **deploy-basic** (outbound / in-place) | Target dir exists; source `templates/cursorrules.template` readable; warns if target has local `.ai/skills/` (fat-client leak) | - (no-overwrite; writes `AGENT_OS_SOURCE` pointer) |
 | **deploy-basic** `update` | Target `.cursorrules` exists (in-place); existing-but-differing local-surface files merged, source pointer re-synced if stale | - (no-overwrite + agent rules-aware merge; never wholesale-replace) |
 | **deploy-basic** `status` | - | Read-only |
-| **deploy-repo** `clone` | Target must not exist; source must have origin remote (I0 gate) | - |
-| **deploy-repo** `archive` | Target parent dir must exist (I0 gate) | - |
-| **deploy-repo** `status` | - | Read-only |
 | **project-query-setup** `install` / `key` / `test` / `register-mcp` | `python3` available (for MCP server); user has access to tools-project web UI | Optional integration — no gate blocks. On `install`: guides through key creation → key file → MCP registration → live test. |
 | **project-query-setup** `status` / `help` | - | Read-only |
 | **dev-stack** `init` | User request / `docker-compose*.yml` present; brownfield gate refuses to silently overwrite existing `bin/start.sh` | - |

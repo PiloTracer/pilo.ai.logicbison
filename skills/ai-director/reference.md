@@ -6,7 +6,7 @@ Full skill registry, dependency map, and routing tables for the `@ai-director` o
 
 ## 1. Complete skill registry (all `.ai` skills)
 
-All 17 registered skills + 2 deploy utilities. Source of truth: `skills/README.md`.
+All 21 registered skills. Source of truth: `skills/README.md`.
 
 | `@` handle | Folder | Role | Modes | Writes? | Depends on |
 |------------|--------|------|-------|---------|------------|
@@ -25,8 +25,12 @@ All 17 registered skills + 2 deploy utilities. Source of truth: `skills/README.m
 | `dev-stack` | `dev-stack/` | Generate/update isolated Docker compose dev helper | `init`, `status` | Yes (`bin/start.sh`) | `docker-compose*.yml` present |
 | `process-router` | `process-router/` | Read-only: "how do I…?" → right skill or guide | `- <question>`, `help` | Read-only | — |
 | `tauri-development` | `tauri-development/` | Domain guidance for Tauri desktop apps: IPC security, shell/webview patterns, Rust backend conventions, API bridge, event-driven state | `status`, `help` | Read-only | Tauri project with `src-tauri/` |
-| `deploy-files` | `deploy-files/` | Deploy `.ai` files to target project (clean rsync) | `copy - <path>`, `status` | Yes (target `.ai/`) | Source git repo |
-| `deploy-repo` | `deploy-repo/` | Full git-based deploy (clone/archive) | `clone - <path>`, `archive - <path>`, `status` | Yes (target repo) | Source git remote (for clone) |
+| `deploy-files` | `deploy-files/` | Deploy `.ai` files to target project (fat-client; in-place bootstrap or outbound copy; `update` = rules-aware merge under `.ai/`) | `copy - <path>`, `update`, `status`, bare (in-place bootstrap) | Yes (target `.ai/` + scaffold) | Source git repo |
+| `deploy-basic` | `deploy-basic/` | Thin-client bootstrap: `.cursorrules` + `.work/` + stack doc; skills load from `AGENT_OS_SOURCE` | `- <path>` (outbound), bare (in-place), `update`, `status` | Yes (target `.cursorrules`, `.work/`, `DOCS_TECH_STACK.md`) | Source framework marker + templates |
+| `docs` | `docs/` | Create guides, tutorials, reference docs under `.work/docs/` | `create guide - <slug>`, `create tutorial - <slug>`, `create reference - <slug>`, `status` | Yes (`.work/docs/`) | Docs templates; SPECs route to `@feature-spec` |
+| `project-query-setup` | `project-query-setup/` | Optional tools-project integration: API key, MCP registration, connectivity test | `install`, `status`, `key`, `test`, `register-mcp`, `help` | Yes (key file, `.opencode/mcp/`, agent config) | Optional; tools-project instance reachable |
+| `ai-director` | `ai-director/` | Free-text orchestrator: classify → confirm gate → skill chain | `- <request>`, `-y`, `--dry-run`, `status`, `review-routing`, `help` | Yes (`{HANDOFF}`, `{ITERATION_CARRIER}`) | `skills/README.md` registry |
+| `x-director` | `x-director/` | Cross-framework orchestrator; sole cross-framework routing authority | `- <request>`, `-y`, `--dry-run`, `status`, `help` | Yes (HANDOFF files across frameworks) | ≥1 framework dir (`.ai*`) |
 
 ---
 
@@ -67,7 +71,7 @@ All 17 registered skills + 2 deploy utilities. Source of truth: `skills/README.m
 | **Schema change** | `@db-migration init` (once) → `@db-migration create - <desc>` → `@db-migration verify` |
 | **Architecture review** | `@concept-run - MOD-01` through `MOD-07` as triggered |
 | **Plan audit + repair** | `@plan-verify foundation` → `@plan-verify master` → findings → `@plan-repair repair - from <mode>` → re-verify |
-| **Deploy framework** | `@deploy-files copy - <path>` or `@deploy-repo clone - <path>` → next steps in target |
+| **Deploy framework** | `@deploy-files copy - <path>` (fat-client) or `@deploy-basic - <path>` (thin-client) → next steps in target |
 
 ---
 
@@ -130,7 +134,7 @@ Before `@code-implementation complete`, ensure these all pass:
 | "Set up Docker" | `dev-stack` | `@dev-stack init` |
 | "Tauri desktop development" | `tauri-development` | `@tauri-development` |
 | "How do I...?" | `process-router` | `@process-router - <question>` |
-| "Deploy to /path/to/project" | `deploy` | `@deploy-files copy - /path/to/project` |
+| "Deploy to /path/to/project" | `deploy` | `@deploy-files copy - /path/to/project` (fat-client) or `@deploy-basic - /path/to/project` (thin-client) |
 | "I need a UI" | `not-.ai` | Route to `@x-director` (cross-framework router) |
 | "Business strategy work" | `not-.ai` | Route to `@x-director` (cross-framework router) |
 | "Community / social engagement work" | `not-.ai` | Route to `@x-director` (cross-framework router) |

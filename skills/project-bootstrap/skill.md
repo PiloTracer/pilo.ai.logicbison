@@ -94,6 +94,8 @@ End the report with the Operator handoff close (Form B with the overwrite/keep/a
 
 **Do not** run `plan-foundation greenfield` automatically unless the user asked for full bootstrap in the same message.
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Status protocol

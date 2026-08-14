@@ -332,11 +332,15 @@ End the status report with the Operator handoff close (Form A `Next: …` when a
 
 Same as Steps 3-4 from Install protocol. Lighter — no MCP registration, no API test (user runs `test` or `status` after).
 
+End the key report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Test protocol
 
 Same as Step 5 from Install protocol. Returns a yes/no + response snippet.
+
+End the test report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -350,6 +354,8 @@ Show the 5 MCP tools available and their descriptions. Then show one domain-spec
 | UI Design | "What projects need UI work?" → `list_projects` + `get_task_info(status="todo")` |
 | Business | "Which clients need attention?" → `list_projects` + `get_project_context()` per project |
 | Security | "Find tickets related to rate limiting" → `search_entities(q="rate limit")` |
+
+End the help output with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 

@@ -77,7 +77,7 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 
 **Goal text:** anything after `-` or on a new line after `start` (not the words `commit`/`push`/`scoped`).
 
-**Commit scope (repo-mode dependent):** detect mode first — **framework source repo** ⇔ repo root contains both `templates/cursorrules.template` **and** `skills/session-control/skill.md`; anything else is a **consumer repo** (fat or thin client).
+**Commit scope (repo-mode dependent):** detect mode first — **framework source repo** ⇔ repo root contains `agent.os.framework.md` (the framework source marker; never modified, never deployed); anything else is a **consumer repo** (fat or thin client).
 
 | Mode | Default commit scope (`commit` / `close commit`) |
 |------|--------------------------------------------------|
