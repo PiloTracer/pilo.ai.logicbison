@@ -101,7 +101,7 @@ and writes idempotent `commit_subject_refs` rows. So a commit authored with the 
 is automatically linked back to its task/ticket — no manual step required. Re-syncs never
 duplicate rows (`ON CONFLICT DO NOTHING`); linking failures never break the sync.
 
-**`close commit` / `commit` default scope:** stage all **safe** changes under the **`.work/` working directory** from `git status --porcelain` (e.g. `git add .work/`), **including new untracked files/dirs** — **not** HANDOFF/NEXT only, **not** the full repo tree (`.ai/` and app dirs stay unstaged). Agent **must** run shell `git add` + `git commit` and show SHA + post-commit `git status -sb`. See `skill.md` § C4b.
+**`close commit` / `commit` default scope (repo-mode dependent):** first detect mode — **framework source repo** ⇔ repo root contains both `templates/cursorrules.template` and `skills/session-control/skill.md`; anything else is a **consumer repo**. Framework source: stage all **safe** changes in the **whole repo** from `git status --porcelain` (e.g. `git add -A` minus exclusions), **including new untracked files/dirs**. Consumer: stage all safe changes under **`.work/`** (e.g. `git add .work/`) **plus** root-level `PROCESS_ROUTER.md`, `DOCS_TECH_STACK.md`, `CHANGELOG.md` **if present**. Either way: **not** HANDOFF/NEXT only; secrets/`tmp/`/protected files never staged. Agent **must** run shell `git add` + `git commit` and show SHA + post-commit `git status -sb`. See `skill.md` § C4b.
 
 **Standalone `commit` / `commit push`:** same git behavior as `close commit` / `close commit push` but **skips** HANDOFF and NEXT updates. Session stays open.
 
@@ -139,7 +139,7 @@ Expect: HANDOFF/NEXT updated; **Commit message** section with draft text; checkl
 session-control close commit
 ```
 
-Expect: HANDOFF/NEXT updated; agent runs `git add` for the **`.work/` scope** (incl. new untracked files/dirs) + `git commit`; report shows SHA and `git status -sb` (clean or explicit leftovers). **Fail** if only bookend files were committed while other safe `.work/` changes remain unstaged, or if files outside `.work/` were staged.
+Expect: HANDOFF/NEXT updated; agent runs `git add` for the **repo-mode scope** (whole repo in framework source; `.work/` + general root files in consumers; incl. new untracked files/dirs) + `git commit`; report shows SHA and `git status -sb` (clean or explicit leftovers). **Fail** if only bookend files were committed while other safe in-scope changes remain unstaged, or if out-of-scope files were staged.
 
 **Close with commit and push:**
 
@@ -223,7 +223,7 @@ Treat the next chat as a **new session**: do not assume unwritten goals from pri
 | When | Allowed |
 |------|---------|
 | `close` | audit only |
-| `close commit` | `git status --porcelain` → stage safe paths under `.work/` (default; incl. new untracked files/dirs) → `git commit` → `git status -sb` |
+| `close commit` | `git status --porcelain` → detect repo mode → stage safe in-scope paths (framework source: whole repo; consumer: `.work/` + root `PROCESS_ROUTER.md`/`DOCS_TECH_STACK.md`/`CHANGELOG.md` if present; incl. new untracked files/dirs) → `git commit` → `git status -sb` |
 | `close commit scoped` | `git add` HANDOFF + NEXT (+ session-listed paths only) |
 | `close commit push` | above + `git push` |
 | `commit` | same as `close commit` but **no** HANDOFF/NEXT update |
@@ -304,7 +304,7 @@ Do not invent project history.
 | Situation | Behavior |
 |-----------|----------|
 | Merge conflict markers in tree | close checklist **fail**; list files |
-| Only `.ai/` / app dirs changed | Outside `.work/` scope — session commit stages nothing; list as follow-up for a separate commit |
+| Only `.ai/` / app dirs changed | Consumer repo: outside `.work/` + general-files scope — session commit stages nothing; list as follow-up for a separate commit. Framework source repo: in scope (whole-repo mode) |
 | `credentials/` in `git status` | **fail** secrets check; do not summarize content |
 | User closes mid-task | HANDOFF notes "in-flight: …" under Repository state |
 | Multiple logical commits | close report suggests 2+ message blocks |
@@ -321,7 +321,7 @@ Do not invent project history.
 |--------|---------|-------------|
 | `close` expecting auto-commit | Default is draft only | `close commit` |
 | `close commit` but tree still dirty | Agent staged HANDOFF-only or skipped shell git | Re-run close; agent must follow C4b default scope |
-| `close commit` for bookend files only | Default commits `.work/` scope (all safe changes under `.work/`) | `close commit scoped` |
+| `close commit` for bookend files only | Default commits the repo-mode scope (framework source: whole repo; consumer: all safe changes under `.work/` + general root files) | `close commit scoped` |
 | `close push` without `commit` | Skill maps to commit+push | `close commit push` |
 | `commit` expecting HANDOFF update | Standalone commit skips HANDOFF/NEXT | Use `close commit` instead |
 | `commit push` expecting session close | Standalone commit keeps session open | Use `close commit push` instead |
@@ -433,7 +433,7 @@ Same as [C4b](#c4b--git-actions-modifiers-only) — default scope, commit via HE
 | 5 | Commit message shown | pass | always |
 | 6 | Task ref extracted | pass/skip | ref or no ref found |
 | 7 | Git commit | pass/fail/skip | modifier `commit`; SHA + `git status` evidence |
-| 8 | `.work/` scope staged | pass/fail/skip | leftover safe `.work/` paths listed |
+| 8 | Repo-mode scope staged | pass/fail/skip | leftover safe in-scope paths listed |
 | 9 | Git push (if requested) | pass/fail/skip | modifier `push` |
 
 ### Commit message
@@ -564,19 +564,26 @@ Keep subject ≤72 chars (including ref prefix), imperative mood (`add`, `fix`, 
 
 **Default commit scope** (when modifier is `commit` or `commit push`, not `scoped`):
 
+0. **Detect repo mode:** framework source ⇔ repo root contains both `templates/cursorrules.template` and `skills/session-control/skill.md`; else consumer.
 1. Run `git status --porcelain` (from C1).
-2. Build the stage list = every path **under `.work/`** with status `M`, `A`, `D`, `R`, `C`, or `??` (untracked — includes **new untracked files/dirs**) **except** paths matching:
-   - Secrets scan patterns (C1) - never add
-   - `tmp/`, `.obfuscation/output/` - never add unless user explicitly named them for commit
-   - Protected files per `{AGENT_RULES_FILE}` §Protected Files - **do not add**; list in close report as follow-up
-3. Stage the working directory (typical):
+2. Build the stage list:
+   - **Framework source:** every path in the repo with status `M`, `A`, `D`, `R`, `C`, or `??` (untracked — includes **new untracked files/dirs**).
+   - **Consumer:** every path **under `.work/`** with those statuses, **plus** root-level `PROCESS_ROUTER.md`, `DOCS_TECH_STACK.md`, `CHANGELOG.md` **if present**.
+   - In **both** modes **except** paths matching:
+     - Secrets scan patterns (C1) - never add
+     - `tmp/`, `.obfuscation/output/` - never add unless user explicitly named them for commit
+     - Protected files per `{AGENT_RULES_FILE}` §Protected Files - **do not add**; list in close report as follow-up
+3. Stage (typical):
    ```bash
-   git add .work/
+   # framework source
+   git add -A
+   # consumer
+   git add .work/ PROCESS_ROUTER.md DOCS_TECH_STACK.md CHANGELOG.md 2>/dev/null || git add .work/
    ```
-   Or stage explicit paths from step 2 if the diff is small. `git add .work/` naturally picks up new untracked files/dirs under `.work/`.
-4. **Do not** stage anything outside `.work/` (`.ai/`, app dirs) — the session commit is **`.work/`-scoped**; list out-of-scope paths in the close report as follow-ups.
+   Or stage explicit paths from step 2 if the diff is small. `git add -A` / `git add .work/` naturally pick up new untracked files/dirs in scope.
+4. **Do not** stage anything outside the repo-mode scope — in a consumer, `.ai/` and app dirs stay out of session commits; list out-of-scope paths in the close report as follow-ups.
 5. **Do not** default to HANDOFF + NEXT only - that is **`commit scoped`**, not default `commit`.
-6. If the only remaining dirty paths are excluded (protected / secrets) or outside `.work/`, commit what was staged and report exclusions.
+6. If the only remaining dirty paths are excluded (protected / secrets) or out of scope, commit what was staged and report exclusions.
 
 **Commit command shape:**
 
@@ -595,7 +602,7 @@ git log -1 --oneline
 | Check | pass when |
 |-------|-----------|
 | Commit created | `git log -1` shows new SHA |
-| Staging complete | No remaining `M`/`D`/`??` under `.work/` in safe paths from step 2, **or** report lists each leftover path and why (protected, secrets, outside scope, intentional WIP) |
+| Staging complete | No remaining `M`/`D`/`??` in safe in-scope paths from step 2 (framework source: whole repo; consumer: `.work/` + general root files), **or** report lists each leftover path and why (protected, secrets, outside scope, intentional WIP) |
 
 **On commit failure:** report hook output; do not claim close complete for git step; HANDOFF/NEXT updates still stand if already written.
 
@@ -651,7 +658,7 @@ If the repo uses plan-foundation conventions, run **status** (read-only) and att
 | 4 | Follow-ups listed | pass | |
 | 5 | Commit message shown | pass | always |
 | 6 | Git commit (if requested) | pass/fail/skip | modifier `commit`; SHA + `git status` evidence |
-| 6b | `.work/` scope staged (default `commit`) | pass/fail/skip | not `scoped`; leftover safe `.work/` paths listed |
+| 6b | Repo-mode scope staged (default `commit`) | pass/fail/skip | not `scoped`; leftover safe in-scope paths listed |
 | 7 | Git push (if requested) | pass/fail/skip | modifier `push` |
 | 8 | HANDOFF updated | pass/fail | |
 | 9 | NEXT updated | pass/fail | |
@@ -953,7 +960,7 @@ This mode is read-only: HANDOFF, NEXT, UNKNOWNS, and `.work/active-ref` are **no
 | **Close** | Large uncommitted diff → suggest commit split |
 | **Close** | User says "close without updating HANDOFF" → only allowed if they confirm; mark checklist item `skip` with reason |
 | **Close** | Protected files changed → flag for explicit owner review |
-| **Close** | `close commit` / `close commit push` → run C4b in shell after HANDOFF/NEXT; stage **`.work/` scope** |
+| **Close** | `close commit` / `close commit push` → run C4b in shell after HANDOFF/NEXT; stage per **repo-mode scope** (framework source: whole repo; consumer: `.work/` + general root files) |
 | **Close** | User expected commit but tree still dirty → **fail** item 6/6b |
 | **Commit** | `@session-control commit` → Run Commit protocol; **do not** update HANDOFF or NEXT |
 | **Commit** | No task ref found → Ask user once (M4/C4 priority 6) |

@@ -2,16 +2,19 @@
 name: session-control
 description: >-
   Open or close an AI working session with verified context load, HANDOFF and NEXT
-  updates, and optional git commit/push scoped to the `.work/` working directory.
-  Also supports standalone commit/push without closing (commit task ref, git add
+  updates, and optional git commit/push with repo-mode-dependent scope: the whole
+  repo in the Agent OS framework source repo, or the `.work/` working directory
+  plus root-level general files (PROCESS_ROUTER.md, DOCS_TECH_STACK.md,
+  CHANGELOG.md — if present) in consumer repos. Also supports standalone
+  commit/push without closing (commit task ref, git add
   + git commit + git push, no HANDOFF/NEXT update). `context` loads all mandatory
   context read-only and is uncommitted-aware (surfaces dirty-tree status without
   writing HANDOFF). Use when the user says session-control start, session-control
   close, @session-control start, close commit, close commit push, commit, commit
   push, or session-control context. Never commits unless the invocation includes
   commit. On commit, MUST run git add + git commit in the shell for all safe
-  changes under `.work/` — including new untracked files/dirs (not HANDOFF-only,
-  not full repo tree).
+  in-scope changes per repo mode — including new untracked files/dirs (not
+  HANDOFF-only).
 ---
 
 # session-control
@@ -27,7 +30,7 @@ Bookend AI work sessions so the next chat (or human) can resume without guessing
 **Hard rules:**
 
 - **Default close / default commit:** never `git commit` or `git push`. Only when invocation includes **`commit`** and/or **`push`** (see [Parse invocation](#parse-invocation)).
-- **`close commit` / `close commit push` / `commit` / `commit push`:** **MUST** run `git add` + `git commit` in the shell (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b) / [Commit protocol](#commit-protocol)), staging **`.work/` only** (default scope, incl. new untracked files/dirs). A dirty `.work/` tree after close with only a draft message is **fail**.
+- **`close commit` / `close commit push` / `commit` / `commit push`:** **MUST** run `git add` + `git commit` in the shell (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b) / [Commit protocol](#commit-protocol)), staging per **repo mode** (see [Parse invocation](#parse-invocation) § Commit scope): **whole repo** in the Agent OS framework source repo, **`.work/` + general root files** in consumer repos (both incl. new untracked files/dirs). A dirty in-scope tree after close with only a draft message is **fail**.
 - **Always** show the commit message - drafted, used for commit, or `none - working tree clean`.
 - **`commit` / `commit push` (standalone):** run git add + commit + push **without** updating HANDOFF or NEXT. Session stays open. Useful for mid-session checkpoints.
 - **Never commit with `type:` format when a task ref is known or could reasonably be asked for.** If the user provided a ref, or the branch/HANDOFF/github-registry contains one — use it. If no ref is known but the work clearly belongs to a task, ask the user once. Commits without refs are not linked to tasks/tickets and are invisible in the association UI.
@@ -60,11 +63,11 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 | `session-control` **start** - \<goal\> | start | - |
 | `@session-control` **close** | close | draft message only |
 | `session-control` **close** | close | draft message only |
-| `session-control` **close** **commit** | close | commit all **safe** changes under `.work/` (default scope - [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b)) |
+| `session-control` **close** **commit** | close | commit all **safe** in-scope changes per repo mode (default scope - [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b)) |
 | `session-control` **close** **commit** **scoped** | close | commit only HANDOFF + NEXT + paths listed in close report |
 | `session-control` **close** **commit** **push** | close | commit then push |
 | `session-control` **close** **push** | close | treat as **commit push** (`push` requires commit) |
-| `session-control` **commit** | commit | commit all safe changes under `.work/` (default scope), NO close |
+| `session-control` **commit** | commit | commit all safe in-scope changes per repo mode (default scope), NO close |
 | `session-control` **commit** **push** | commit | commit then push, NO close |
 | `@session-control` **context** | context | - |
 | `@session-control` **status** | status | - |
@@ -73,7 +76,14 @@ Normalize the user message to **verb** + optional **modifiers**. The word `sessi
 
 **Goal text:** anything after `-` or on a new line after `start` (not the words `commit`/`push`/`scoped`).
 
-**Commit scope:** default is **`.work/` only** — the working directory at repo root (all safe changed + **new untracked files/dirs** under `.work/`; e.g. `git add .work/`). Nothing outside `.work/` is staged (`.ai/`, app dirs stay out of session commits). Use **`commit scoped`** only when the user wants bookend files only.
+**Commit scope (repo-mode dependent):** detect mode first — **framework source repo** ⇔ repo root contains both `templates/cursorrules.template` **and** `skills/session-control/skill.md`; anything else is a **consumer repo** (fat or thin client).
+
+| Mode | Default commit scope (`commit` / `close commit`) |
+|------|--------------------------------------------------|
+| Framework source | **Whole repo** — all safe changed + **new untracked files/dirs** (e.g. `git add -A`, minus the exclusions below) |
+| Consumer | **`.work/`** plus root-level `PROCESS_ROUTER.md`, `DOCS_TECH_STACK.md`, `CHANGELOG.md` **if present** (e.g. `git add .work/ PROCESS_ROUTER.md DOCS_TECH_STACK.md CHANGELOG.md`, tolerating missing files) |
+
+Exclusions in both modes: secrets-scan paths (C1), `tmp/`, `.obfuscation/output/`, and protected files per §Protected Files — never staged by session commits; list them in the close/commit report as follow-ups. Note **`push` ships the whole branch** — scope only controls what enters the new commit. Use **`commit scoped`** only when the user wants bookend files (HANDOFF + NEXT) only.
 
 **Standalone commit:** `commit` / `commit push` run the same git steps as `close commit` / `close commit push` but **skip** HANDOFF and NEXT updates. The session remains open.
 
@@ -323,7 +333,7 @@ Close report template and checklist: [reference.md § Close protocol (detailed)]
 |------|----------|
 | **Start** | Prior HANDOFF says `Closed` → treat as new session; do not assume prior chat memory |
 | **Start** | Missing HANDOFF → offer to run `plan-foundation` greenfield or create minimal HANDOFF |
-| **Close** | `close commit` / `close commit push` → run C4b in shell after HANDOFF/NEXT; stage **`.work/` scope** |
+| **Close** | `close commit` / `close commit push` → run C4b in shell after HANDOFF/NEXT; stage per **repo-mode scope** (whole repo in framework source; `.work/` + general root files in consumers) |
 | **Commit** | User says `@session-control commit` → Run [Commit protocol](#commit-protocol); **do not** update HANDOFF or NEXT |
 
 Full table: [reference.md § Critical interactions](reference.md#critical-interactions).
@@ -335,7 +345,7 @@ Full table: [reference.md § Critical interactions](reference.md#critical-intera
 - Claiming "context loaded" without reading HANDOFF and NEXT
 - Closing session without updating HANDOFF and NEXT (on **close**)
 - **`close commit` without running `git commit`** or without a new SHA
-- **Staging outside `.work/`** (`.ai/`, app dirs) on a default commit — session commits are `.work/`-scoped
+- **Staging outside the repo-mode scope** on a default commit — in a consumer repo, session commits touch `.work/` + the general root files only (`.ai/`, app dirs stay out); the whole-repo scope applies **only** in the framework source repo
 - Omitting the commit message block from close/commit reports
 - Adding `Co-authored-by:` trailers
 
@@ -345,4 +355,4 @@ Full list: [reference.md § Anti-patterns](reference.md#anti-patterns).
 
 ## Project layout (convention)
 
-**`{WORK_ROOT}` = `.work/`** at repo root. See [reference.md § Project layout](reference.md#project-layout-convention). All session git commits are **scoped to `.work/`** (default scope).
+**`{WORK_ROOT}` = `.work/`** at repo root. See [reference.md § Project layout](reference.md#project-layout-convention). Session git commit scope is **repo-mode dependent** (see [Parse invocation](#parse-invocation) § Commit scope): whole repo in the framework source repo; `.work/` + general root files in consumers.

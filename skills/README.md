@@ -36,7 +36,7 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | plan-master | `plan-master/` | Master implementation plan, **probe** (plan-completeness loop), integrity, traceability; certifies **implementation-ready** |
 | plan-verify | `plan-verify/` | Plan audits: foundation, master, alignment, **coverage** (code→SPEC), **brownfield** (framework slots) |
 | plan-repair | `plan-repair/` | Fix plan gaps; **brownfield synthesis** from code/README/ROADMAP; optional formal certify later |
-| session-control | `session-control/` | Session open/close, HANDOFF, NEXT; `context` read-only load + uncommitted-aware; optional git (scoped to `.work/`) |
+| session-control | `session-control/` | Session open/close, HANDOFF, NEXT; `context` read-only load + uncommitted-aware; optional git (repo-mode scope: whole repo in framework source, `.work/` + general root files in consumers) |
 | db-migration | `db-migration/` | Idempotent numbered SQL migration scripts; no version table, no chain conflicts |
 | code-implementation | `code-implementation/` | Iteration execution: `NEXT.md` scope, task gates, completion |
 | tauri-development | `tauri-development/` | Domain guidance for Tauri desktop apps: IPC security, shell/webview patterns, Rust backend conventions, API bridge, event-driven state |

@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-07-06
+**Updated:** 2026-08-14
 
 ---
 
@@ -10,6 +10,8 @@
 
 | Item | Artifact |
 |------|----------|
+| session-control repo-mode commit scope (2026-08-14) | Whole-repo commits in framework source; `.work/` + general root files in consumers; `skills/session-control/{skill,reference}.md`, `.cursorrules`, `templates/cursorrules.template`, `skills/README.md`, `CHANGELOG.md` [Unreleased]; `framework-verify` + `skill-functional-verify` + `touch-scope-verify` pass |
+| plan-foundation evidence-based stack grills (2026-08-12, commit `70dc9a1`) | `skills/plan-foundation/{skill,reference}.md`, `.work/analysis/20260812-mod06-plan-foundation-stack-grill-gaps.md` |
 | Full framework audit + gap remediation (2026-07-06) | `.work/reports/full-audit-report.md`, `.work/analysis/20260706-mod06-full-audit.md`; `framework-verify` + `skill-functional-verify` + `touch-scope-verify` pass |
 | Agent OS bootstrap | `.work/` skeleton, `.cursorrules` from template |
 | Standalone commit verb + task-ref extraction + hook | `@session-control commit`/`commit push`; auto ref from HANDOFF/branch/prior commit; GitHub task registry discovery; `API_BASE_URL`; `prepare-commit-msg` hook; cursorrules Task Refs + readability rules; deployed to tools-project |
@@ -43,7 +45,7 @@
 
 | Priority | Item | Notes |
 |----------|------|-------|
-| **P1** | Deploy v0.5.2 layout consolidation + prior fixes to tools-project | `@deploy-files copy - /path` or `@deploy-basic update` — propagates `.work/standards/` + `.work/docs/integration/` layout, token-optimized rules, repaired `plan-foundation/skill.md`, thin-client script-path baking, legacy cursorrules path patching, **and** the master-plan-standard fix (fixed `full-plan.md.template`, `master-plan-verify.sh`). Resolve source path from the live `.ai` repo at invocation time (`deploy-files.sh`/`deploy-basic.sh` derive `AI_ROOT` from the invoked script path). |
+| **P1** | Deploy v0.5.2 layout consolidation + prior fixes to tools-project | `@deploy-files copy - /path` or `@deploy-basic update` — propagates `.work/standards/` + `.work/docs/integration/` layout, token-optimized rules, repaired `plan-foundation/skill.md`, thin-client script-path baking, legacy cursorrules path patching, the master-plan-standard fix (fixed `full-plan.md.template`, `master-plan-verify.sh`), **and** the repo-mode session-control commit scope (2026-08-14). Resolve source path from the live `.ai` repo at invocation time (`deploy-files.sh`/`deploy-basic.sh` derive `AI_ROOT` from the invoked script path). |
 | **P2** | ~~Cross-skill anchor-hygiene cleanup~~ | **Done 2026-07-06** — 8 skills repaired; promoted to `ANCHOR_CLEAN` in `skill-functional-verify.py` |
 | **P3** | ~~Clarify greenfield P0 registry-creation ordering~~ | **Done 2026-07-06** — greenfield step 3 creates registries before `p0-probe`; U2 closed |
 | **P4** | Live greenfield walkthrough | Run `@plan-foundation greenfield` end-to-end on a scratch/test project now that `skill.md` is structurally clean, to confirm the AIOS-1 question-order fix behaves correctly in practice (deferred this session in favor of closing) |
