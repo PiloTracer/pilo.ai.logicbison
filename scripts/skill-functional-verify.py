@@ -36,6 +36,15 @@ ANCHOR_CLEAN = {
     "session-control",
 }
 
+# Skills whose primary output is generated documents — must reference the
+# Document clarity contract (SKILL_DEPENDENCIES.md).
+DOC_GENERATING = {
+    "docs",
+    "plan-foundation",
+    "plan-master",
+    "feature-spec",
+}
+
 def strict_slug(text: str) -> str:
     """GitHub-accurate heading slug: does NOT collapse repeated hyphens
     (unlike github_slug below, which is lenient for legacy reference.md
@@ -122,6 +131,17 @@ for d in skill_dirs:
             fail += 1
         else:
             print(f"DEBT {name}: {issue} (pre-existing - see NEXT.md follow-up)")
+
+    # Operator handoff contract (SKILL_DEPENDENCIES.md) — every skill must
+    # reference it so operator-facing responses stay terse and enumerable.
+    if "Operator handoff" not in text:
+        print(f"FAIL {name}: missing Operator handoff contract reference")
+        fail += 1
+
+    # Document clarity contract — mandatory for document-generating skills.
+    if name in DOC_GENERATING and "Document clarity" not in text:
+        print(f"FAIL {name}: missing Document clarity contract reference")
+        fail += 1
 
 print(f"\n=== Trimmed skills ({len(TRIMMED)}) ===")
 for name in sorted(TRIMMED):

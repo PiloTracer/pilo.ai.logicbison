@@ -355,3 +355,5 @@ If master plan **missing** → **implementation-ready: no** - run **greenfield**
 | 2 | Foundation/plan read | pass/fail | paths |
 | … | | | |
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Any approval/question implied by **Recommended next** or **Owner blockers** must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in those sections.

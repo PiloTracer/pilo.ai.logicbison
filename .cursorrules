@@ -229,6 +229,7 @@ Skills (`code-implementation`, `code-verify`) must use these commands, not hardc
 - **On failure:** report exact error, diagnose root cause, fix, re-run.
 - **Scope:** declare scope first (§ Change safety); `touch-scope-verify` + `blast-radius-check` enforce it.
 - **Communication:** be concise; surface blockers early; label uncertainty; distinguish confirmed facts / inferences / proposals.
+- **Operator handoff (mandatory):** every response that ends a turn closes per `skills/SKILL_DEPENDENCIES.md` § Operator handoff contract — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line (Form A) when no input is needed. Decisions and questions never mixed; empty sections omitted.
 
 ---
 

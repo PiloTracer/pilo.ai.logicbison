@@ -1,6 +1,7 @@
 # REPLACE:PROJECT_NAME - Product adjacency (phased modules)
 
 **Doc:** foundation **03** · **Created:** YYYY-MM-DD
+**Status:** Draft · **Needs:** <owner review/approval or "nothing">
 
 **Purpose:** Optional product lanes beside the **core v1** slice - phasing, integration seams, explicit out-of-scope.
 

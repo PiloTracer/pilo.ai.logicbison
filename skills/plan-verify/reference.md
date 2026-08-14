@@ -257,6 +257,8 @@ Score each **canonical slot** against what exists on disk. Do not require formal
 
 ### Next step
 @plan-repair brownfield | @plan-repair brownfield - foundation | @project-bootstrap init (overwrite-missing)
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **High-priority gaps** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 
 **Verdict rules (brownfield):**
@@ -349,6 +351,8 @@ Record: **integrity:** pass | pass with waivers | fail
 ### Next step
 - pass / pass with gaps (waived): `@plan-foundation certify plan-master-ready` or `@plan-master greenfield` if already certified
 - fail: `@plan-repair repair - from foundation` or `@plan-repair foundation - <goal>`
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **Gaps** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 ---
 
@@ -437,6 +441,8 @@ Against `.ai/standards/20260519-MASTER_PLAN_STANDARD.md`:
 ### Next step
 - fail: `@plan-repair repair - from master` or `@plan-repair master - <goal>` or `@plan-master revise - <reason>`
 - pass + not Approved: `@plan-master continue` or owner approval workflow
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **Gaps** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 ---
 
@@ -497,6 +503,8 @@ When **BF0 = yes**:
 - Master wrong: `@plan-repair master - <reason>` or `@plan-master revise - <reason>`
 - NEXT wrong only: `@code-implementation plan - M{N}` (after master is source of truth)
 - Both: fix master first (tutorial §6 order)
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **Gaps** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 ---
 
@@ -588,6 +596,8 @@ For each surface, resolve **mapped slug** using this order:
 ### Next step
 - gaps: `@plan-repair repair - from coverage` (or `@plan-repair brownfield` when framework slots also missing)
 - pass: optional `bash scripts/framework-verify.sh` when validating Agent OS install
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **Unmapped surfaces** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 
 **Verdict rules:**

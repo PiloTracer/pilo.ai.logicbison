@@ -66,6 +66,8 @@ The repository is already partially bootstrapped. Choose how to proceed:
 - **`abort`** - exit silently
 ```
 
+End the report with the Operator handoff close (Form B with the overwrite/keep/abort choice as a `**Needs your approval:**` item + one `**Next step:**` command) per SKILL_DEPENDENCIES.md.
+
 3. On **`overwrite-missing`** (default safest): proceed to step B1 below, copying only files that don't exist.
 4. On **`overwrite-all`**: require an extra `confirm-overwrite-all` token in the same message; otherwise treat as `abort`.
 5. On **`keep`** / **`abort`**: exit; do not write.
@@ -109,6 +111,8 @@ Report:
 | Master plan | `.work/plans/full/*-full-plan.md` | |
 | Unfilled tokens | `rg 'REPLACE:' .cursorrules` count | |
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Unfilled `REPLACE:` tokens the operator must fill are enumerated as Form B items with `path:line`, not only listed in the table.
+
 ---
 
 ## Template index
@@ -131,3 +135,4 @@ Report:
 - **Never overwrite** existing `.work/` or `.cursorrules` without explicit user permission.
 - **Never commit** secrets; templates contain no credentials.
 - **Do not** mark foundation or implementation-ready - other skills own those gates.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.

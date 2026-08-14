@@ -28,6 +28,8 @@ Two-direction deploy of the `.ai` framework into a target project so the project
 
 **Contrast with `deploy-repo`:** `deploy-files` copies only the `.ai/` directory (no VCS artifacts). Use `@deploy-repo clone` when you need the full repo including `.git` and `.github/`.
 
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+
 ---
 
 ## Parse invocation
@@ -157,6 +159,8 @@ After I1 (no-overwrite copy) the script:
 | 8 | `update`: merge candidate list processed; each merged file recorded; no wholesale replaces | |
 | 9 | User informed of next steps | |
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ## Next commands (in target project)
 
 ```text
@@ -164,6 +168,8 @@ After I1 (no-overwrite copy) the script:
 ```
 
 (In-place `@deploy-files` already scaffolded `.work/` + `.cursorrules`; `@project-bootstrap init` is only needed for the outbound `copy - <path>` direction.)
+
+Any operator-required approval or question raised anywhere in the report must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in this section. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 

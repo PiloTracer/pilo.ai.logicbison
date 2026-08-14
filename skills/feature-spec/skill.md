@@ -24,6 +24,8 @@ Orchestrate **feature SPEC** artifacts under `{FEATURE_SPEC_ROOT}/<feature-slug>
 - **High-risk** SPECs (threat model / FEATURE_STANDARD §2) need ≥2 reviewers before Approved.
 - **No code** in this skill unless user explicitly asks to implement after Approved.
 - **Filename:** `{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md` (date = today when creating).
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+- **Document clarity:** every generated document follows the [Document clarity contract](../SKILL_DEPENDENCIES.md#document-clarity-contract) — Status + Needs header, separate Decisions/Open questions lists, one `## Next action`, no placeholder scaffolding left behind.
 
 ---
 
@@ -100,6 +102,8 @@ If the request is `underspecified` and the owner is not available to probe now, 
 **Recorded:** {PLANS_ROOT}/NEXT.md § Intake queue
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Create protocol
@@ -135,7 +139,7 @@ Explicit kebab-case slug → skip this step.
 5. Fill **§15 Concept / NFR registry** - one row per MOD-01…MOD-07 with Applies yes/no + reason (or run `@concept-run list` for trigger hints).
 6. Set `**Status:** Draft`.
 7. When creating for **brownfield catalog** or cross-cutting surfaces (shell, layout, analytics): add optional **§14 Implementation map** (FEATURE_STANDARD) with primary file paths from `@plan-verify coverage` or user inventory.
-8. Output create report with path and open questions (§13).
+8. Output create report with path and open questions (§13). Any operator-required approval/question (e.g. open §13 questions) must ALSO appear in the closing handoff block (enumerated, with `path:line`); end the report with the Operator handoff close per SKILL_DEPENDENCIES.md.
 
 **Stop** if user has not stated problem scope - ask once for one-paragraph purpose.
 
@@ -174,6 +178,8 @@ Per [SKILL_DEPENDENCIES.md § Blocked report shape](../SKILL_DEPENDENCIES.md#blo
 approve-ready | needs-revision - <bullets>
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question above (e.g. high-risk reviewer waiver) must ALSO appear in that closing handoff block (enumerated, with `path:line`), not only in the checklist.
+
 ---
 
 ## Amend protocol
@@ -188,7 +194,7 @@ approve-ready | needs-revision - <bullets>
 
 ## Status protocol
 
-Read-only. Report: path, Status header, last modified, §15 present?, linked ADRs, amendment siblings.
+Read-only. Report: path, Status header, last modified, §15 present?, linked ADRs, amendment siblings. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -237,6 +243,8 @@ If a formal SPEC exists at `.work/features/<slug>/`, link it as **Source SPEC**.
 **Surface scanned:** <list of routes/modules checked>
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question (e.g. D0 overwrite/amend/abort choice) must ALSO appear in that closing handoff block (enumerated, with `path:line`), not only in the report body.
+
 ---
 
 ## Integration
@@ -256,6 +264,7 @@ If a formal SPEC exists at `.work/features/<slug>/`, link it as **Source SPEC**.
 - Editing Approved SPEC in place (use amend).
 - Skipping §15 "because M1 is small".
 - Empty §2 Out of scope.
+- Burying operator actions/questions in prose instead of the closing handoff block.
 
 ---
 
@@ -268,3 +277,5 @@ If a formal SPEC exists at `.work/features/<slug>/`, link it as **Source SPEC**.
 | 3 | Slug/path valid | pass |
 | 4 | Surface scanned (document mode) | pass/skip |
 | 5 | No unauthorized code changes | pass |
+
+End the checklist with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question must ALSO appear in that closing handoff block (enumerated, with `path:line`), not only in the checklist.

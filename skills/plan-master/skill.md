@@ -25,6 +25,8 @@ Produce a **production-grade, implementation-ready** development plan: architect
 - **Never** edit files marked **archived** or **do not edit** in HANDOFF.
 - **Never** paste secrets from `.env`, `credentials/`, or tokens into plans or chat.
 - Every mode ends with a **Completion checklist** - each item `pass` | `fail` | `skip` with evidence.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+- **Document clarity:** every generated document follows the [Document clarity contract](../SKILL_DEPENDENCIES.md#document-clarity-contract) — Status + Needs header, separate Decisions/Open questions lists, one `## Next action`, no placeholder scaffolding left behind.
 - **Traceability:** no major requirement without a chain: Business goal → Requirement → Architecture component → Execution task → Validation/test → Acceptance criterion.
 
 ---
@@ -70,6 +72,8 @@ Run **before** **greenfield**, **continue**, or **revise** (not before **status*
 **Detected:** `plan-master-ready: no`
 **Run first:** `@plan-foundation status` → `@plan-foundation continue` → `@plan-foundation certify plan-master-ready` → re-invoke `@plan-master <command>`
 ```
+
+End the blocked report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 3. If **yes** → proceed to the mode protocol.
 
@@ -301,6 +305,8 @@ If master plan **missing** → **implementation-ready: no** - run **greenfield**
 | … | | | |
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Any approval/question implied by **Recommended next** or **Owner blockers** must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in those sections.
+
 ---
 
 ## Continue protocol
@@ -311,7 +317,7 @@ If master plan **missing** → **implementation-ready: no** - run **greenfield**
 3. Complete that phase per workflow; update plan artifact.
 4. Run integrity subset for completed phase.
 5. If **Phase 5** complete (integrity **pass** or documented waivers) and user approved → set plan **Approved**; sync **one** line to `NEXT.md` recommended next.
-6. Output completion checklist report.
+6. Output completion checklist report - end it with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -350,6 +356,7 @@ Mandatory status report template and phase progress table: [reference.md § Stat
 - Running **greenfield** / **continue** / **revise** when **plan-master-ready: no** (see § Prerequisite gate)
 - Editing archived decision prompts during plan cleanup
 - Claiming plan complete without checklist evidence
+- Burying operator actions/questions in prose instead of the closing Operator handoff block
 
 ---
 
@@ -385,6 +392,7 @@ Read-only. No writes to plan or HANDOFF.
 
 6. If the task ID does not exist in the plan → say so explicitly; do not invent content.
 7. If the plan does not exist → recommend `@plan-master greenfield`.
+8. End the output with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 

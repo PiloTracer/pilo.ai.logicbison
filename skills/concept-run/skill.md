@@ -22,6 +22,7 @@ Execute **concept pack** procedures under `.ai/concepts/<name>/prompt.md`. Regis
 - **Output shape** must match each `prompt.md` § Output section.
 - **Default when unsure:** MOD-01 (coupling-audit) - lightest prompt.
 - **MOD-06 required** for every `@code-implementation` session that touches code - **AI-assisted: yes** by default in Cursor/agent sessions; only explicit **`human-only`** (same message) opts out.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -95,6 +96,8 @@ Execute **concept pack** procedures under `.ai/concepts/<name>/prompt.md`. Regis
 proceed | conditions | block - per prompt Recommendation section
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Any operator-required approval or question implied by a `conditions`/`block` Recommendation must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the Recommendation section.
+
 ---
 
 ## Concept index (quick)
@@ -124,6 +127,7 @@ When `@code-verify milestone` runs, any iteration row with `Applies=yes` and `St
 - Presenting `assumption` as `measured`.
 - Editing concept `prompt.md` files during a run.
 - Running MOD-03 without a `$` line when adding billable units.
+- Burying operator actions or questions in prose instead of the closing handoff block.
 
 ---
 
@@ -135,3 +139,5 @@ When `@code-verify milestone` runs, any iteration row with `Applies=yes` and `St
 | 2 | Output shape matches prompt | pass |
 | 3 | Evidence tags present | pass |
 | 4 | Output attached to correct artifact | pass |
+
+End the checklist response with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.

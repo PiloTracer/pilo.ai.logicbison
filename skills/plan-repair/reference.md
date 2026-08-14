@@ -282,6 +282,8 @@ Record **Correction YYYY-MM-DD:** notes when editing Approved plans (per fix-exi
 ### Next
 @plan-verify <mode> | @plan-foundation certify | @plan-master status | @code-implementation plan - M{N}
 ```
+
+Any operator-required approval or question (e.g. **Remaining / owner** items, waivers, Inference confirmations) must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the report body. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 ---
 
 ## Brownfield repair protocol (detailed)
@@ -384,3 +386,5 @@ Append to R5:
 - [ ] @plan-foundation certify plan-master-ready
 - [ ] @plan-master continue → Approved
 ```
+
+Any operator-required approval or decision in **Formal path remaining** must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in this section.

@@ -22,6 +22,7 @@ description: >-
 - **Source of truth order:** `skill.md` > standard > guide > this router. If router conflicts, follow the skill.
 - **Evidence:** cite path + section when recommending a command.
 - **Escalate:** if the question needs execution (create SPEC, run migration, start iteration), name the target skill and stop - do not impersonate it.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -80,6 +81,8 @@ description: >-
 
 ### Snippet (optional, ≤5 lines)
 <Minimal command block only when it helps copy-paste>
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 ```
 
 ---
@@ -92,6 +95,7 @@ Output:
 2. Modes: `route`, `ask`, `help`.
 3. Five examples (from reference.md).
 4. Link: `.ai/START_HERE.md` for "what do I do right now?"
+5. End the output with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -101,6 +105,7 @@ Output:
 - Running `code-implementation start`, writing SPECs, or updating HANDOFF from this skill.
 - Inventing skills or paths not in `reference.md` or `.ai/skills/README.md`.
 - Replacing `@session-control status` / `@code-implementation status` when user only needs a one-line snapshot - suggest those first for status questions.
+- Burying operator actions/questions in prose instead of the closing handoff block.
 
 ---
 
@@ -112,3 +117,5 @@ Output:
 | 2 | Primary skill or doc named | pass |
 | 3 | No file writes | pass |
 | 4 | Sources cited with paths | pass |
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Any operator-required approval/question surfaced by the checks must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the checklist.

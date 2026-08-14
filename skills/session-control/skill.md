@@ -38,6 +38,7 @@ Bookend AI work sessions so the next chat (or human) can resume without guessing
 - Never paste secrets from `.env`, `credentials/`, or tokens into chat or HANDOFF.
 - **`{PROMPTS_ROOT}/initial.md` is user-owned.** Do not read or create it on start/close unless the user explicitly names that path in the same invocation.
 - Every mode ends with a **Completion checklist** - each item `pass` | `fail` | `skip` with evidence.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ### Path resolution (mandatory before any Read)
 
@@ -165,6 +166,8 @@ Read-only snapshot. **No** HANDOFF/NEXT writes. **No** completion checklist.
 **Owner blockers:** <short list or none>
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per [SKILL_DEPENDENCIES.md](../SKILL_DEPENDENCIES.md#operator-handoff-contract).
+
 Optional: one line on dirty files (no full diff). For full context load, use **start**.
 
 For full context load **without** HANDOFF writes + uncommitted-aware detail, use **context**.
@@ -240,6 +243,8 @@ Classify the working tree:
 ### No files written
 This mode is read-only: HANDOFF, NEXT, UNKNOWNS, and `.work/active-ref` are **not** modified. To open a session bookend, run `@session-control start`.
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per [SKILL_DEPENDENCIES.md](../SKILL_DEPENDENCIES.md#operator-handoff-contract).
 
 ### Anti-patterns (context)
 - Treating `context` as `start` (writing the HANDOFF "Open" line) — `context` writes nothing.
@@ -348,6 +353,7 @@ Full table: [reference.md § Critical interactions](reference.md#critical-intera
 - **Staging outside the repo-mode scope** on a default commit — in a consumer repo, session commits touch `.work/` + the general root files only (`.ai/`, app dirs stay out); the whole-repo scope applies **only** in the framework source repo
 - Omitting the commit message block from close/commit reports
 - Adding `Co-authored-by:` trailers
+- Burying operator actions/questions in prose instead of the closing handoff block (Form A single line / Form B labeled sections)
 
 Full list: [reference.md § Anti-patterns](reference.md#anti-patterns).
 

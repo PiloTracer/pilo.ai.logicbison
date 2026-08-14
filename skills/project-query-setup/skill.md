@@ -21,6 +21,7 @@ description: >-
 2. **Read-only.** The API provides read-only access. No mutations, no writes, no data modification.
 3. **Key security.** Never log the API key. Never store it in shell history. `/tmp` is forbidden for key material. The `~/.tools-project-key` file must be `chmod 600`.
 4. **Verify before claiming done.** Run a live query to the API and show the actual response. Never claim "connected" without evidence.
+5. **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -161,6 +162,8 @@ Before applying Branch A, B, or C, present this prompt to the operator:
 >
 > Proceed with registration? (yes/no)
 
+Present this gate as a Form B Operator handoff close: the approval enumerated under `**Needs your approval:**` citing `path:L<n>` of the config file to modify, ending with one `**Next step:**` command — per SKILL_DEPENDENCIES.md.
+
 Wait for the operator's explicit `yes`. Do **not** proceed on silence, "maybe", or any non-affirmative response. If the operator says `no`, stop Step 6 and skip to the completion checklist (items 5 and 6 will be `skip`).
 
 **Record the approval (after successful registration):**
@@ -266,6 +269,8 @@ Output the MCP registration details so the operator's own coding agent can regis
 > - **Claude Code:** `.claude/mcp.json` or `.claude/settings.json` → `"mcpServers"` block
 > - **Other:** check your tool's MCP integration docs
 
+End the Branch D output with the Operator handoff close (Form B — the registration hand-off to the operator's agent enumerated under `**Needs your approval:**` — + one `**Next step:**` command) per SKILL_DEPENDENCIES.md.
+
 ### Step 7 — Verify with completion checklist
 
 Run each check and report the result:
@@ -279,6 +284,8 @@ Run each check and report the result:
 | 5 | MCP server file present | `test -f .opencode/mcp/project-mcp/mcp_server.py` (or consuming project) | pass / skip |
 | 6 | MCP registered in coding agent config | Check the detected agent config for `tools-project` entry (opencode: `mcp.tools-project`, Cursor/Claude: `mcpServers.tools-project`) | pass / skip |
 | 7 | python3 available | `which python3` | pass / fail |
+
+End the checklist report with the Operator handoff close (Form A `Next: …` when all pass, or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**` when any check needs operator action) per SKILL_DEPENDENCIES.md.
 
 ### Step 8 — Show OS-specific usage patterns
 
@@ -300,6 +307,8 @@ Reference: .work/docs/agent-query-api.md
 Tutorial:  .work/docs/tutorials/LLM-2-API_SETUP.md
 ```
 
+End the install summary with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Status protocol
@@ -314,6 +323,8 @@ Auth:        {ok / 401 / 403}
 Projects:    {count} accessible
 MCP tools:   {count} registered ({names})
 ```
+
+End the status report with the Operator handoff close (Form A `Next: …` when all green, or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**` when the operator must fix something) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -361,3 +372,4 @@ Show the 5 MCP tools available and their descriptions. Then show one domain-spec
 - Storing the key in `/tmp` or any non-`~/.tools-project-key` location
 - Logging the key value in any output
 - Registering MCP in the framework's own config (it belongs in the consuming project's coding-agent config)
+- Burying operator actions/questions in prose instead of the closing Operator handoff block

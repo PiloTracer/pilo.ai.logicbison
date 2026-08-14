@@ -352,6 +352,8 @@ Example: `Batch 3/5: M4-T4 done`
 **Next:** @code-implementation continue | @code-implementation continue - 3 | fix M4-T4 and re-run continue
 ```
 
+End the report with the Operator handoff close per SKILL_DEPENDENCIES.md. The `**Next:**` line is the Form A close; when the batch stopped on a blocker, gate fail, or protected file needing operator input, replace it with Form B (`**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) and enumerate the action there with `path:line`.
+
 ### Batch-end sweep
 
 Cheap audit on the **cumulative** changeset after a batch (or single-task `continue`) finishes. Prevents the "issues surface only after I ask" pattern - per-task gates run on one task's files; this sweep looks at the union.
@@ -464,6 +466,8 @@ Refresh `## Repository state` with current truth: which milestones are done, wha
 ### Next
 {from NEXT.md - Recommended next}
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Any operator-required approval or question listed under Follow-ups must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in that section.
 ---
 
 ## Plan protocol (detailed)
@@ -542,6 +546,8 @@ Include a **`### Concept / NFR registry (this iteration)`** subsection (table or
 | 7 | Valid iteration block criteria met | pass/fail | criteria |
 | 8 | Concept / NFR registry subsection present | pass/fail | rows or N/A |
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Ambiguities/blockers needing a recommended owner action must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in that section.
 ---
 
 ## Start protocol (detailed)
@@ -627,6 +633,8 @@ All mandatory checks (1–5, 7–8) are **pass**. If any **fail**, fix before pr
 **Files:** {list}
 **SPEC rules in scope:** {R1…}
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 ---
 
 ## Task gate (detailed)
@@ -724,5 +732,7 @@ This applies whether the original issue was caught inside the same batch, in a f
 ### Residual risks / unknowns
 {from UNKNOWNS.md entries opened this iteration}
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Owner blockers requiring an operator decision must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in that section.
 
 **Visual / datagrid output:** on user request for a visual summary, render the task table with alignment and a text progress bar. Do not use emojis unless the user requests them.

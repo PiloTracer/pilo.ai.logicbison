@@ -29,6 +29,7 @@ Remediation layer for **planning documentation**. **Implements plan fixes**; doe
 - **No secrets** in plan prose; no PII in examples.
 - Does **not** own HANDOFF/NEXT bookends unless the user asks (route to `session-control`).
 - Every **repair** ends with a **Completion checklist** — `pass` | `fail` | `skip` with evidence.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -152,6 +153,8 @@ Report template and checklist: [reference.md § Repair protocol R0–R5 (detaile
 ```
 
 Or run **`@plan-repair brownfield`** to align without prior formal foundation.
+
+End the blocked report with the Operator handoff close (Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md — the prerequisite run and the brownfield alternative are operator actions, so enumerate them there, not only in the body.
 
 ### MG2 - Apply delta
 
@@ -342,6 +345,8 @@ Read-only.
 **Master plan:** <path | substitute | none>
 **Suggested repair:** @plan-repair brownfield | foundation | master | brownfield - foundation
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md — a **Suggested repair** the operator must run is an operator action and belongs in that closing block.
 
 ### BR0 - Brownfield detection
 

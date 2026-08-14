@@ -449,6 +449,8 @@ Same as [C4b](#c4b--git-actions-modifiers-only) — default scope, commit via HE
 **Session:** still open — no HANDOFF or NEXT changes.
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per [SKILL_DEPENDENCIES.md](../SKILL_DEPENDENCIES.md#operator-handoff-contract).
+
 ---
 
 ## Close protocol (detailed)
@@ -681,6 +683,8 @@ If the repo uses plan-foundation conventions, run **status** (read-only) and att
 ### Next session should
 <one line from NEXT.md>
 ```
+
+Any operator-required approval/question in **Follow-ups** must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in that section. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per [SKILL_DEPENDENCIES.md](../SKILL_DEPENDENCIES.md#operator-handoff-contract).
 ---
 
 ## Start protocol (detailed)
@@ -873,6 +877,8 @@ All mandatory checks (1–4, 6–8) are **pass**, and row **5** is **pass** (doc
 ### MCP availability
 <if MCP detected but not registered: include the ⓘ note from S3c. If registered or absent: omit this section.>
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per [SKILL_DEPENDENCIES.md](../SKILL_DEPENDENCIES.md#operator-handoff-contract).
 ---
 
 ## Context protocol (detailed)
@@ -941,6 +947,8 @@ Classify the working tree:
 This mode is read-only: HANDOFF, NEXT, UNKNOWNS, and `.work/active-ref` are **not** modified. To open a session bookend, run `@session-control start`.
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per [SKILL_DEPENDENCIES.md](../SKILL_DEPENDENCIES.md#operator-handoff-contract).
+
 ### Anti-patterns (context)
 - Treating `context` as `start` (writing the HANDOFF "Open" line) — `context` writes nothing.
 - Pasting raw `git diff` output (use per-area counts; respect no-PII/scope).
@@ -980,6 +988,7 @@ This mode is read-only: HANDOFF, NEXT, UNKNOWNS, and `.work/active-ref` are **no
 - Continuing close after secrets scan **fail**
 - Running HANDOFF/NEXT updates on standalone `commit` or `commit push`
 - Adding `Co-authored-by:` trailers or using `git commit --trailer "Co-authored-by:..."`
+- Burying operator actions/questions in prose instead of the closing handoff block (Form A single line / Form B labeled sections)
 
 ---
 

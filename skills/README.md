@@ -8,6 +8,8 @@ Portable, tool-agnostic workflows. Each skill is a folder with `skill.md` (+ opt
 
 **Work tree paths:** `{WORK_ROOT}` = `.work/` at repo root — never `context/` or `plans/` without the `.work/` prefix. See [`SKILL_DEPENDENCIES.md` § Work tree path resolution](SKILL_DEPENDENCIES.md#work-tree-path-resolution-mandatory).
 
+**Operator handoff:** every skill response that ends a turn follows the [Operator handoff contract](SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted. Enforced by `scripts/skill-functional-verify.py`.
+
 ---
 
 ## Naming protocol

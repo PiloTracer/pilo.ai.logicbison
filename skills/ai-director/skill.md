@@ -18,6 +18,7 @@ description: >-
 4. Do not invent skills or modes not registered in `skills/README.md`. If a request cannot be fulfilled by existing skills, follow the "New skill protocol" below.
 5. Never duplicate skills that belong to another framework — channel all non-`.ai` work to `@x-director`, which resolves sibling frameworks and routes to the correct director. Do not redirect to individual directors directly.
 6. Never write artifacts under `.ai/` — project work goes to `.work/`.
+7. **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ## Modes
 
@@ -68,6 +69,8 @@ Render a **routing plan** and get explicit ack. Do **not** invoke any skill or w
 **Non-reversible writes:** <list of HANDOFF / NEXT / SPEC / migration / plan files about to be created or modified, or "none (dry-run)">
 Reply `y` / `yes` to proceed, `n` to abort, or edit the plan above.
 ```
+
+End the gate with the Operator handoff close (Form B with the plan approval under `**Needs your approval:**` + one `**Next step:**` command) per SKILL_DEPENDENCIES.md.
 
 **Trust mode (`-y`):** skip the gate. **Dry-run (`--dry-run`):** render the plan, write nothing, stop.
 **Confidence `low` with no user ack within the call:** do not execute — ask one clarifying question instead.
@@ -230,6 +233,8 @@ Also update `{ITERATION_CARRIER}` § Recommended next if the workflow advanced t
 |--------|---------|----------|-------------|--------|----------------------|
 | <bucket> | N | n | n | n | tighten / ok / split |
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. Any `tighten`/`split` change request the operator must approve must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the verdict table.
 
 **Verdict rules:** `tighten` if corrections ≥ 2 or low-conf ≥ 3; `split` if corrections diverge (operators redirect the same bucket to two different skills); `ok` otherwise.
 

@@ -211,6 +211,8 @@ After deploying to a framework:
 - [ ] Agent calls `@project-query-setup status` and sees green
 - [ ] One OS-specific skill declares MCP tools as prerequisite and uses them in a protocol step
 
+Close with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per `skills/SKILL_DEPENDENCIES.md`.
+
 ---
 
 ## Files involved

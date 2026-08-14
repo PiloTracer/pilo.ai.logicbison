@@ -25,6 +25,7 @@ Verification layer for the implementation workflow. **Does not implement feature
 - **AI-assisted default:** Diffs from Cursor/agent sessions are AI-assisted unless the human declared **`human-only`** in the same message. MOD-06 **fail** (not `skip`) when code changed and no MOD-06 output path is cited.
 - **Open language** — when the user does not name an explicit mode, emit a [Request interpretation](#open-language-interpretation-free-requests) block before running the protocol; map intent to `milestone` | `uncommitted` | `last` | `status`.
 - Every mode ends with a **Completion checklist** - each item `pass` | `fail` | `skip` with evidence.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -241,6 +242,8 @@ Waivers for high-risk milestones do not carry forward to the next high-risk mile
 - fail: `@code-repair repair - from milestone` (or `@code-implementation continue` + fix gaps)
 ```
 
+Any operator-required approval or question (e.g. gap waivers, high-risk milestone review) must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the report body. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Uncommitted verify protocol
@@ -314,6 +317,8 @@ When the diff touches application source or tests and the session is AI-assisted
 - pass with conditions: safe to commit after MOD-06 attached or blast-radius warn acknowledged
 - fail: `@code-repair repair - from uncommitted` (or fix manually), then re-run `@code-verify uncommitted`
 ```
+
+Any operator-required approval or question (e.g. blast-radius warn acknowledgement, protected-surface approval) must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the report body. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -403,6 +408,8 @@ Only rows relevant to files in range (security, scope, test coverage partial) - 
 - fail: `@code-repair repair - from last` (or fix manually), then re-run `@code-verify last`
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question above must ALSO appear in that closing handoff block (enumerated, with `path:line`).
+
 ---
 
 ## Status protocol
@@ -423,6 +430,8 @@ Read-only. No writes to HANDOFF/NEXT unless user asks.
 **Suggested verify:** @code-verify uncommitted | last | milestone
 **Request:** <explicit status mode — or open-language interpretation if user asked a question>
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -465,3 +474,4 @@ Registry: `SKILL_DEPENDENCIES.md` § Self-verify auto-invoke.
 - Accepting `Confirmed` assumptions in implementation reports without file or test cite
 - Running open-language verify without a **Request interpretation** block
 - Claiming milestone **pass** with no `## Current iteration` block (use uncommitted + gap note)
+- Burying operator actions/questions in prose instead of the closing handoff block (Operator handoff contract)

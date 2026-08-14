@@ -29,6 +29,7 @@ Generate or update a **single-file** POSIX shell script (`bin/start.sh` preferre
 - **`set -euo pipefail`** at top; in interactive menu loops, scope `set +e` / `set -e` around compose calls so failures return to the menu instead of exiting the shell.
 - **Respect protected files** where the repo marks them (e.g. this project's `.cursorrules` §Protected Files): do not change `docker-compose*.yml`, `Dockerfile.*`, or `.env*` **unless the user explicitly permits** those edits in the same message. The skill may still **generate** `bin/start.sh` without touching compose.
 - **Host hygiene:** Do not document or script host-side `npm`/`yarn`/`pip install` for stack services. Package installs belong **inside** compose services (`.cursorrules` § Host hygiene); `start.sh` may offer `exec` into a service for installs when appropriate.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) - terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -86,6 +87,8 @@ Read-only. No file writes.
 **Recommendation:** ok | run `@dev-stack init` to regenerate
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 If `bin/start.sh` is missing → recommend `@dev-stack init`.
 If syntax / scoping / guard missing → recommend `@dev-stack init` (will regenerate; confirm before overwrite - see Brownfield below).
 
@@ -103,6 +106,8 @@ Before generating:
 4. On **overwrite**: proceed to [Generation protocol](#generation-protocol).
 
 Do not silently overwrite a customized script.
+
+Present the overwrite | keep | abort question in the closing Operator handoff block (Form B with `path:L<n>` citations + one `**Next step:**` command) per SKILL_DEPENDENCIES.md - not only in prose.
 
 ---
 
@@ -152,6 +157,8 @@ Confirm in the generated script:
 | 5 | `MENU_QUIET=1` + CI path documented | pass |
 | 6 | `bash -n bin/start.sh` (or `sh -n` for POSIX scripts) | pass / skip |
 
+End the checklist with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Anti-patterns
@@ -161,6 +168,7 @@ Confirm in the generated script:
 - Single `y/n` for volume wipe.
 - Hard-coded container names from other projects.
 - Embedding secrets in the script; read from env only.
+- Burying operator actions/questions in prose instead of the closing Operator handoff block (Form A single line / Form B labeled sections).
 
 ---
 

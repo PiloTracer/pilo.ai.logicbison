@@ -14,6 +14,9 @@ description: >-
 
 **Canonical path:** `.ai/skills/plan-foundation/skill.md` (this file). **Invocation examples:** `reference.md`.
 
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+- **Document clarity:** every generated document follows the [Document clarity contract](../SKILL_DEPENDENCIES.md#document-clarity-contract) — Status + Needs header, separate Decisions/Open questions lists, one `## Next action`, no placeholder scaffolding left behind.
+
 ---
 
 <a id="terminology-required--prevents-confusion-with-plan-master"></a>
@@ -79,7 +82,7 @@ Before **certify**:
 
 ### Blocked-report shape
 
-Per [SKILL_DEPENDENCIES.md § Blocked report shape](../SKILL_DEPENDENCIES.md#blocked-report-shape) - header: `## @plan-foundation <command> - blocked (prerequisite)`.
+Per [SKILL_DEPENDENCIES.md § Blocked report shape](../SKILL_DEPENDENCIES.md#blocked-report-shape) - header: `## @plan-foundation <command> - blocked (prerequisite)`. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -172,6 +175,8 @@ Use when the user asks to **certify**, **verify for plan-master**, or **plan-mas
 - Next: `@plan-foundation continue` (missing artifacts) or `@plan-foundation probe` (understanding gaps - vague scope, NFRs, constraints)
 ```
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. The template's `Next:` bullets do not replace the closing block - any operator-required approval/question must ALSO appear there, enumerated, with `path:line`.
+
 Do **not** create `*-full-plan.md` in certify mode - that is **plan-master**'s job.
 
 **Certification report template and steps:** [`reference.md` § Certify protocol (detailed)](reference.md#certify-protocol-detailed).
@@ -207,6 +212,7 @@ At P6 pass: evaluate [Plan-master readiness](reference.md#s4-plan-master-readine
 - **Skipping `p1-nfr` / `p1-data-model` before `p2-database` / `p2-data-services`** (stack and DB recommendations without NFR/data evidence are invented defaults — see Recommendation protocol, which is mandatory for every stack interaction)
 - **Accepting a stack/service option the operator never chose, or a choice that contradicts their stated requirements, without recording the divergence** in `RISK_REGISTRY.md` + `UNKNOWNS.md` (Recommendation protocol rules 2, 4)
 - **Defaulting every data service to `none`** (cache/queue/search/object-storage) while D4/D5/D8 or `p1-integrations` evidence implies the workload (Recommendation protocol rule 5)
+- Burying operator actions/questions in prose instead of the closing handoff block (Operator handoff contract)
 
 ---
 

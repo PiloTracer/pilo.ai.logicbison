@@ -1,16 +1,19 @@
 {
   "ref": "AIOS-1",
   "updated": "2026-08-14",
-  "goal": "session-control commit scope: whole-repo in framework source repo, .work/ + general root files in consumers",
+  "goal": "Operator handoff contract (all skills) + Document clarity contract (document-generating skills, templates) - terse outputs, enumerated approvals with path:L<n>, separate question lists, single next step/action",
   "allowed_paths": [
-    "skills/session-control/skill.md",
-    "skills/session-control/reference.md",
+    "skills/SKILL_DEPENDENCIES.md",
     "skills/README.md",
+    "scripts/skill-functional-verify.py",
     ".cursorrules",
     "templates/cursorrules.template",
     "CHANGELOG.md"
   ],
   "allowed_patterns": [
+    "skills/*/skill.md",
+    "skills/*/reference.md",
+    "templates/work/**",
     ".work/**"
   ]
 }

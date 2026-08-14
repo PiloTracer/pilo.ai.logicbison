@@ -28,6 +28,7 @@ Manage database schema and data with **idempotent numbered SQL scripts** - no ve
 - **Stop on first error.** If a script fails, the runner halts. Fix the script, restart. No partial state.
 - **Never embed secrets.** Migration scripts contain DDL/DML only. Credentials, keys, tokens live in environment variables or KMS.
 - **Policy:** `.cursorrules` § **Migration policy** (startup runner, verify idempotency, verify applied, exceptions, test DB mutations) is canonical; this skill implements items 1–3.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -121,6 +122,8 @@ The migration system is already initialized. Choose how to proceed:
 - **`overwrite-runner`** - replace `migration_runner.py` only (preserves your `*.sql` files)
 - **`overwrite-all`** - replace runner + all `001`–`005` baseline files (destroys current content; **append-only scripts beyond `005_` are preserved**)
 - **`abort`** - exit silently
+
+End the report with the Operator handoff close (Form B) per SKILL_DEPENDENCIES.md; the keep/overwrite/abort choice must be an enumerated `**Needs your approval:**` item in that close, not only in the list above.
 ```
 
 3. On **`overwrite-all`**: require an extra `confirm-overwrite-all` token in the same message; otherwise treat as `abort`.
@@ -231,6 +234,8 @@ Remove any `alembic upgrade head` or `sleep && alembic` lines. The migration run
 - Review `001_init.sql` - add any project-specific extensions, base tables, or default schemas.
 - Test: `docker compose up` → check logs for `migration.runner.complete`.
 - Run `@db-migration verify` to confirm idempotency.
+
+End the report with the Operator handoff close (Form A or Form B) per SKILL_DEPENDENCIES.md. Any manual step requiring operator approval or input must ALSO be enumerated in that close with `path:L<n>`, not only listed above.
 ```
 
 ---
@@ -305,6 +310,8 @@ If this script introduces a new directory or a new bounded-context module, updat
 
 **Why row 6 is mandatory by default:** A script that fails on second run is not idempotent by definition - and silent failure on re-run produces drift the runner cannot detect (no version table). Verifying at create-time prevents shipping broken idempotency to other environments. Record the verify output (exit code + the runner's `migration.run` log line) as evidence in the create report.
 
+End the create report with the Operator handoff close (Form A or Form B) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Add protocol
@@ -353,6 +360,8 @@ Run the runner a **second time**. All scripts should produce zero errors (they'r
 | 3 | Runner logs captured | pass |
 | 4 | Application health check passes after migrations | pass |
 
+End the run report with the Operator handoff close (Form A or Form B) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Status protocol
@@ -386,6 +395,8 @@ Read-only. No writes to scripts or database.
 - Runner exists: yes/no
 - Last run: <date or "not run">
 - Last result: ok/fail/unknown
+
+End the report with the Operator handoff close (Form A or Form B) per SKILL_DEPENDENCIES.md.
 ```
 
 ---
@@ -400,7 +411,7 @@ Confirms every script is truly idempotent:
 4. Assert: zero errors on second run.
 5. Compare schema (`pg_dump --schema-only`) before and after second run - must be identical.
 
-Failures produce a report listing the script name and the error message. The script must be fixed before merging. Recommend `@code-repair repair - from migration`, then re-run `@db-migration verify`.
+Failures produce a report listing the script name and the error message. The script must be fixed before merging. Recommend `@code-repair repair - from migration`, then re-run `@db-migration verify`. End the verify report with the Operator handoff close (Form A on pass; Form B on failure) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -439,6 +450,7 @@ For schema-per-tenant (PostgreSQL with multiple schemas), the runner iterates te
 - Running scripts manually instead of through the runner (bypasses logging and error handling).
 - Treating the script list as a version chain (there is no version - scripts are a ledger, not a linked list).
 - Assuming scripts only run once (they run on every startup - idempotency is the contract).
+- Burying operator actions or questions in prose instead of the closing handoff block (Operator handoff contract, Form A/B).
 
 ---
 
@@ -467,3 +479,5 @@ For schema-per-tenant (PostgreSQL with multiple schemas), the runner iterates te
 | 8b | **Idempotency double-run after create/add** (`@db-migration verify` on the new script) | pass/fail/skip | exit code + run log; skip only when DB not reachable |
 | 9 | All config files updated (init mode) | pass/skip | pyproject.toml, DOCS_TECH_STACK, .cursorrules, DIRECTORY_MAP |
 | 10 | Application starts and runs migrations (init/run mode) | pass/skip | |
+
+Close every mode's final output with the Operator handoff close (Form A or Form B) per SKILL_DEPENDENCIES.md; no operator-required action may live only in a checklist row.

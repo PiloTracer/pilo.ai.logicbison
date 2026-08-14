@@ -22,6 +22,8 @@ Create and manage human-readable project documentation under `{DOCS_ROOT}` (`.wo
 - One file per doc; output naming `YYYYMMDD-<slug>.md` (substitute the real kebab-case slug).
 - Template files on disk use literal `slug` (never `<>` in repo paths): `YYYYMMDD-slug.md.template`.
 - Keep docs git-friendly — one sentence per line when possible.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+- **Document clarity:** every generated document follows the [Document clarity contract](../SKILL_DEPENDENCIES.md#document-clarity-contract) — Status + Needs header, separate Decisions/Open questions lists, one `## Next action`, no placeholder scaffolding left behind.
 
 ---
 
@@ -53,11 +55,14 @@ If any `.work/docs/guides/YYYYMMDD-<slug>.md` already exists for that slug → *
 - **Detected:** existing file at path
 - **Run first:** `@docs create guide - <different-slug>` or delete the existing file if stale
 
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ### G3 - Create
 
 1. Read template from `.ai/templates/work/docs/guides/YYYYMMDD-slug.md.template` (self-hosted: `templates/work/docs/guides/YYYYMMDD-slug.md.template`).
 2. Write to `.work/docs/guides/YYYYMMDD-<slug>.md` with filled sections (`YYYYMMDD` = today; `<slug>` = kebab-case slug).
 3. If user gave a free-text purpose, populate the goal section from it.
+4. **Document clarity contract:** Status line filled (default `Draft` + date; `Needs:` set or `nothing`), `## Next action` present (or `none — <reason>`), all `<placeholder>` scaffolding filled or its section omitted — a document with leftover `<>` scaffolding is **fail**.
 
 ### G4 - Report
 
@@ -68,6 +73,8 @@ If any `.work/docs/guides/YYYYMMDD-<slug>.md` already exists for that slug → *
 **Template:** `templates/work/docs/guides/YYYYMMDD-slug.md.template`
 **Status:** created
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -89,7 +96,7 @@ Same as guide protocol but:
 
 ## Status protocol
 
-Read-only. List all files under `.work/docs/` grouped by subdirectory. Report counts per type.
+Read-only. List all files under `.work/docs/` grouped by subdirectory. Report counts per type. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -111,3 +118,6 @@ Read-only. List all files under `.work/docs/` grouped by subdirectory. Report co
 | 2 | No brownfield collision | pass/fail |
 | 3 | File created at correct path | pass |
 | 4 | Template sections filled | pass |
+| 5 | Document clarity (Status line, `## Next action`, no `<>` scaffolding left) | pass/fail |
+
+Any operator-required approval/question must ALSO appear in the closing handoff block (enumerated, with `path:line`) per SKILL_DEPENDENCIES.md — not only in this checklist.

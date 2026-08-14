@@ -19,6 +19,8 @@ Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.g
 
 **Contrast with `deploy-files`:** `deploy-repo` includes VCS artifacts. Use `@deploy-files copy` when you only need the `.ai/` directory without git history or `.github/`.
 
+**Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+
 ---
 
 ## Parse invocation
@@ -87,3 +89,5 @@ Deploys the entire `.ai` Agent OS repository (including `.git/`, `.github/`, `.g
 @project-bootstrap init
 @session-control start
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question above must ALSO appear in that closing handoff block (enumerated, with `path:line`).

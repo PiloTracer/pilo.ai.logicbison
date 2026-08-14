@@ -959,7 +959,7 @@ If the user asks "implementation-ready?" or "ready to code?":
 - **Invoke:** `@plan-master integrity` (Cursor) or "Follow .ai/skills/plan-master/skill.md - integrity mode" (opencode/Codex)
 ```
 
-**Rules:** Do not modify files in status mode unless the user asks. Do not edit prompts marked **archived** or "do not edit".
+**Rules:** Do not modify files in status mode unless the user asks. Do not edit prompts marked **archived** or "do not edit". End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. **Recommended next** and any owner blocker needing approval/answer must ALSO appear in that closing block, enumerated, with `path:line` - not only in the sections above.
 ---
 
 ## Probe protocol (detailed)
@@ -1027,6 +1027,8 @@ Use when the user asks to **certify**, **verify for plan-master**, or **plan-mas
 - Blockers: <ordered list>
 - Next: `@plan-foundation continue` (missing artifacts) or `@plan-foundation probe` (understanding gaps - vague scope, NFRs, constraints)
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md. The template's `Next:` bullets do not replace the closing block - any operator-required approval/question must ALSO appear there, enumerated, with `path:line`.
 
 5. Do **not** create `*-full-plan.md` in certify mode - that is **plan-master**'s job.
 ---

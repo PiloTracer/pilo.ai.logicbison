@@ -1,6 +1,6 @@
 # <Feature Name>
 
-**Status:** Documented
+**Status:** Documented — YYYY-MM-DD · **Needs:** <review/approval or "nothing">
 **Source SPEC:** `.work/features/<slug>/YYYYMMDD-SPEC.md` (optional)
 
 ## Purpose
@@ -26,3 +26,7 @@
 | Date | Change |
 |------|--------|
 | YYYY-MM-DD | Initial documentation |
+
+## Next action
+
+<exactly one action in exact syntax, or: none — document complete>

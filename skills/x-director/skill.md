@@ -51,6 +51,7 @@ The x-director knows about every framework in the workspace. **Path resolution i
 5. Route through existing directors (`@ai-director`, `@ui-director`, `@biz-director`, `@soc-director`) whenever possible — they own their domain's skill chain and gates. x-director only classifies the framework; the director classifies the sub-bucket. ai-director never routes outside `.ai` directly — it channels all non-`.ai` and `unsure` requests to x-director.
 6. Never duplicate a skill that exists in another framework. If in doubt, check all installed framework skill registries.
 7. **Preflight + graceful degradation before every route:** if a target director's framework is not installed (per § Framework registry resolution), note it and **degrade gracefully**: handle the request through `.ai` (engineering) skills + direct LLM capabilities. Do not stop — the agent's native reasoning covers most UI, business, and social tasks when the dedicated framework is absent.
+8. **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -120,6 +121,8 @@ Reply `y` / `yes` to proceed, `n` to abort, or edit the plan above.
 
 **Trust mode (`-y`):** skip the gate. **Dry-run (`--dry-run`):** render the plan, write nothing, stop.
 **Confidence `low` with no user ack within the call:** do not route — ask one clarifying question instead.
+
+End the routing plan with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; the `Reply y / n` ask must appear as an [approve] item in the Form B block, not only in prose.
 
 ### 5. Structure/format the record
 After completing or changing state, update **every touched HANDOFF** with this exact shape:
@@ -254,6 +257,8 @@ After completing the workflow (or on any meaningful state change), update ALL to
 
 **Feedback loop:** the `Routing confidence` and `User correction` fields feed `@ai-director review-routing` aggregates. Even if a routing plan aborts (user said `n` at the Confirm gate), still write a record with `Executed: aborted at confirm gate` and the correction note — this is signal that the bucket table needs tightening.
 
+The HANDOFF record's `Next recommended` / `Blockers` fields are file content — they do not replace the Operator handoff close. Any operator-required approval or question must ALSO appear in the turn-ending handoff block (Form B: enumerated, with `path:line`) per SKILL_DEPENDENCIES.md, not only in the record.
+
 ---
 
 ## New skill protocol
@@ -300,6 +305,8 @@ If the user request cannot be fulfilled by any existing skill across all framewo
 | 9b | Unavailable frameworks gracefully degraded to `.ai` + direct LLM (not silently dropped) |
 | 10 | All touched HANDOFF files updated with action summary including `Routing confidence` + `User correction` |
 | 11 | New skill registered properly (if created) |
+
+End the turn with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any blocker/gap needing operator action must be enumerated there with `path:line`, not only in the checklist.
 
 ---
 

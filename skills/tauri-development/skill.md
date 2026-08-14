@@ -33,6 +33,7 @@ Domain guidance for Tauri desktop development. This skill is **read-only referen
 - **Shell strategy preferred.** When the Tauri app wraps a Docker/local web service, prefer webview redirection over iframe embedding. Use iframes only when strict DOM isolation is required.
 - **Full-duplex events for async state.** Use `emit` and `listen` for asynchronous updates (e.g., Docker container status, long-running task progress). Do not poll.
 - **Binary size discipline.** Strip debug symbols in release builds. Leverage the system webview (WebKit/WebView2) instead of bundling Chromium.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 

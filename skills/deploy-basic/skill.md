@@ -21,6 +21,8 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 
 **Source not modified.** deploy-basic only writes to the **target**. The source `.ai` is read-only (script reads its templates).
 
+**Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
+
 **Contrast with `deploy-files`:** `deploy-files` = **fat-client** (vendored full `.ai/` into target, skills are local). `deploy-basic` = **thin-client** (skills remote in source). Choose:
 - `deploy-files` — you want skills/standards/concepts versioned inside the project, offline-editable, no external dependency.
 - `deploy-basic` — you want the project to track the live source framework, share one source of truth across many consumer repos, and accept new skills/standards automatically by updating the source (no per-project re-deploy).
@@ -77,7 +79,7 @@ Thin-client deploy of the `.ai` framework. The target project receives only the 
 2. Resolve target = `REPO_ROOT` of the consumer (cwd for in-place, or the named path for outbound).
 3. Write `.cursorrules` into the target from the template, substituting `AGENT_OS_SOURCE=REPLACE_BASICSOURCE` → `AGENT_OS_SOURCE=<absolute AI_ROOT>`. **No-overwrite** if `.cursorrules` exists; `--force` overwrites.
 4. Run the `.work/` + `DOCS_TECH_STACK.md` scaffold via `BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT=<target> bash <source>/templates/bootstrap.sh` (bootstrap's `copy_if_missing` enforces no-overwrite; the env flag keeps it from re-writing `.cursorrules` that we just wrote with the substituted pointer).
-5. Report: source pointer value, `.work/` presence, fat-client leak check, next steps.
+5. Report: source pointer value, `.work/` presence, fat-client leak check, next steps. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 **Idempotent re-run.** Safe to re-run; no-overwrite preserves target customizations. The source pointer is re-synced only in `update` mode (or `--force`).
 
@@ -94,7 +96,7 @@ After I1 (no-overwrite) the script:
    - `.work/<file>` (target has user content; templates are skeletons)
    - `DOCS_TECH_STACK.md` (preserve target stack pins)
    - `opencode.json` (paths still stale after `--sync-paths`)
-4. The **agent** then performs a rules-aware merge per candidate (this is agent work, not script work).
+4. The **agent** then performs a rules-aware merge per candidate (this is agent work, not script work). Any candidate needing operator approval/decision must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the candidate list.
 
 ### Merge rules per file class
 
@@ -135,6 +137,8 @@ The `.cursorrules` checks are delegated to `scripts/cursorrules-verify.sh` (sing
 
 Exit code: non-zero when any `[FAIL]` finding remains (stale source, unbaked paths, stale sister cell, missing `.cursorrules`). Repair verb: `@deploy-basic update` (runs `cursorrules-verify.sh --fix`).
 
+End the status report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from the table must ALSO appear in the closing block (enumerated, with `path:line`), not only in the report rows.
+
 ---
 
 ## Completion
@@ -151,6 +155,8 @@ Exit code: non-zero when any `[FAIL]` finding remains (stale source, unbaked pat
 | 8 | Fat-client leak checked (no unexpected local `.ai/skills/`) | |
 | 9 | User informed that skills load from `$AGENT_OS_SOURCE` at runtime + next steps | |
 
+End the completion report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ## Next commands (in target project)
 
 ```text
@@ -163,6 +169,8 @@ test -d "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | head -1 | cut -d= -f2
 # First skill invocation — loads from source:
 @session-control start
 ```
+
+End the next-steps output with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question must ALSO appear in the closing block (enumerated, with `path:line`), not only in this section.
 
 ---
 
@@ -210,3 +218,4 @@ Cursor / Claude Code / Codex: `.cursorrules` is sufficient for skills; use `@pro
 - Invoking `@deploy-basic -` from the source dir **without** a target path — the shell aborts; the agent must prompt for the target rather than guessing or defaulting to the source's own cwd.
 - Using `deploy-basic` to "upgrade" a fat-client repo without first removing the local `.ai/` (creates a mixed state; skills resolve fat-client first).
 - Running `install-opencode-config.sh --force` when `--sync-paths` would suffice (destroys custom MCP / instructions).
+- Burying operator actions/questions in prose instead of the closing handoff block (per SKILL_DEPENDENCIES.md § Operator handoff contract).

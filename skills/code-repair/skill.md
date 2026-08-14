@@ -27,6 +27,7 @@ Remediation layer for the implementation workflow. **Implements fixes**; does no
 - **Protected files / secrets.** Stop on `code-verify` S1/S5 failures; do not work around without owner approval in HANDOFF or the same user message.
 - **Does not own HANDOFF/NEXT** unless the user explicitly asks (route bookends to `session-control`). May update task `Notes`, `UNKNOWNS.md`, and concept registry rows.
 - Every **repair** mode ends with a **Completion checklist** - each item `pass` | `fail` | `skip` with evidence.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -225,6 +226,8 @@ Task M{N}-T{N} re-gated <YYYY-MM-DD> after code-repair: pass | fail (<reason>)
 @code-implementation continue | @code-verify milestone | @session-control close
 ```
 
+Any operator-required approval or question (e.g. owner items under **Remaining / owner**, waivers, scope expansion) must ALSO appear in the closing handoff block (enumerated, with `path:line`), not only in the report body. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
+
 ---
 
 ## Status protocol
@@ -242,6 +245,8 @@ Read-only. No fixes.
 **Iteration:** M{N} active | none
 **Suggested repair:** @code-repair repair - from uncommitted | from milestone | custom - …
 ```
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -269,6 +274,7 @@ Read-only. No fixes.
 - Using **milestone** re-verify for a one-line typo when **uncommitted** suffices (heavy but allowed if user asked)
 - Open-language repair without **R0-free** Implementation alignment map
 - Plan-doc-only fixes in code-repair (redirect to `@plan-repair`)
+- Burying operator actions or questions in prose instead of the closing handoff block
 
 ---
 

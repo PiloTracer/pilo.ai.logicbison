@@ -27,6 +27,7 @@ Verification layer for **planning documentation** — not application code. **Do
 - **Layer discipline** — foundation verify must **not** score **implementation-ready** (redirect to `@plan-master status`). Master verify must **not** certify **plan-master-ready** (redirect to `@plan-foundation certify`).
 - **Brownfield-first** — when [Brownfield detection](reference.md#brownfield-detection-bf0) is **yes**, use [Brownfield verify](reference.md#brownfield-verify-protocol) (or the BF branch inside the requested mode). Do **not** hard-stop solely because `@plan-foundation` / `@plan-master` were never run; assess **framework alignment** from repo evidence.
 - Every mode ends with a **Completion checklist** — each item `pass` | `fail` | `skip` with evidence.
+- **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
 ---
 
@@ -194,6 +195,8 @@ Record: **integrity:** pass | pass with waivers | fail
 ### Next step
 - pass / pass with gaps (waived): `@plan-foundation certify plan-master-ready` or `@plan-master greenfield` if already certified
 - fail: `@plan-repair repair - from foundation` or `@plan-repair foundation - <goal>`
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **Gaps** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 
 ---
@@ -259,6 +262,8 @@ Cross-check foundation layer: P0–P6 gates, registries, traceability, semantic 
 - Master wrong: `@plan-repair master - <reason>` or `@plan-master revise - <reason>`
 - NEXT wrong only: `@code-implementation plan - M{N}` (after master is source of truth)
 - Both: fix master first (tutorial §6 order)
+
+End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md; any operator-required approval/question from **Gaps** / **Next step** must ALSO appear in the closing handoff block, enumerated with `path:line`.
 ```
 
 ---
@@ -327,7 +332,7 @@ Cross-check master plan and implementation-ready prerequisites (report only).
 
 ## Status protocol
 
-Read-only summary of plan-verify readiness. Emit a compact table: foundation status (from `@plan-foundation status` when present), master status (`@plan-master status`), active iteration in `{ITERATION_CARRIER}`, and top gaps from `{PLANS_ROOT}/UNKNOWNS.md`. **No writes.**
+Read-only summary of plan-verify readiness. Emit a compact table: foundation status (from `@plan-foundation status` when present), master status (`@plan-master status`), active iteration in `{ITERATION_CARRIER}`, and top gaps from `{PLANS_ROOT}/UNKNOWNS.md`. **No writes.** End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
 ---
 
@@ -344,6 +349,7 @@ Read-only summary of plan-verify readiness. Emit a compact table: foundation sta
 | 7 | No application code written | pass | |
 | 8 | Layer labels not conflated | pass/fail | |
 | 9 | Request interpretation emitted (when open language) | pass/skip | |
+| 10 | Operator handoff close emitted (Form A or Form B) | pass/fail | |
 
 ---
 
@@ -359,6 +365,7 @@ Read-only summary of plan-verify readiness. Emit a compact table: foundation sta
 - Running open-language verify without emitting a **Request interpretation** block (see [Open language interpretation](#open-language-interpretation-free-requests))
 - Claiming **100% cataloged** from framework slot alignment alone — run **coverage** when the question is code locate-ability
 - Introducing parallel registries (`feature.yml`, per-repo domain-registry files) instead of SPEC **Implementation map** + DIRECTORY_MAP
+- Burying operator actions/questions in prose instead of the closing Operator handoff block (Form A single line / Form B labeled sections)
 Detect drift between `{ITERATION_CARRIER}` and `{MASTER_PLAN}`.
 
 **BF branch, A0 existence gate, A1 checks, A2 report template:** [`reference.md` § Alignment verify protocol (detailed)](reference.md#alignment-verify-protocol-detailed).
