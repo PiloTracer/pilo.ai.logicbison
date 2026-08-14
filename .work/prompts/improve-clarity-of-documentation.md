@@ -1,6 +1,8 @@
 # Documentation Clarity Protocol
 
-**Status:** Approved · 2026-08-14 · **Enforced by:** `skills/SKILL_DEPENDENCIES.md` § Document clarity contract + `scripts/skill-functional-verify.py` (`DOC_GENERATING` set)
+**Status:** Approved · 2026-08-14 (Agent OS `.ai`) · **Portable:** yes — adopt in any OS framework via `adopt-framework-improvements.md` (Phase 2)
+**Enforced by (Agent OS):** `skills/SKILL_DEPENDENCIES.md` § Document clarity contract + `scripts/skill-functional-verify.py` (`DOC_GENERATING` set)
+**Adoption target (any OS framework):** contract section in the target's `skills/SKILL_DEPENDENCIES.md` + a reference in every doc-generating `skill.md` + updated `templates/**`; wire the target's skill verifier if one exists, else record the enforcement gap as a follow-up
 
 ## Purpose
 Every generated document (plan, proposal, tutorial, guide, reference, SPEC, ADR) must make it immediately obvious what it is, what state it is in, and what — if anything — the reader must do next. The reader should never have to ask "what is this for, and what do you need from me?"
@@ -20,7 +22,7 @@ Every document opens with a header block (≤4 lines) answering:
 
 ## Rule 3 — Exact References
 - Claims derived from code, plans, or other documents cite `path/to/file.md:L42` (relative to repo root).
-- Quantitative claims are tagged `measured` | `estimated` | `assumption` | `unknown` (per `concepts/README.md`).
+- Quantitative claims are tagged `measured` | `estimated` | `assumption` | `unknown` (per `concepts/README.md` where the framework has one; the tags apply regardless).
 - Never make the reader hunt for the source of a claim.
 
 ## Rule 4 — Decisions and Questions in Separate Lists

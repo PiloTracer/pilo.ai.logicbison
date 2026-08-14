@@ -1,6 +1,8 @@
 # Response Clarity Protocol
 
-**Status:** Approved · 2026-08-14 · **Enforced by:** `skills/SKILL_DEPENDENCIES.md` § Operator handoff contract + `scripts/skill-functional-verify.py`
+**Status:** Approved · 2026-08-14 (Agent OS `.ai`) · **Portable:** yes — adopt in any OS framework via `adopt-framework-improvements.md` (Phase 1)
+**Enforced by (Agent OS):** `skills/SKILL_DEPENDENCIES.md` § Operator handoff contract + `scripts/skill-functional-verify.py`
+**Adoption target (any OS framework):** contract section in the target's `skills/SKILL_DEPENDENCIES.md` + a reference in every `skills/<id>/skill.md`; wire the target's skill verifier if one exists, else record the enforcement gap as a follow-up
 
 Sibling protocol: `improve-clarity-of-documentation.md` (generated documents). This file is the equivalent for **chat responses**.
 

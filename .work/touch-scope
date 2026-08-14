@@ -32,6 +32,8 @@
     ".work/prompts/20260814-marker-detection-deploy-repo-removal-audit.md",
     ".work/prompts/improve-clarity-of-documentation.md",
     ".work/prompts/improve-clarity-of-responses.md",
+    ".work/prompts/adopt-framework-improvements.md",
+    ".work/prompts/framework-audit.md",
     ".work/touch-scope",
     "CHANGELOG.md",
     ".work/context/HANDOFF.md",

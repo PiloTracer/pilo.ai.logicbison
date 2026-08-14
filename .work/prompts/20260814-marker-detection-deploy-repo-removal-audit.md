@@ -3,6 +3,8 @@
 **Status:** Approved · 2026-08-14
 **Needs:** execution per plan; no commit without explicit same-message approval.
 
+> **`.ai`-only — already executed 2026-08-14.** Historical record of the Agent OS marker/deploy-repo/audit session. Do NOT copy to or run in sibling frameworks; the reusable audit procedure is `framework-audit.md`, orchestrated by `adopt-framework-improvements.md`.
+
 Verify the 2026-08-14 changes (commits 29a668e, a12d69b) still pass all
 verifiers, then:
 
