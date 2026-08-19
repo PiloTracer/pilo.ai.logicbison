@@ -30,7 +30,8 @@ Bookend AI work sessions so the next chat (or human) can resume without guessing
 **Hard rules:**
 
 - **Default close / default commit:** never `git commit` or `git push`. Only when invocation includes **`commit`** and/or **`push`** (see [Parse invocation](#parse-invocation)).
-- **`close commit` / `close commit push` / `commit` / `commit push`:** **MUST** run `git add` + `git commit` in the shell (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b) / [Commit protocol](#commit-protocol)), staging per **repo mode** (see [Parse invocation](#parse-invocation) § Commit scope): **whole repo** in the Agent OS framework source repo, **`.work/` + general root files** in consumer repos (both incl. new untracked files/dirs). A dirty in-scope tree after close with only a draft message is **fail**.
+- **`close commit` / `close commit push` / `commit` / `commit push`:** **MUST** run `git add` + `git commit` in the shell (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) (C4b) / [Commit protocol](#commit-protocol)), staging per **repo mode** (see [Parse invocation](#parse-invocation) § Commit scope): **whole repo** in the Agent OS framework source repo, **`.work/` + general root files** in consumer repos (both incl. new untracked files/dirs). A dirty in-scope tree after `close commit`/`commit` with only a draft message is **fail**.
+- **Human commit lane:** plain `close` (no `commit`/`push` modifier) with a dirty in-scope tree is a **valid pass** — the draft commit message (with task ref) and suggested `git add` scope are handed to the operator, who commits/pushes manually (see [reference.md § Close protocol (detailed)](reference.md#close-protocol-detailed) C4/C4b/C5). **Core Principle 8 constrains the agent, not the operator** — the operator may commit/push at any time. `.work/active-ref` is kept (not deleted at close) while the tree is dirty, so manual commits stay ref-linked by `prepare-commit-msg`. Never stage operator WIP unless the invocation includes `commit`.
 - **Always** show the commit message - drafted, used for commit, or `none - working tree clean`.
 - **`commit` / `commit push` (standalone):** run git add + commit + push **without** updating HANDOFF or NEXT. Session stays open. Useful for mid-session checkpoints.
 - **Never commit with `type:` format when a task ref is known or could reasonably be asked for.** If the user provided a ref, or the branch/HANDOFF/github-registry contains one — use it. If no ref is known but the work clearly belongs to a task, ask the user once. Commits without refs are not linked to tasks/tickets and are invisible in the association UI.
@@ -349,6 +350,7 @@ Full table: [reference.md § Critical interactions](reference.md#critical-intera
 
 - Claiming "context loaded" without reading HANDOFF and NEXT
 - Closing session without updating HANDOFF and NEXT (on **close**)
+- Reporting a plain `close` with a dirty tree + draft message as **fail** — that is a valid **human commit lane** pass; only `close commit`/`commit` (requested but no SHA) fail
 - **`close commit` without running `git commit`** or without a new SHA
 - **Staging outside the repo-mode scope** on a default commit — in a consumer repo, session commits touch `.work/` + the general root files only (`.ai/`, app dirs stay out); the whole-repo scope applies **only** in the framework source repo
 - Omitting the commit message block from close/commit reports

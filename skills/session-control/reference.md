@@ -58,7 +58,7 @@ Follow .ai/skills/session-control/skill.md - close commit push.
 | `commit` | yes | no | **always** (used + SHA if ok) | **no** |
 | `commit push` | yes | yes | **always** (used + push result) | **no** |
 
-Default `close` never runs `git commit` or `git push`. User runs git manually from the drafted message if they want.
+Default `close` never runs `git commit` or `git push`. User runs git manually from the drafted message if they want. This manual path is the **human commit lane** — a dirty in-scope tree at plain `close` is a **valid pass** (`skip - human commit lane`), not a fail (see [C4](#c4---commit-message-with-task-ref-always), [C4b](#c4b---git-actions-modifiers-only), [C5](#c5---update-handoff-mandatory-on-close)).
 
 ### GitHub task registry (optional)
 
@@ -307,6 +307,7 @@ Do not invent project history.
 | Only `.ai/` / app dirs changed | Consumer repo: outside `.work/` + general-files scope — session commit stages nothing; list as follow-up for a separate commit. Framework source repo: in scope (whole-repo mode) |
 | `credentials/` in `git status` | **fail** secrets check; do not summarize content |
 | User closes mid-task | HANDOFF notes "in-flight: …" under Repository state |
+| Plain `close` with dirty tree | Valid **human commit lane** pass — draft + ref handed over; items 6/6b/7 `skip`; `.work/active-ref` retained |
 | Multiple logical commits | close report suggests 2+ message blocks |
 | HANDOFF already Open, new `start -` goal | Set Open line to new goal + today's date; note prior goal in start report |
 | HANDOFF says Open but user runs start again (same goal) | Refresh date only; do not duplicate artifact table |
@@ -319,7 +320,8 @@ Do not invent project history.
 
 | Prompt | Problem | Use instead |
 |--------|---------|-------------|
-| `close` expecting auto-commit | Default is draft only | `close commit` |
+| `close` expecting auto-commit | Default is draft only (human commit lane) | `close commit`, or commit manually from the draft |
+| Plain `close` + dirty tree reported as **fail** | Valid human commit lane pass | Report `skip - human commit lane` (draft + ref + `git add` scope handed over) |
 | `close commit` but tree still dirty | Agent staged HANDOFF-only or skipped shell git | Re-run close; agent must follow C4b default scope |
 | `close commit` for bookend files only | Default commits the repo-mode scope (framework source: whole repo; consumer: all safe changes under `.work/` + general root files) | `close commit scoped` |
 | `close push` without `commit` | Skill maps to commit+push | `close commit push` |
@@ -552,17 +554,20 @@ Keep subject ≤72 chars (including ref prefix), imperative mood (`add`, `fix`, 
 
 - One message if changes are cohesive; suggest **split** with multiple message blocks if not.
 - Label in report: **Commit message (draft)** vs **Commit message (used)**.
+- **Human commit lane (plain `close`, no git modifier, dirty tree):** the draft is the operator's hand-off artifact — include the task ref (priority order above) and the exact commands to run: `git add <repo-mode scope from C4b step 2>` + `git commit` with this message. Report label: **Commit message (draft - human commit lane)**.
 
 ### C4b - Git actions (modifiers only)
 
 | Modifier | Action |
 |----------|--------|
-| *(none)* | Message only. User runs `git commit` themselves. |
+| *(none)* | Message only — **human commit lane**. User runs `git commit` themselves; agent never stages operator WIP. |
 | `commit` | Only if C1 secrets **pass**. After C5/C6 (close) **or** after M4 (standalone commit): stage per **default scope** → `git commit` (HEREDOC) → verify tree → record SHA. |
 | `commit scoped` | After C5/C6: stage only `{HANDOFF}`, `{ITERATION_CARRIER}`, and paths explicitly tied to this session in the close report. |
 | `commit push` | After successful commit: `git push` (current branch). Warn before force-push. |
 
 **Hard rule - agents MUST execute git:** Typing `@session-control close commit` or `@session-control commit` does not commit by itself. The agent **MUST** run shell commands below. Checklist item 6 (close) / item 7 (commit) is **fail** if the tree still has unstaged safe changes and no commit SHA was produced.
+
+**Human commit lane (no modifier, plain `close`):** when the invocation has **no** `commit`/`push` modifier and the tree is dirty: do **not** stage or commit — hand the operator the draft message (C4, incl. task ref) + the suggested `git add` scope from step 2 below; checklist items 6/6b/7 = `skip - human commit lane`. `close commit` / `commit` stay strict: a requested commit without a produced SHA is **fail** (item 6).
 
 **Default commit scope** (when modifier is `commit` or `commit push`, not `scoped`):
 
@@ -626,10 +631,12 @@ Rewrite top sections (keep history table append-only style):
 8. **Foundation gate snapshot** (if project uses doc 04 §14): update table.
 9. Remove stale "Open" session line; closed sessions must not say "in progress".
 
-**Cleanup:** Remove `.work/active-ref` if it exists:
-```bash
-rm -f .work/active-ref
-```
+**Cleanup — `.work/active-ref` is repo-mode + tree-state dependent:**
+- **Tree clean** (or operator confirmed no manual commits pending): remove it:
+  ```bash
+  rm -f .work/active-ref
+  ```
+- **Tree dirty (human commit lane active):** **keep** `.work/active-ref` so the operator's manual commits still get the `REF:` auto-prefix from `prepare-commit-msg` (priority #2) and stay linked to the task; note `active-ref retained for operator commits` in the close report. It is rewritten at every `@session-control start` (S4c), so a stale ref cannot leak across sessions.
 
 Do not delete historical rows in artifact tables; append new entries.
 
@@ -659,8 +666,8 @@ If the repo uses plan-foundation conventions, run **status** (read-only) and att
 | 3 | Verification honest | pass/fail | |
 | 4 | Follow-ups listed | pass | |
 | 5 | Commit message shown | pass | always |
-| 6 | Git commit (if requested) | pass/fail/skip | modifier `commit`; SHA + `git status` evidence |
-| 6b | Repo-mode scope staged (default `commit`) | pass/fail/skip | not `scoped`; leftover safe in-scope paths listed |
+| 6 | Git commit (if requested) | pass/fail/skip | modifier `commit`; SHA + `git status` evidence; plain `close` + dirty tree = `skip - human commit lane` (draft + ref handed over) |
+| 6b | Repo-mode scope staged (default `commit`) | pass/fail/skip | not `scoped`; leftover safe in-scope paths listed; `skip - human commit lane` on plain `close` |
 | 7 | Git push (if requested) | pass/fail/skip | modifier `push` |
 | 8 | HANDOFF updated | pass/fail | |
 | 9 | NEXT updated | pass/fail | |
@@ -675,7 +682,7 @@ If the repo uses plan-foundation conventions, run **status** (read-only) and att
 
     Optional body - why, not what.
 
-**Git:** no commit (default) | committed \<sha\> | push \<remote/branch\> result
+**Git:** no commit (default) | committed \<sha\> | push \<remote/branch\> result | no commit - human commit lane (draft + ref handed over; `active-ref` retained)
 
 ### Follow-ups before next session
 <ordered list>

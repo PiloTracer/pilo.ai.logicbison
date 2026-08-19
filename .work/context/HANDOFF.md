@@ -4,11 +4,11 @@
 
 ## Session status
 
-**Closed:** 2026-08-14 — Marker-file framework detection landed (`agent.os.framework.md`, marker-only repo-mode detection, protected + never deployed); `deploy-repo` skill removed (21 skills); clarity prompts synced to contracts (Rule 6, Form A/B naming, Status headers); full framework audit applied (registry repair, 12 missing handoff closes, 8 document templates contract-conformant); all verifiers exit 0; committed and pushed.
+**Open:** 2026-08-19 - goal: next-level framework professionalism — add infra/CI/stack technologies (AWS, Terraform, Ansible, GitHub Actions, Node/React, Python, Spring Boot, SQL/Docker depth) as slim modular skills + standards + concepts; plan foundation → dev → production
 
-**Updated:** 2026-08-14
+**Updated:** 2026-08-19
 
-Treat the next chat as a **new session**: do not assume unwritten goals from prior threads unless they appear here or in linked artifacts.
+Treat prior closed sessions as historical only; see "What this cycle produced" below.
 
 **Repository state:** Agent OS framework repo (self-hosted). Latest tag `v0.6.0`; `[Unreleased]` holds deploy-arg-parsing + cursorrules-verify work, the session-control scope change, both clarity contracts, **marker detection + deploy-repo removal + audit fixes**. Repo mode is detected via root `agent.os.framework.md` (marker-only; never modified, never deployed — `deploy-files` excludes it, `deploy-basic` validates it). 21 skills; `deploy-repo` gone (use plain `git clone` out-of-band for full mirrors). All skills in `ANCHOR_CLEAN` set; verifiers enforce Operator handoff + Document clarity references. Known pre-existing structural debt: NEXT.md P6 (plan-master/plan-verify/plan-repair/x-director/plan-foundation-reference) + standards gate gap — details in `.work/reports/20260814-framework-audit.md`. `framework-verify` + `skill-functional-verify` + `touch-scope-verify` exit 0; blast-radius high-risk warn (protected surfaces, owner-approved) (verified 2026-08-14).
 
