@@ -1,8 +1,8 @@
 # Agent OS - process framework for coding agents
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Last commit](https://img.shields.io/github/last-commit/PiloTracer/.ai)
-![Stars](https://img.shields.io/github/stars/PiloTracer/.ai?style=social)
+![Last commit](https://img.shields.io/github/last-commit/PiloTracer/pilo.ai.logicbison)
+![Stars](https://img.shields.io/github/stars/PiloTracer/pilo.ai.logicbison?style=social)
 
 > Your AI coding agent forgets context between sessions, contradicts past decisions, claims tests pass when they fail, and starts coding before the plan exists. **Agent OS fixes that** with a small set of repeatable **skills**, binding **standards**, and a tiny **project-memory** folder.
 
