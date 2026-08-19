@@ -1,15 +1,17 @@
 {
   "$schema": "https://opencode.ai/config.json",
-
   "instructions": [
     "./START_HERE.md",
     "./PROCESS_ROUTER.md",
     "../.ai.ui/START_HERE.md",
     "../.ai.ui/COHABITATION.md",
     "../.ai.biz/START_HERE.md",
-    "../.ai.soc/START_HERE.md"
+    "../.ai.soc/START_HERE.md",
+    "../.ai.cto/START_HERE.md",
+    "../.ai.flutter/START_HERE.md",
+    "../.ai.flutter/COHABITATION.md",
+    "../.ai.mlt/START_HERE.md"
   ],
-
   "references": {
     "ai": {
       "path": ".",
@@ -26,22 +28,38 @@
     "ai-soc": {
       "path": "../.ai.soc",
       "description": "Security OS: autonomous AI security testing, penetration testing, vulnerability assessment"
+    },
+    "ai-cto": {
+      "path": "../.ai.cto",
+      "description": "CTO Professor OS: technical leadership, architecture consulting, mentoring"
+    },
+    "ai-flutter": {
+      "path": "../.ai.flutter",
+      "description": "Flutter Agent OS: Flutter app development, design systems, release"
+    },
+    "ai-mlt": {
+      "path": "../.ai.mlt",
+      "description": "MLT Agent OS: machine-learning training, labs, mentoring"
     }
   },
-
   "skills": {
     "paths": [
       "./skills",
       "../.ai.ui/skills",
       "../.ai.biz/skills",
-      "../.ai.soc/skills"
+      "../.ai.soc/skills",
+      "../.ai.cto/skills",
+      "../.ai.flutter/skills",
+      "../.ai.mlt/skills"
     ]
   },
-
   "mcp": {
     "tools-project": {
       "type": "local",
-      "command": ["python3", ".opencode/mcp/project-mcp/mcp_server.py"],
+      "command": [
+        "python3",
+        ".opencode/mcp/project-mcp/mcp_server.py"
+      ],
       "enabled": true
     }
   }

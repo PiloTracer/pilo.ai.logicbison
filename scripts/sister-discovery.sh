@@ -27,6 +27,9 @@
 #   sister_names <fw> <ai-root>   → candidate dir names, preferred first
 #   find_sister_dir <ai-root> <fw> [parent...] → first existing dir with
 #                                  skills/README.md (exit 1 when none)
+#   agent_os_names <ai-root>      → candidate dir names for the Agent OS root
+#   find_agent_os_dir <ai-root> [parent...] → first existing Agent OS root
+#                                  (exit 1 when none — caller asks the user)
 set -euo pipefail
 
 # The six sibling framework slots (framework IDs). Order also drives the
@@ -89,5 +92,56 @@ find_sister_dir() {
       fi
     done
   done < <(sister_names "$fw" "$root")
+  return 1
+}
+
+# agent_os_names <ai-root> — candidate dir names for the Agent OS root (the
+# "big brother" orchestrator framework, registry row `.ai`), most-preferred
+# first: the family name derived from the source basename with its framework
+# slot removed (`pilo.ai.biz.logicbison` → `pilo.ai.logicbison`,
+# `.ai.biz` → `.ai`), then the well-known family root `pilo.ai.logicbison`,
+# then legacy `.ai`.
+agent_os_names() {
+  local root="$1" name stem tail stem2 last fam=""
+  name="$(basename "$root")"
+  # Family-named sources (≥3 dot segments, e.g. pilo.ai.biz.logicbison): the
+  # derived family root is the strongest candidate. Legacy `.ai.*` sources
+  # carry no family prefix to derive from — they fall through to the two
+  # well-known names below (family root preferred over the legacy `.ai`).
+  if [[ "$name" == *.*.* && "$name" != .ai* ]]; then
+    stem="${name%.*}"; tail="${name##*.}"; stem2="${stem%.*}"; last="${stem##*.}"
+    case " $FRAMEWORK_SLOTS " in
+      *" $last "*) fam="${stem2}.${tail}" ;;   # source is a sister → drop its slot
+    esac
+  fi
+  [[ -n "$fam" && "$fam" != "$name" ]] && printf '%s\n' "$fam"
+  printf 'pilo.ai.logicbison\n.ai\n'
+}
+
+# find_agent_os_dir <ai-root> [parent...] — first existing Agent OS root among
+# agent_os_names × parents (must contain skills/README.md). Empty output +
+# exit 1 when neither `../.ai` nor the family root exists — the caller must ask
+# the user for the correct path rather than guess.
+find_agent_os_dir() {
+  local root="$1"
+  shift
+  local name p p2 d seen=""
+  local parents=()
+  if [[ $# -gt 0 ]]; then
+    parents=("$@")
+  else
+    parents=("$(cd "$root/.." && pwd)" "$(cd "$PWD/.." && pwd)")
+  fi
+  while IFS= read -r name; do
+    [[ "$name" == "$seen" ]] && continue; seen="$name"
+    for p in "${parents[@]}"; do
+      p2="$(cd "$p" 2>/dev/null && pwd)" || continue
+      d="${p2}/${name}"
+      if [[ -f "${d}/skills/README.md" ]]; then
+        printf '%s' "$d"
+        return 0
+      fi
+    done
+  done < <(agent_os_names "$root")
   return 1
 }

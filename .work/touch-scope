@@ -18,6 +18,7 @@
     "README.md",
     "PROCESS_ROUTER.md",
     "context/README.md",
+    "opencode.json",
     "docs/guides/workflows/README.md",
     "docs/homogenization/biz.md",
     "docs/homogenization/cto.md",
@@ -28,7 +29,8 @@
     ".work/analysis/20260819-mod06-deploy-dirname-sister-naming.md",
     ".work/touch-scope",
     ".work/active-ref",
-    ".work/context/HANDOFF.md"
+    ".work/context/HANDOFF.md",
+    ".work/plans/NEXT.md"
   ],
   "allowed_patterns": [
     ".work/analysis/**",

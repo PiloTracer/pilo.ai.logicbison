@@ -49,7 +49,7 @@ for ag in .ai pilo.ai.logicbison; do
   [[ -f "$DISCOVERY_BASE/$ag/skills/README.md" ]] && echo "  info: sister framework $ag: installed"
 done
 ```
-Also fix the dual-base inconsistency (`DEST_ROOT` vs `DISCOVERY_BASE` at `:115`): use one base for both checks.
+Also fix the dual-base inconsistency (`DEST_ROOT` vs `DISCOVERY_BASE` at `:115`): use one base for both checks. For the Agent OS anchor (`.ai` row), use the canonical helper from the shared lib — `source scripts/sister-discovery.sh; find_agent_os_dir "<source-root>" "<parent>"` (derives the family root `pilo.ai.logicbison` by slot-strip, falls back to `.ai`; empty output → ask the user for the path, never guess).
 
 ### 4. `deploy-basic.sh` — wire the six-slot fill (Layer 2)
 In the substitution step (after `TRAINER_CTO_SOURCE` is baked), mirror `pilo.ai.logicbison/scripts/deploy-basic.sh` step 2: `source scripts/sister-discovery.sh`; loop `$FRAMEWORK_SLOTS`; `find_sister_dir "<source-root>" "$fw" "$(dirname "<source-root>")"`; fill `REPLACE:AI_<FW>_PATH (default \`../.ai.<fw>\`)` → `<abs> (discovered at deploy time)`; else print checked candidates. (The template already carries the cells, so this fill is effective immediately.)

@@ -44,8 +44,10 @@ Sister frameworks are siblings on disk; `.ai.<fw>` (legacy) / `pilo.ai.<fw>.logi
 ### 3. Templates — add the registry to the full template (optional but recommended)
 In `templates/cursorrules.flutter.template`, add the same 7-row registry (consumer-style cells: `REPLACE:AI_UI_PATH (default \`../.ai.ui\`)` etc., self-excluded) + resolution text. If you add it, also add the same block to `templates/cursorrules.flutter.snippet.template` so snippet-merged targets get it.
 
-### 4. `deploy-basic.sh` — wire the six-slot fill (Layer 2, only if step 3 done)
+### 4. `deploy-basic.sh` — wire the six-slot fill + replace the local Agent OS copies (Layer 2, only if step 3 done)
 Mirror `pilo.ai.logicbison/scripts/deploy-basic.sh` step 2 inside the merge/substitution step: `source scripts/sister-discovery.sh`; loop `$FRAMEWORK_SLOTS`; `find_sister_dir "<source-root>" "$fw" "$(dirname "<source-root>")"`; fill the `REPLACE:AI_<FW>_PATH` cells → `<abs> (discovered at deploy time)`; else print checked candidates. Also replace the hardcoded `.ai`/`.ai.ui` collision note (`:177`) with a generic "a local `.ai*` framework dir exists — fat-client leak" warning (six names, not two).
+
+**Delete the 4 local `find_agent_os_dir()` definitions** (deploy-basic.sh, deploy-files.sh, deploy-repo.sh, deploy-verify.sh) and call the canonical lib helper instead: `source scripts/sister-discovery.sh; find_agent_os_dir "<source-root>" "<parent>"` (family root by slot-strip → `pilo.ai.logicbison` → `.ai`; empty output → ask the user, never guess). Verify: `grep -rn 'find_agent_os_dir()' scripts/` returns nothing; `deploy-verify.sh` still validates `AI_PATH` alongside the six `AI_*_PATH` tokens.
 
 ### 5. Verify
 ```bash

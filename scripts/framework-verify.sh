@@ -445,6 +445,22 @@ bash "${RN_PARENT}/.ai/scripts/cursorrules-verify.sh" "${RN_PARENT}/legacy-targe
   || die "sister_names ui .ai.biz: legacy sibling source wrong"
 [[ "$(sister_names ui "${RN_PARENT}/agent-os")" == $'agent-os.ui\n.ai.ui' ]] \
   || die "sister_names ui agent-os: append rule broken"
+# Agent OS anchor helpers (promoted into the shared lib): family-named sister
+# derives the family root by slot-strip; legacy source falls to .ai.
+[[ "$(agent_os_names "${RN_PARENT}/pilo.ai.ui.logicbison" | head -1)" == "pilo.ai.logicbison" ]] \
+  || die "agent_os_names: family root not derived from pilo.ai.ui.logicbison"
+[[ "$(find_agent_os_dir "${RN_PARENT}/pilo.ai.ui.logicbison" "${RN_PARENT}")" == "${RN_SRC}" ]] \
+  || die "find_agent_os_dir: family-named sister did not resolve the orchestrator"
+[[ "$(find_agent_os_dir "${RN_PARENT}/.ai" "${RN_PARENT}")" == "${RN_SRC}" ]] \
+  || die "find_agent_os_dir: family root must win over legacy .ai when both exist"
+[[ -z "$(find_agent_os_dir "${RN_PARENT}/pilo.ai.ui.logicbison" "${RN_PARENT}/does-not-exist" || true)" ]] \
+  || die "find_agent_os_dir: must exit empty when no Agent OS root exists"
+AO_ONLY="$(mktemp -d)"
+mkdir -p "${AO_ONLY}/.ai/skills"
+printf '# Agent OS (legacy-only fixture)\n' > "${AO_ONLY}/.ai/skills/README.md"
+[[ "$(find_agent_os_dir "${AO_ONLY}/.ai" "${AO_ONLY}")" == "${AO_ONLY}/.ai" ]] \
+  || die "find_agent_os_dir: legacy-only parent did not resolve .ai"
+rm -rf "${AO_ONLY}"
 rm -rf "${RN_PARENT}"
 ok "deploy-basic + cursorrules-verify handle renamed source dir; family + legacy sister naming"
 

@@ -22,3 +22,9 @@ merge_ok — reason: behavior verified live (pre-change deploy smoke from the re
 
 ## Conditions if merge_with_conditions
 - Must add tests: done — framework-verify 2i (renamed-source + family/legacy smokes + unit asserts).
+
+## Follow-up 2026-08-19 (post-close): Agent OS anchor helpers promoted to the shared lib
+- AI-assisted: yes · Boundaries: 0 (scripts/ only) · Test isolation: ok — framework-verify 2i unit asserts
+- Blast radius: additive pure functions in `scripts/sister-discovery.sh`; no existing behavior changed; siblings unaffected until they adopt the canonical lib
+- Recommendation: merge_ok — asserted in 2i (family-root derivation via slot-strip, resolution from family + legacy sources, empty-on-missing)
+- Operator follow-ups: `.ai.biz` — verify lib matches canonical (147L vs promoted 147L); `.ai.flutter` — replace 4 local `find_agent_os_dir` copies with `source scripts/sister-discovery.sh` + lib call, then run its framework-verify.
