@@ -30,6 +30,7 @@ ANCHOR_CLEAN = {
     "code-repair",
     "db-migration",
     "feature-spec",
+    "infra-terraform",
     "plan-master",
     "plan-repair",
     "plan-verify",

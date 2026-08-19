@@ -92,7 +92,7 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 | `.work/context/HANDOFF.md` | Session handoff |
 | `.ai/docs/guides/workflows/README.md` | Workflow index and artifact matrix |
 
-**Concept pack:** `.ai/concepts/README.md` (MOD-01–MOD-07). When a change touches architecture, coupling, latency, cost, ops load, AI-generated code, or prompt architecture: list applicable concept ids, run matching `prompt.md` under `.ai/concepts/<name>/`, attach outputs to the PR or `### Concept / NFR registry` in `.work/plans/NEXT.md`; tag quantitative claims `measured` | `estimated` | `assumption` | `unknown`.
+**Concept pack:** `.ai/concepts/README.md` (MOD-01–MOD-08). When a change touches architecture, coupling, latency, cost, ops load, AI-generated code, prompt architecture, or declarative infrastructure: list applicable concept ids, run matching `prompt.md` under `.ai/concepts/<name>/`, attach outputs to the PR or `### Concept / NFR registry` in `.work/plans/NEXT.md`; tag quantitative claims `measured` | `estimated` | `assumption` | `unknown`.
 
 ### Placeholder map
 
@@ -158,7 +158,8 @@ Skills live under `.ai/skills/<id>/skill.md` (folder name = id). When a task mat
 | dev-stack | Isolated Docker Compose dev stack helper |
 | process-router | Read-only process Q&A router |
 | feature-spec | Author, review, amend feature SPECs |
-| concept-run | Run MOD-01…MOD-07 concept prompts |
+| concept-run | Run MOD-01…MOD-08 concept prompts |
+| infra-terraform | Terraform IaC: init/plan/apply lifecycle, remote state + locking, drift, destroy discipline |
 | project-bootstrap | Copy `.work/` skeleton, `.cursorrules`, stack doc from templates |
 | docs | Create/manage project docs under `.work/docs/` |
 | ai-director | Free-text orchestrator; routes to `.ai` skill chain; skill-gap detection |

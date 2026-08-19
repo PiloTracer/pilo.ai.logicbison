@@ -498,6 +498,7 @@ Mirror vendor artifacts under `.work/docs/integration/<vendor>-<version>/` + `MA
 - `go` | Go
 - `rust` | Rust
 - `csharp` | C# + .NET
+- `java-spring-boot` | Java + Spring Boot
 **Default:** python-fastapi (fallback when evidence-neutral)
 
 #### INTERACTION: p2-database

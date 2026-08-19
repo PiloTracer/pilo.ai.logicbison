@@ -1,18 +1,37 @@
 {
   "ref": "AIOS-1",
   "updated": "2026-08-19",
-  "goal": "Human commit lane - operator manual commit/push autonomy with framework tracking intact (session-control close pass-state, active-ref retention, CP8 binding wording, no-attribution hooks unchanged)",
+  "goal": "Initial basic support for Spring Boot (stack template pack + p2-backend grill option) and Terraform (infra-terraform skill + IAC_CONVENTIONS standard + MOD-08 declarative-infra concept) with registry wiring",
   "allowed_paths": [
-    ".work/touch-scope",
-    "skills/session-control/skill.md",
-    "skills/session-control/reference.md",
-    ".cursorrules",
+    "templates/stacks/spring-boot/",
+    "templates/README.md",
     "templates/cursorrules.template",
+    "skills/plan-foundation/reference.md",
+    "skills/infra-terraform/",
+    "skills/README.md",
+    "skills/ai-director/reference.md",
+    "skills/concept-run/skill.md",
+    "standards/20260819-IAC_CONVENTIONS.md",
+    "concepts/declarative-infra/",
+    "concepts/README.md",
+    ".cursorrules",
     "CHANGELOG.md",
+    "README.md",
+    "DOCS_TECH_STACK.md",
+    "START_HERE.md",
+    "PROCESS_ROUTER.md",
+    "standards/20260517-FEATURE_STANDARD.md",
+    "docs/guides/workflows/README.md",
+    "skills/feature-spec/skill.md",
+    "skills/code-implementation/reference.md",
+    "scripts/skill-functional-verify.py",
+    "skills/SKILL_DEPENDENCIES.md",
+    ".work/touch-scope",
+    ".work/active-ref",
+    ".work/analysis/20260819-mod06-spring-boot-terraform-support.md",
+    ".work/plans/",
     ".work/context/HANDOFF.md",
-    ".work/active-ref"
+    ".work/feedback/20260819-uncommitted-review.md"
   ],
-  "allowed_patterns": [
-    ".work/analysis/20260819-*.md"
-  ]
+  "allowed_patterns": []
 }

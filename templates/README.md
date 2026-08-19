@@ -128,6 +128,16 @@ templates/work/
 
 ---
 
+## Stack packs (`stacks/`)
+
+Filled-in per-stack fragments (conventions, tech-stack rows, Dockerfile, compose fragment, `.cursorrules` values) to apply **after** bootstrap when the backend stack is known. Merge fragments into the consumer repo - never wholesale-replace existing files.
+
+| Pack | Directory | Apply when |
+|------|-----------|------------|
+| Spring Boot | `stacks/spring-boot/` | `p2-backend = java-spring-boot` (`@plan-foundation`) |
+
+---
+
 ## Framework repository note
 
 When the git root **is** this Agent OS tree, `.work/` at the same root holds an **empty demo skeleton** so pointer links from `.ai/plans/README.md` resolve. Application projects keep `.ai/` + `.work/` as siblings under the app repo root.

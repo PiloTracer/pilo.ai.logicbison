@@ -41,6 +41,7 @@ Stable **MOD-*** ids are for cross-links only; they are not registered in `.curs
 | MOD-05 | [`modularity-vs-distribution/`](modularity-vs-distribution/README.md) | Choosing modular monolith vs services; extraction rationale |
 | MOD-06 | [`ai-amplification/`](ai-amplification/README.md) | **AI-generated code** reliability: boundaries, reviewability, churn |
 | MOD-07 | [`prompt-architecture/`](prompt-architecture/README.md) | **Prompt composition** audit: rule registry, layered composition, stage separation, post-generation validation |
+| MOD-08 | [`declarative-infra/`](declarative-infra/README.md) | Writing or changing Terraform/IaC, reviewing infra state drift |
 
 ---
 
@@ -50,7 +51,7 @@ This table answers: **"I am about to do X — which concept prompt MUST I run, a
 
 | If you are about to… | Run prompt | Output goes to | Required or recommended |
 |---|---|---|---|
-| Open a feature SPEC (`{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md`) | List MOD-01…MOD-07 in **§15 Concept / NFR registry** with `applies yes/no` + reason | SPEC §15 | **Required** by `FEATURE_STANDARD §3` |
+| Open a feature SPEC (`{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md`) | List MOD-01…MOD-08 in **§15 Concept / NFR registry** with `applies yes/no` + reason | SPEC §15 | **Required** by `FEATURE_STANDARD §3` |
 | Run `@code-implementation plan - M{N}` | Copy SPEC §15 rows into `### Concept / NFR registry (this iteration)` in `NEXT.md` | `NEXT.md ## Current iteration` | **Required** by `code-implementation` valid-iteration criteria |
 | Run **`@code-implementation`** (start / continue / complete) in a **Cursor or agent session** | [`ai-amplification/prompt.md`](ai-amplification/prompt.md) (MOD-06) | PR description, task `Notes`, or `NEXT.md` iteration registry | **Required** — treat as **AI-assisted: yes** by default; only **`human-only`** (same message, human author) opts out |
 | Implement a task whose diff crosses **>1 hard module boundary** (per `{BOUNDARY_MAP}` or interim `DIRECTORY_MAP`) | [`coupling-audit/prompt.md`](coupling-audit/prompt.md) (MOD-01) | PR description; attach to iteration `Notes` | **Required** when boundaries crossed |
@@ -60,6 +61,7 @@ This table answers: **"I am about to do X — which concept prompt MUST I run, a
 | Propose **extracting a service** from the monolith | MOD-01 + MOD-05 + MOD-03 + MOD-04 (run in that order) | Architecture ADR | **Required** before approval |
 | Run `@code-verify milestone` | Re-run any concept whose iteration row is `Applies=yes` and `Status=pending` | Iteration registry; mark `done` or `gap` | **Required** by verify check matrix |
 | Add a new **LLM feature** or observe **hallucination patterns** | [`prompt-architecture/prompt.md`](prompt-architecture/prompt.md) (MOD-07) | SPEC §15, ADR, or iteration registry | Recommended; **Required** when handling sensitive data |
+| Write or change **Terraform / IaC** for shared environments | [`declarative-infra/prompt.md`](declarative-infra/prompt.md) (MOD-08) | ADR or iteration registry | Recommended; **Required** before first apply to shared infra |
 
 **Evidence tags (mandatory on every quantitative output):** `measured` | `estimated` | `assumption` | `unknown`. Skill outputs must not present an `assumption` as `measured`.
 

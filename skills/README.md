@@ -46,7 +46,8 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | dev-stack | `dev-stack/` | Isolated Docker Compose helper (`bin/start.sh`); safe `.env` handling |
 | process-router | `process-router/` | Read-only router: process questions → skill, guide, or standard (no writes) |
 | feature-spec | `feature-spec/` | Author, review, amend feature SPECs per FEATURE_STANDARD |
-| concept-run | `concept-run/` | Run MOD-01…MOD-07 concept prompts; attach output to PR/NEXT/SPEC |
+| concept-run | `concept-run/` | Run MOD-01…MOD-08 concept prompts; attach output to PR/NEXT/SPEC |
+| infra-terraform | `infra-terraform/` | **Terraform IaC:** init/plan/apply with plan-review gates, remote state + locking, drift detection, destroy discipline |
 | project-bootstrap | `project-bootstrap/` | Bootstrap `.work/`, `.cursorrules`, `DOCS_TECH_STACK.md` from templates |
 | docs | `docs/` | **Documentation:** create guides, tutorials, reference docs under `.work/docs/` |
 | project-query-setup | `project-query-setup/` | **Optional integration:** guide through tools-project API key creation, MCP registration, connectivity test. OS-aware (tailors guidance per framework). |

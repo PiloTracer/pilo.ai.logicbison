@@ -27,7 +27,7 @@
 | `.work/docs/integration/` | Vendor integration cache |
 | `scripts/` | Deploy, verify, hooks |
 | `templates/` | Bootstrap artifacts for consumer repos |
-| `concepts/` | MOD-01…MOD-07 architecture prompts |
+| `concepts/` | MOD-01…MOD-08 architecture prompts |
 | `.work/` | Plans, HANDOFF, `touch-scope` |
 
 See `.work/standards/*-DIRECTORY_MAP.md` after customization (framework templates: `standards/20260517-DIRECTORY_MAP.md`).

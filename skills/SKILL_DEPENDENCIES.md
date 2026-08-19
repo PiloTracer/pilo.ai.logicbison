@@ -169,6 +169,11 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **project-query-setup** `status` / `help` | - | Read-only |
 | **dev-stack** `init` | User request / `docker-compose*.yml` present; brownfield gate refuses to silently overwrite existing `bin/start.sh` | - |
 | **dev-stack** `status` | - | Read-only |
+| **infra-terraform** `init` | Backend/state strategy chosen per `standards/20260819-IAC_CONVENTIONS.md` | - |
+| **infra-terraform** `plan` | Terraform project present; remote backend configured for shared envs | **Required** for shared environments |
+| **infra-terraform** `apply` | Reviewed `plan` output from the same session; state locking enabled | **Required** (plan-review gate) |
+| **infra-terraform** `status` / `drift` | - | Read-only |
+| **infra-terraform** `destroy` | Explicit same-message human approval (`.cursorrules` Core Principle 8) | **Required** hard stop |
 | **docs** `create guide` / `create tutorial` / `create reference` | `.work/docs/` tree exists (created by `@project-bootstrap init`) | Recommended: `@project-bootstrap init` if `.work/docs/` missing |
 | **docs** `status` | - | Read-only |
 | **tauri-development** `status` | Tauri project with `src-tauri/` directory | Read-only; checks project structure and configuration |
@@ -243,7 +248,7 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 
 | Canonical verb | Meaning | Skills that implement it |
 |----------------|---------|---------------------------|
-| `status` | Read-only: report current state | plan-foundation, plan-master, plan-verify, plan-repair, session-control, code-implementation, code-verify, code-repair, feature-spec, db-migration, concept-run, dev-stack, project-bootstrap, docs |
+| `status` | Read-only: report current state | plan-foundation, plan-master, plan-verify, plan-repair, session-control, code-implementation, code-verify, code-repair, feature-spec, db-migration, concept-run, dev-stack, project-bootstrap, docs, infra-terraform |
 | `repair` | Fix reported issues; re-verify | code-repair, plan-repair |
 | `verify` | Audit planning artifacts (foundation / master / alignment) | plan-verify |
 | `probe` | Adaptive gap-driven interrogation loop; scores knowledge/plan coverage, asks targeted questions, fills gaps into registries. **New verb** (distinct from `status` read-only, `continue` resume-phase, `integrity` auto-sweep). Engine: [`probe-protocol.md`](probe-protocol.md) | plan-foundation, plan-master |
@@ -255,7 +260,7 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 | `close` | Wrap up + handoff | session-control |
 | `complete` | Mark a unit as done | code-implementation |
 | `plan` | Prepare next unit | code-implementation *(alias: `plan-iteration`)* |
-| `init` | One-time setup | project-bootstrap, db-migration, dev-stack |
+| `init` | One-time setup | project-bootstrap, db-migration, dev-stack, infra-terraform |
 | `update` | Rules-aware merge of existing-but-differing files (append new, update shared, preserve target customizations, never wholesale-replace) | deploy-files, deploy-basic |
 | `intake` | Classify a free-text feature request → route to the right executor; records to `NEXT.md § Intake queue` (does not auto-execute cross-cutting/brownfield paths) | feature-spec |
 | `create` | Make a new artifact | feature-spec, db-migration, docs |
@@ -267,8 +272,11 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 | `verify` / `milestone` / `uncommitted` / `last` | Runtime/output checks | code-verify (scope flag), db-migration; **plan-verify** uses `foundation` / `master` / `alignment` (not bare `verify` alone) |
 | `brownfield` | Discover/create missing planning artifacts from existing repo | plan-repair |
 | `alignment` / `drift` | NEXT vs master plan consistency | plan-verify (read-only), plan-repair (fix) |
+| `drift` | Infra state vs config drift (Terraform `plan -detailed-exitcode`) | infra-terraform (read-only) |
 | `run` | Execute (scripts / prompts) | db-migration, concept-run |
 | `run-all` | Execute all pending concept prompts for the current iteration | concept-run |
+| `apply` | Execute a reviewed infrastructure plan (plan-review gate upstream) | infra-terraform |
+| `destroy` | Tear down managed infrastructure — hard stop: same-message human approval | infra-terraform |
 | `show` | Read-only inspect of a specific record | plan-master *(alias: `task`)* |
 | `task` | Execute a single task by shorthand or globally-unique ID (active iteration context) | code-implementation |
 | `- <free-text>` | Free-text routing: parse intent → classify → Confirm gate → execute skill chain | ai-director, x-director |

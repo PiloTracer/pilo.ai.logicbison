@@ -136,7 +136,7 @@ Explicit kebab-case slug → skip this step.
 2. Confirm slug does not collide with existing bounded-context folder name alone (use verb phrase if needed).
 3. Check for related ADRs / foundation docs; list in SPEC header.
 4. Create `{FEATURE_SPEC_ROOT}/<slug>/YYYYMMDD-SPEC.md` with all §3 H2 sections.
-5. Fill **§15 Concept / NFR registry** - one row per MOD-01…MOD-07 with Applies yes/no + reason (or run `@concept-run list` for trigger hints).
+5. Fill **§15 Concept / NFR registry** - one row per MOD-01…MOD-08 with Applies yes/no + reason (or run `@concept-run list` for trigger hints).
 6. Set `**Status:** Draft`.
 7. When creating for **brownfield catalog** or cross-cutting surfaces (shell, layout, analytics): add optional **§14 Implementation map** (FEATURE_STANDARD) with primary file paths from `@plan-verify coverage` or user inventory.
 8. Output create report with path and open questions (§13). Any operator-required approval/question (e.g. open §13 questions) must ALSO appear in the closing handoff block (enumerated, with `path:line`); end the report with the Operator handoff close per SKILL_DEPENDENCIES.md.

@@ -6,7 +6,7 @@ Full skill registry, dependency map, and routing tables for the `@ai-director` o
 
 ## 1. Complete skill registry (all `.ai` skills)
 
-All 21 registered skills. Source of truth: `skills/README.md`.
+All 22 registered skills. Source of truth: `skills/README.md`.
 
 | `@` handle | Folder | Role | Modes | Writes? | Depends on |
 |------------|--------|------|-------|---------|------------|
@@ -20,9 +20,10 @@ All 21 registered skills. Source of truth: `skills/README.md`.
 | `code-verify` | `code-verify/` | Audits: milestone, uncommitted, last commit/push | `milestone`, `uncommitted`, `last`, `status` | Read-only (report) | **Required:** Active milestone (for milestone mode) |
 | `code-repair` | `code-repair/` | Fix verifier/migration/SPEC findings; re-verify before pass | `repair - from <source>`, `repair - custom - …`, `status` | Yes (code) | Verifier report or custom brief |
 | `feature-spec` | `feature-spec/` | Triage, author, review, or amend feature SPECs | `intake - <sentence>`, `create - <slug>`, `review - <path>`, `amend - <slug>`, `approve`, `status` | Yes (SPECs) | FEATURE_STANDARD |
-| `concept-run` | `concept-run/` | Run MOD-01…07 architecture/NFR prompts | `list`, `status`, `run - MOD-0N` | Varies (attachments) | Trigger table in `concepts/README.md` |
+| `concept-run` | `concept-run/` | Run MOD-01…08 architecture/NFR prompts | `list`, `status`, `run - MOD-0N` | Varies (attachments) | Trigger table in `concepts/README.md` |
 | `db-migration` | `db-migration/` | Idempotent numbered SQL migration scripts | `init`, `create - <description>`, `run`, `verify`, `status` | Yes (SQL scripts) | **Required:** `db-migration init` (for create/run) |
 | `dev-stack` | `dev-stack/` | Generate/update isolated Docker compose dev helper | `init`, `status` | Yes (`bin/start.sh`) | `docker-compose*.yml` present |
+| `infra-terraform` | `infra-terraform/` | Terraform IaC: init/plan/apply lifecycle with plan-review gates, remote state + locking, drift, destroy discipline | `init`, `plan`, `apply`, `status`, `drift`, `destroy` | Yes (`.tf` config, state) | **Required:** remote backend + locking for shared envs; approved plan for `apply`; same-message approval for `destroy` |
 | `process-router` | `process-router/` | Read-only: "how do I…?" → right skill or guide | `- <question>`, `help` | Read-only | — |
 | `tauri-development` | `tauri-development/` | Domain guidance for Tauri desktop apps: IPC security, shell/webview patterns, Rust backend conventions, API bridge, event-driven state | `status`, `help` | Read-only | Tauri project with `src-tauri/` |
 | `deploy-files` | `deploy-files/` | Deploy `.ai` files to target project (fat-client; in-place bootstrap or outbound copy; `update` = rules-aware merge under `.ai/`) | `copy - <path>`, `update`, `status`, bare (in-place bootstrap) | Yes (target `.ai/` + scaffold) | Source git repo |
@@ -69,7 +70,7 @@ All 21 registered skills. Source of truth: `skills/README.md`.
 | **Per milestone** | `@code-implementation plan - M{N}` → `@code-implementation start` → `@code-implementation continue` (loop) → `@code-verify milestone` → `@code-implementation complete` |
 | **Feature intake to code** | `@feature-spec intake` → `@feature-spec create` → `@feature-spec review` → `@feature-spec approve` → plan → implement |
 | **Schema change** | `@db-migration init` (once) → `@db-migration create - <desc>` → `@db-migration verify` |
-| **Architecture review** | `@concept-run - MOD-01` through `MOD-07` as triggered |
+| **Architecture review** | `@concept-run - MOD-01` through `MOD-08` as triggered |
 | **Plan audit + repair** | `@plan-verify foundation` → `@plan-verify master` → findings → `@plan-repair repair - from <mode>` → re-verify |
 | **Deploy framework** | `@deploy-files copy - <path>` (fat-client) or `@deploy-basic - <path>` (thin-client) → next steps in target |
 
@@ -89,6 +90,7 @@ From `concepts/README.md`. Run these as required during the build cycle:
 | Security review | `@concept-run - MOD-05` | Recommended |
 | Plan-foundation P6 | `@concept-run - MOD-06` | Required per P6 gate |
 | New LLM feature or hallucination patterns | `@concept-run - MOD-07` | Recommended; Required when handling sensitive data |
+| Write/change Terraform or review infra drift | `@concept-run - MOD-08` | Recommended; Required before first apply to shared infra |
 
 ---
 
@@ -185,7 +187,7 @@ When a user request spans multiple domains or belongs to another framework (e.g.
 |----------|----------|---------|
 | Probe protocol | `skills/probe-protocol.md` | Shared adaptive interrogation loop |
 | Standards | `.work/standards/*.md` (binding); framework templates at `standards/*.md` in source | Binding engineering standards |
-| Concepts | `concepts/*/` (MOD-01..07) | Architecture/NFR quality prompts |
+| Concepts | `concepts/*/` (MOD-01..08) | Architecture/NFR quality prompts |
 | Guides | `docs/guides/workflows/` | Tutorials + artifact matrix |
 | Templates | `templates/` | cursorrules.template, bootstrap scripts |
 | Decision tree | `START_HERE.md` | Operator entry point |

@@ -30,7 +30,7 @@ Then in chat:
 
 ## What you get
 
-- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (21 skills in total).
+- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (22 skills in total).
 - **Standards** - binding contracts (CONVENTIONS, FEATURE_STANDARD, observability, security) keep agent output honest.
 - **`.work/`** - the project's memory: plans, SPECs, ADRs, `HANDOFF.md`, `NEXT.md`. Survives session boundaries.
 - **Gates** - `plan-master-ready`, `implementation-ready`, milestone verify; skip a step and the agent **stops** with a redirect.
@@ -153,7 +153,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
   @process-router - <question>      lost? read-only signpost (no file writes)
   @feature-spec create - <slug>     feature SPEC (see Skills at a glance)
-  @concept-run list | - MOD-0N      architecture prompts MOD-01…07 (MOD-06 default for agent code)
+  @concept-run list | - MOD-0N      architecture prompts MOD-01…08 (MOD-06 default for agent code)
   @dev-stack                        Docker dev helper script (bin/start.sh)
   @code-verify uncommitted | last   commit hygiene (milestone mode is in the loop above)
 ```
@@ -174,7 +174,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
 ### Skills at a glance
 
-All **21** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
+All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
 
 | Skill | One line | Typical invoke |
 |-------|----------|----------------|
@@ -188,9 +188,10 @@ All **21** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **code-verify** | Audits (not implementation): milestone, dirty tree, last commit/push | `milestone` · `uncommitted` · `last` |
 | **code-repair** | Fix verifier/migration/SPEC findings; re-verify before pass | `repair - from uncommitted` · `repair - custom - …` · `status` |
 | **feature-spec** | Triage, author, review, or amend feature SPECs | `intake - <free sentence>` · `create - <slug>` · `review - <path>` · `amend - <slug>` |
-| **concept-run** | Run MOD-01…07 architecture/NFR prompts | `list` · `status` · `run - MOD-06` (required for agent-assisted code) |
+| **concept-run** | Run MOD-01…08 architecture/NFR prompts | `list` · `status` · `run - MOD-06` (required for agent-assisted code) |
 | **db-migration** | Idempotent numbered SQL scripts (no Alembic chain) | `init` · `create - <description>` · `run` · `status` · `verify` |
 | **dev-stack** | Generate or update isolated Docker `bin/start.sh` | `init` · `status` |
+| **infra-terraform** | Terraform IaC lifecycle: plan-review gates, remote state + locking, drift, destroy discipline | `init` · `plan` · `apply` · `status` · `drift` |
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
 | **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |
 | **deploy-files** | Fat-client deploy: full `.ai/` copy or in-place bootstrap | `copy - <path>` · `update` · `status` |
@@ -298,7 +299,7 @@ The bird's-eye flow above is the conceptual map. Below is the **literal command 
 |------|-----|
 | Re-explaining workflows every chat | **Skills** - `@session-control`, `@code-implementation`, … |
 | Drifty code style | **Standards** - conventions, SPEC template, directory map |
-| Architecture surprises at AI speed | **Concepts** MOD-01…07 - run before big splits |
+| Architecture surprises at AI speed | **Concepts** MOD-01…08 - run before big splits |
 | Context evaporates overnight | **`.work/`** + session bookends |
 
 ---
@@ -333,7 +334,7 @@ Skill prerequisite gates: [`skills/SKILL_DEPENDENCIES.md`](skills/SKILL_DEPENDEN
 |--------|------|
 | [`skills/`](skills/README.md) | Executable playbooks - full registry |
 | [`standards/`](standards/) | Engineering contract **templates** (customize per project) |
-| [`concepts/`](concepts/README.md) | MOD-01…07 architecture prompts |
+| [`concepts/`](concepts/README.md) | MOD-01…08 architecture prompts |
 | [`docs/guides/workflows/`](docs/guides/workflows/README.md) | Tutorials + artifact matrix |
 | [`docs/integration/`](docs/integration/) | Framework MANIFEST template (consumer copies to `.work/docs/integration/` in their project) |
 | [`templates/`](templates/README.md) | **`cursorrules.template`** - copy to repo root as `.cursorrules`; **`.ai/.cursorrules`** mirrors the template when present (keep in sync) |

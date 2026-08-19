@@ -98,8 +98,8 @@ The **artifact matrix** below maps **planning** vs **implementation** (plus cros
 | `.ai/skills/process-router/skill.md` | Both | Skill | Read-only router: process questions → skill verb, guide, standard (no writes). |
 | `.ai/skills/process-router/reference.md` | Both | Context | Routing table and example invocations for `process-router`. |
 | `.ai/skills/feature-spec/skill.md` | Planning | Skill | Author, review, amend feature SPECs per FEATURE_STANDARD. |
-| `.ai/skills/concept-run/skill.md` | Both | Skill | Run MOD-01…MOD-07 concept prompts; attach output to PR/NEXT/SPEC. |
-| `.ai/concepts/README.md` | Both | Context | Architecture / NFR **concept pack** index (e.g. MOD-01–MOD-07). |
+| `.ai/skills/concept-run/skill.md` | Both | Skill | Run MOD-01…MOD-08 concept prompts; attach output to PR/NEXT/SPEC. |
+| `.ai/concepts/README.md` | Both | Context | Architecture / NFR **concept pack** index (e.g. MOD-01–MOD-08). |
 | `.ai/concepts/<concept>/README.md` | Both | Context | Per-concept human + agent context. |
 | `.ai/concepts/<concept>/prompt.md` | Both | Guide | Per-concept agent procedure + output shape. |
 | `.ai/docs/guides/workflows/README.md` | Both | Context | This file: filename rules + **canonical artifact matrix**. |

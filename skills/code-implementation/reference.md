@@ -161,7 +161,7 @@ Validate with `@plan-master status` and the **approved** `{PLANS_ROOT}/full/YYYY
 
 ### Concept / NFR registry (this iteration)
 <!-- Required by skill.md § Valid iteration block criteria #6.
-     One row per MOD-01…MOD-07 (or single `N/A - no pack` row if the repo has no concept pack). -->
+     One row per MOD-01…MOD-08 (or single `N/A - no pack` row if the repo has no concept pack). -->
 | Concept id | Applies | Status | Evidence / trigger |
 |------------|---------|--------|-------------------|
 | MOD-01 | yes/no | pending/done/n-a | … |
