@@ -12,7 +12,7 @@
 
 It answers: *"Which skill, guide, or standard should I open for this question?"* and gives you the exact `@` command to run next. It does **not** write files, implement code, create SPECs, or run checklists.
 
-> **Don't know which skill to run?** Use `@ai-director - <describe what you want>` and let it route for you. If the work spans `.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`, use `@x-director - <describe what you want>` — it resolves sibling frameworks from `.cursorrules` § Frameworks registry and preflight-checks each before routing. All directors show a **Confirm gate** before writing anything; add `-y` to skip it, `--dry-run` to preview only. `@ai-director review-routing` surfaces routing misclassifications over time.
+> **Don't know which skill to run?** Use `@ai-director - <describe what you want>` and let it route for you. If the work spans multiple frameworks (`.ai`, `.ai.biz`, `.ai.cto`, `.ai.flutter`, `.ai.mlt`, `.ai.soc`, `.ai.ui`), use `@x-director - <describe what you want>` — it resolves sibling frameworks from `.cursorrules` § Frameworks registry and preflight-checks each before routing. All directors show a **Confirm gate** before writing anything; add `-y` to skip it, `--dry-run` to preview only. `@ai-director review-routing` surfaces routing misclassifications over time.
 
 ```text
 You ask a question

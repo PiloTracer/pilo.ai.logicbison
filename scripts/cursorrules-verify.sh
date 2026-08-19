@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # cursorrules-verify.sh — verify (optionally repair) a deployed target's
 # .cursorrules against the CURRENT Agent OS source location and the sister
-# frameworks installed on disk (.ai.ui / .ai.biz / .ai.soc).
+# frameworks installed on disk (IDs .ai.ui / .ai.biz / .ai.soc; dirs discovered
+# as family names like pilo.ai.ui.logicbison or legacy .ai.<fw> — see
+# sister-discovery.sh).
 #
 # Read-only by default. --fix applies safe mechanical repairs (idempotent;
 # preserves target customizations and filled REPLACE: tokens):
@@ -51,6 +53,9 @@ else
   AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
+# Shared sister-framework discovery (family naming `pilo.ai.ui.logicbison` + legacy `.ai.ui`).
+source "${AI_ROOT}/scripts/sister-discovery.sh"
+
 if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
   DEST_ROOT="$(pwd)"
 else
@@ -75,15 +80,23 @@ get_source() {
   printf '%s' "$s"
 }
 
-# Sister lookup: canonical thin-client parent first ($AGENT_OS_SOURCE/..), then
-# the consumer's own parent / root (fat-client / co-located layouts).
+# Sister lookup: candidate names = family (<prefix>.<fw>) then legacy (.ai.<fw>);
+# candidate parents = canonical source parent first, then the consumer's own
+# parent / root (fat-client / co-located layouts).
 find_sister() {
-  local fw="$1" p d
-  for p in "$AI_ROOT/.." "$(dirname "$DEST_ROOT")" "$DEST_ROOT"; do
-    d="$(cd "$p" 2>/dev/null && pwd)/.ai.${fw}" || continue
-    if [[ -f "${d}/skills/README.md" ]]; then printf '%s' "$d"; return 0; fi
-  done
-  return 1
+  local fw="$1"
+  find_sister_dir "$AI_ROOT" "$fw" "$AI_ROOT/.." "$(dirname "$DEST_ROOT")" "$DEST_ROOT" || true
+}
+
+# Extract baked sister paths from the target .cursorrules (any candidate dir
+# name — family or legacy; custom manual cells are left untouched).
+baked_sister_paths() {
+  local fw="$1" names_re
+  # Escape every ERE metachar (not just dots) — source basenames may contain
+  # any character; an unescaped `(` or `|` would corrupt the pattern.
+  names_re="$(sister_names "$fw" "$AI_ROOT" | sed 's/[.[\*^$()+?{|]/\\&/g' | paste -sd'|' -)"
+  grep -oE '/[^ |]+/[^ |]+' "$CURS_DEST" 2>/dev/null \
+    | grep -E "/(${names_re})$" | sort -u || true
 }
 
 # ── Layout detection (unless forced) ──────────────────────────────────
@@ -123,7 +136,7 @@ if [[ "$FIX" -eq 1 && -f "$CURS_DEST" ]]; then
     rm -f "$before"
   fi
   # 3. Sister framework cells (both layouts).
-  for fw in ui biz soc; do
+  for fw in $FRAMEWORK_SLOTS; do
     FWU="$(echo "$fw" | tr '[:lower:]' '[:upper:]')"
     token="REPLACE:AI_${FWU}_PATH"
     sister_dir="$(find_sister "$fw" || true)"
@@ -141,7 +154,7 @@ if [[ "$FIX" -eq 1 && -f "$CURS_DEST" ]]; then
         perl -i -pe "s{\Q${old}\E}{${sister_dir}}g" "$CURS_DEST"
         echo "  [fix] sister .ai.${fw}: re-pointed ${old} → ${sister_dir}"
       fi
-    done < <(grep -oE "/[^ |]+/\.ai\.${fw}\b" "$CURS_DEST" | sort -u)
+    done < <(baked_sister_paths "$fw")
   done
 fi
 
@@ -203,7 +216,7 @@ else
 fi
 
 # Sister framework cells (both layouts).
-for fw in ui biz soc; do
+for fw in $FRAMEWORK_SLOTS; do
   FWU="$(echo "$fw" | tr '[:lower:]' '[:upper:]')"
   token="REPLACE:AI_${FWU}_PATH"
   if grep -q "$token" "$CURS_DEST"; then
@@ -211,11 +224,12 @@ for fw in ui biz soc; do
     if [[ -n "$sister_dir" ]]; then
       warn ".ai.${fw}: installed at ${sister_dir} but cell unfilled (${token}) — run deploy update"
     else
-      note ".ai.${fw}: not installed (runtime auto-discover reports degraded)"
+      checked="$(sister_names "$fw" "$AI_ROOT" | paste -sd' ' -)"
+      note ".ai.${fw}: not installed (checked ${checked} next to source + target; runtime auto-discover reports degraded — for other dir names, fill the cell manually)"
     fi
     continue
   fi
-  baked="$(grep -oE "/[^ |]+/\.ai\.${fw}\b" "$CURS_DEST" 2>/dev/null | sort -u || true)"
+  baked="$(baked_sister_paths "$fw")"
   if [[ -z "$baked" ]]; then
     note ".ai.${fw}: custom cell value (non-standard — verify manually)"
     continue

@@ -75,8 +75,8 @@ Implements the operator-provided **Documentation Clarity Protocol** (origin: `.w
 
 `@ai-director` (when redirecting outside `.ai`) and `@x-director` (always) must resolve sibling framework roots in **this exact order** before routing. Never assume a fixed absolute path.
 
-1. **`.cursorrules` § Frameworks registry** — the file shipped to every adopter repo. If it names a path for `.ai.ui` / `.ai.biz` / `.ai.soc`, use it.
-2. **Sibling auto-discovery from `.ai` parent:** `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"; test -d "${parent}/.ai.ui"` (same for `.ai.biz` and `.ai.soc`).
+1. **`.cursorrules` § Frameworks registry** — the file shipped to every adopter repo. If it names a path for a listed framework (e.g. `.ai.ui`, `.ai.cto`), use it.
+2. **Sibling auto-discovery from the source parent:** `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"` (thin-client: `$AGENT_OS_SOURCE/..`); sister dir name = source basename with `<fw>` inserted before its last `.segment` (family, e.g. `pilo.ai.ui.logicbison` for a `pilo.ai.logicbison` source; a framework slot in second-to-last position — ui/biz/soc/cto/flutter/mlt — is replaced; `.ai`-prefixed sources resolve `.ai.<fw>` directly) else legacy `.ai.<fw>`; e.g. `test -d "${parent}/pilo.ai.ui.logicbison"`.
 3. **Preflight:** verify `<framework_root>/skills/README.md` is readable before invoking that framework's director. Absent → output one line `framework not installed here` and stop. Never route into the void.
 
 | Framework | Default sibling path | Director | Bootstrap artifact (preflight target) |
@@ -85,6 +85,9 @@ Implements the operator-provided **Documentation Clarity Protocol** (origin: `.w
 | `.ai.ui` (UI Design OS) | `../.ai.ui` | `@ui-director` | `../.ai.ui/skills/README.md` |
 | `.ai.biz` (Business OS) | `../.ai.biz` | `@biz-director` | `../.ai.biz/skills/README.md` |
 | `.ai.soc` (Social OS) | `../.ai.soc` | `@soc-director` | `../.ai.soc/skills/README.md` |
+| `.ai.cto` (CTO Professor OS) | `../.ai.cto` | `@cto-director` | `../.ai.cto/skills/README.md` |
+| `.ai.flutter` (Flutter Agent OS) | `../.ai.flutter` | `@flutter-director` | `../.ai.flutter/skills/README.md` |
+| `.ai.mlt` (MLT Agent OS) | `../.ai.mlt` | `@mlt-director` | `../.ai.mlt/skills/README.md` |
 
 **Readiness states** (do not conflate):
 
@@ -185,7 +188,7 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **ai-director** `status` | - | Read-only |
 | **ai-director** `review-routing` | `{HANDOFF}` readable with ≥1 `## Latest action (@ai-director)` block | Read-only; aggregates `Routing confidence` / `User correction` entries; surfaces buckets needing signal-table tightening. Never edits the bucket table. |
 | **ai-director** `help` | - | Read-only |
-| **x-director** `- <free-text>` | At least one framework directory (`.ai/`, `.ai.ui`, `.ai.biz`, `.ai.soc`) must exist; relevant HANDOFF files readable | Recommended: read all present framework HANDOFF files for routing context. **Confirm gate** before any director invoke (skip with `-y`; render-only with `--dry-run`). **Framework preflight** mandatory: resolve roots via `.cursorrules` § Frameworks registry → sibling discovery → read `<fw>/skills/README.md`; absent framework → `framework not installed here`, no route into the void. |
+| **x-director** `- <free-text>` | At least one listed framework directory (`.ai/`, `.ai.ui`, `.ai.biz`, `.ai.soc`, `.ai.cto`, `.ai.flutter`, `.ai.mlt`) must exist; relevant HANDOFF files readable | Recommended: read all present framework HANDOFF files for routing context. **Confirm gate** before any director invoke (skip with `-y`; render-only with `--dry-run`). **Framework preflight** mandatory: resolve roots via `.cursorrules` § Frameworks registry → sibling discovery → read `<fw>/skills/README.md`; absent framework → `framework not installed here`, no route into the void. |
 | **x-director** `- <free-text> -y` | Same as `- <free-text>` | Trust-mode: skips Confirm gate. |
 | **x-director** `- <free-text> --dry-run` | Same as `- <free-text>` | Render routing plan, write nothing, stop. |
 | **x-director** `status` | - | Read-only; marks uninstalled frameworks |

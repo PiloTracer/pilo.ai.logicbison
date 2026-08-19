@@ -3,7 +3,7 @@ name: x-director
 description: >-
   Cross-framework orchestration skill that receives any free-text request and
   coordinates across all frameworks available in the current workspace:
-  .ai (Agent OS), .ai.ui (UI Design OS), .ai.biz (Business OS), and .ai.soc (Social OS).
+  .ai (Agent OS), .ai.ui (UI Design OS), .ai.biz (Business OS), .ai.soc (Social OS), .ai.cto (CTO Professor OS), .ai.flutter (Flutter Agent OS), and .ai.mlt (MLT Agent OS).
   Routes to the correct director (ai-director, ui-director, biz-director, soc-director) or
   coordinates multi-framework workflows. Flags when a new skill is needed
   across any framework.
@@ -11,18 +11,18 @@ description: >-
 
 # x-director — Cross-Framework Orchestrator
 
-**Role:** Top-level "director of directors". You are the **sole cross-framework routing authority**. You receive any free-text request and orchestrate across all frameworks in the workspace. All non-`.ai` requests from `@ai-director` are channelled to you. You classify by framework and route to the correct director: `@ai-director` (`.ai`), `@ui-director` (`.ai.ui`), `@biz-director` (`.ai.biz`), or `@soc-director` (`.ai.soc`). You also handle `@ai-director`'s `unsure` cases.
+**Role:** Top-level "director of directors". You are the **sole cross-framework routing authority**. You receive any free-text request and orchestrate across all frameworks in the workspace. All non-`.ai` requests from `@ai-director` are channelled to you. You classify by framework and route to the correct director: `@ai-director` (`.ai`), `@ui-director` (`.ai.ui`), `@biz-director` (`.ai.biz`), `@soc-director` (`.ai.soc`), or — for frameworks the registry lists beyond these (`.ai.cto`, `.ai.flutter`, `.ai.mlt`) — their `@<fw>-director`. You also handle `@ai-director`'s `unsure` cases.
 
 ## Framework registry
 
 The x-director knows about every framework in the workspace. **Path resolution is dynamic** — never assume the framework dirs sit at a fixed absolute path. Resolve in this order:
 
-1. **Authoritative:** `.cursorrules` § *Frameworks registry* (the file shipped to every adopter repo). If the registry names a path for `.ai.ui` / `.ai.biz` / `.ai.soc`, use it.
+1. **Authoritative:** `.cursorrules` § *Frameworks registry* (the file shipped to every adopter repo). If the registry names a path for any listed framework (e.g. `.ai.ui`, `.ai.cto`), use it.
 2. **Auto-discover from `.ai` parent or source:**
    - **Fat-client** (`$REPO_ROOT/.ai/` exists): `parent="$(cd "$REPO_ROOT/.ai/.." && pwd)"`
    - **Thin-client** (`$REPO_ROOT/.ai/` absent, `$AGENT_OS_SOURCE` is set and readable): `parent="$(cd "$AGENT_OS_SOURCE/.." && pwd)"`
    - **Neither** (no source to scan from): skip auto-discover — no sister frameworks.
-   A sibling dir at `${parent}/.ai.ui`, `${parent}/.ai.biz`, or `${parent}/.ai.soc` is a valid framework root.
+   A sibling dir at `${parent}/<source basename with <fw> inserted before its last .segment>` (family naming, e.g. `pilo.ai.ui.logicbison` for a `pilo.ai.logicbison` source; a ui/biz/soc slot in second-to-last position is replaced) or the legacy `${parent}/.ai.<fw>` is a valid framework root.
 3. **Preflight + graceful degradation:** before routing to any director, verify `<framework_root>/skills/README.md` is readable. If not → note `framework not installed here` and **degrade gracefully**: handle the request through `.ai` engineering skills + direct LLM capabilities instead. Never route into the void and never silently drop the request.
 
 | Framework | Default sibling path | Director | Role (one line only — fine-grained routing lives in each director) |
@@ -112,7 +112,7 @@ Before routing, render a **routing plan** and get explicit ack. Do **not** invok
 **Request:** "<user's verbatim request>"
 **Classified framework(s):** <engineering | ui | business | cross-framework>
 **Routing confidence:** high | med | low
-**Preflight (installed frameworks):** .ai ✓ | .ai.ui ✓/✗ | .ai.biz ✓/✗ | .ai.soc ✓/✗
+**Preflight (installed frameworks):** .ai ✓ | .ai.ui ✓/✗ | .ai.biz ✓/✗ | .ai.soc ✓/✗ | .ai.cto ✓/✗ | .ai.flutter ✓/✗ | .ai.mlt ✓/✗
 **Will invoke:**
 1. @<director> - "<verbatim request>" → <expected outcome one-liner>
 2. ...
@@ -133,7 +133,7 @@ After completing or changing state, update **every touched HANDOFF** with this e
 ## Cross-framework action (@x-director)
 **Date:** YYYY-MM-DD
 **Request:** "<user's original request>"
-**Frameworks involved:** .ai, .ai.ui, .ai.biz, .ai.soc (list only those touched)
+**Frameworks involved:** .ai, .ai.ui, .ai.biz, .ai.soc, .ai.cto, .ai.flutter, .ai.mlt (list only those touched)
 **Classified bucket(s):** <bucket-name(s)>
 **Executed:**
 1. @<director> - "<request>" → <result>
@@ -244,10 +244,10 @@ After completing the workflow (or on any meaningful state change), update ALL to
 ## Cross-framework action (@x-director)
 **Date:** YYYY-MM-DD
 **Request:** "<user's original request>"
-**Frameworks involved:** .ai, .ai.ui, .ai.biz, .ai.soc (list only those touched)
+**Frameworks involved:** .ai, .ai.ui, .ai.biz, .ai.soc, .ai.cto, .ai.flutter, .ai.mlt (list only those touched)
 **Classified framework bucket(s):** <engineering | ui | business | social | cross-framework>
 **Routing confidence:** high | med | low
-**Preflight (frameworks installed):** .ai yes | .ai.ui yes/no | .ai.biz yes/no | .ai.soc yes/no
+**Preflight (frameworks installed):** .ai yes | .ai.ui yes/no | .ai.biz yes/no | .ai.soc yes/no | .ai.cto yes/no | .ai.flutter yes/no | .ai.mlt yes/no
 **Executed:**
 1. @<director> - "<verbatim request>" → <result>
 2. ...

@@ -131,11 +131,47 @@ def build_config():
         join("PROCESS_ROUTER.md"),
     ]
 
-    sibling_parent = pathlib.Path(repo_root).parent
+    # Sister framework discovery (mirrors scripts/sister-discovery.sh — keep in
+    # sync): candidate dir names = family (source basename with <fw> inserted
+    # before its last dot-segment, e.g. pilo.ai.ui.logicbison for a
+    # pilo.ai.logicbison source; a ui/biz/soc slot in second-to-last position
+    # is replaced — pilo.ai.ui.logicbison → pilo.ai.<fw>.logicbison) then
+    # legacy .ai.<fw>. Candidate parents: next to the Agent OS source first,
+    # then next to the consumer repo (self-hosted: both are the same).
+    src_name = os.path.basename(ai_root.rstrip("/"))
+
+    def sister_candidates(fw):
+        names = []
+        if src_name == ".ai" or src_name.startswith(".ai."):
+            # Legacy-named source (`.ai`, `.ai.biz`, …): sisters are `.ai.<fw>`
+            # only — no family prefix/tail to derive family naming from.
+            names.append(f".ai.{fw}")
+        elif src_name.count(".") >= 2:
+            stem, _, tail = src_name.rpartition(".")
+            stem2, _, last = stem.rpartition(".")
+            if last in FRAMEWORK_SLOTS:
+                stem = stem2
+            names.append(f"{stem}.{fw}.{tail}")
+            names.append(f".ai.{fw}")
+        else:
+            names.append(f"{src_name}.{fw}")
+            names.append(f".ai.{fw}")
+        return names
+
+    sibling_parents = []
+    for p in (ai_root, repo_root):
+        # realpath mirrors bash's `cd && pwd` canonicalization in sister-discovery.sh
+        pp = str(pathlib.Path(p).resolve().parent)
+        if pp not in sibling_parents:
+            sibling_parents.append(pp)
+
     sisters = [
-        ("ai-ui", ".ai.ui", "UI Design OS: UI component specs, design tokens, accessibility"),
-        ("ai-biz", ".ai.biz", "Business OS: strategy, brand, content, pricing"),
-        ("ai-soc", ".ai.soc", "Security OS: autonomous AI security testing, penetration testing, vulnerability assessment"),
+        ("ai-ui", "ui", "UI Design OS: UI component specs, design tokens, accessibility"),
+        ("ai-biz", "biz", "Business OS: strategy, brand, content, pricing"),
+        ("ai-soc", "soc", "Security OS: autonomous AI security testing, penetration testing, vulnerability assessment"),
+        ("ai-cto", "cto", "CTO Professor OS: technical leadership, architecture consulting, mentoring"),
+        ("ai-flutter", "flutter", "Flutter Agent OS: Flutter app development, design systems, release"),
+        ("ai-mlt", "mlt", "MLT Agent OS: machine-learning training, labs, mentoring"),
     ]
     refs = {
         "ai": {
@@ -143,9 +179,19 @@ def build_config():
             "description": "Agent OS: skills, standards, concepts, workflow guides",
         }
     }
-    for key, dirname, desc in sisters:
-        sib = sibling_parent / dirname
-        if sib.is_dir() and (sib / "skills" / "README.md").is_file():
+    for key, fw, desc in sisters:
+        # Names-outer / parents-inner — same priority as sister-discovery.sh
+        # find_sister_dir: the family name wins over legacy across ALL parents.
+        sib = None
+        for name in sister_candidates(fw):
+            for pp in sibling_parents:
+                cand = pathlib.Path(pp) / name
+                if cand.is_dir() and (cand / "skills" / "README.md").is_file():
+                    sib = cand
+                    break
+            if sib is not None:
+                break
+        if sib is not None:
             rel = os.path.relpath(sib, repo_root)
             cfg["instructions"].append(f"{rel}/START_HERE.md")
             if (sib / "COHABITATION.md").is_file():
@@ -236,13 +282,29 @@ def replace_prefix_in_tree(obj, old_prefix, new_prefix):
     return changed
 
 
+FRAMEWORK_SLOTS = ("ui", "biz", "soc", "cto", "flutter", "mlt")
+
+
+def is_sister_skill_path(p):
+    """True when p is a sister-framework skills path under either naming:
+    legacy `.../.ai.ui/skills` (slot = last dir segment) or family
+    `.../pilo.ai.ui.logicbison/skills` (slot = second-to-last segment).
+    Mirrors sister_names() in scripts/sister-discovery.sh (keep in sync)."""
+    p = str(p)
+    if not p.endswith("/skills"):
+        return False
+    segs = os.path.basename(p[: -len("/skills")]).split(".")
+    if len(segs) >= 2 and segs[-1] in FRAMEWORK_SLOTS:
+        return True
+    return len(segs) >= 3 and segs[-2] in FRAMEWORK_SLOTS
+
+
 def infer_old_prefix(cfg):
     if old_source:
         return old_source
-    sister_markers = (".ui/skills", ".biz/skills", ".soc/skills")
     paths = (cfg.get("skills") or {}).get("paths") or []
     for p in paths:
-        if any(m in str(p) for m in sister_markers):
+        if is_sister_skill_path(p):
             continue
         p = norm_path(p)
         if p.endswith("/skills"):
@@ -338,7 +400,6 @@ def sync_framework_sections(cfg):
 
     fresh_paths = fresh["skills"]["paths"]
     old_paths = (cfg.get("skills") or {}).get("paths", [])
-    sister_markers = (".ui/skills", ".biz/skills", ".soc/skills")
     fresh_resolved = {
         os.path.normpath(os.path.join(repo_root, p)) if not os.path.isabs(p) else os.path.normpath(p)
         for p in fresh_paths
@@ -347,7 +408,7 @@ def sync_framework_sections(cfg):
     def is_stale_framework_path(p):
         if p in fresh_paths:
             return True
-        if any(m in str(p) for m in sister_markers):
+        if is_sister_skill_path(p):
             return True
         resolved = os.path.normpath(os.path.join(repo_root, p)) if not os.path.isabs(p) else os.path.normpath(p)
         return resolved in fresh_resolved

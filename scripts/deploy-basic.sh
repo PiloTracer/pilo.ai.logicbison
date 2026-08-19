@@ -71,6 +71,9 @@ else
   AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
+# Shared sister-framework discovery (family naming `pilo.ai.ui.logicbison` + legacy `.ai.ui`).
+source "${AI_ROOT}/scripts/sister-discovery.sh"
+
 # ── Status mode (read-only) ───────────────────────────────────────────
 if [[ "$MODE" == "status" ]]; then
   if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
@@ -202,9 +205,13 @@ fi
 # Build the substituted .cursorrules content.
 # Substitutes:
 #   1. AGENT_OS_SOURCE=REPLACE_BASICSOURCE → absolute AI_ROOT
-#   2. REPLACE:AI_UI_PATH → absolute path if .ai.ui/ exists as sibling, else leave token
-#   3. REPLACE:AI_BIZ_PATH → absolute path if .ai.biz/ exists as sibling, else leave token
-#   4. REPLACE:AI_SOC_PATH → absolute path if .ai.soc/ exists as sibling, else leave token
+#   2. REPLACE:AI_UI_PATH → absolute path if a sister framework dir exists as
+#      sibling — family name (source basename with `<fw>` inserted before its
+#      last .segment, e.g. `pilo.ai.ui.logicbison` for a `pilo.ai.logicbison`
+#      source) or legacy `.ai.ui` — else leave the token and print what was
+#      checked + how to adjust (manual fill)
+#   3. REPLACE:AI_BIZ_PATH → same for biz
+#   4. REPLACE:AI_SOC_PATH → same for soc
 #   5. `.ai/scripts/<name>` → `<AI_ROOT>/scripts/<name>` (Change-safety gate table +
 #      Co-authored-by hook install line). These commands live inside .cursorrules
 #      itself, not inside a skill doc, so the general "any .ai/<x> inside a skill
@@ -223,16 +230,21 @@ subst_cursorrules() {
   perl -pe "s/AGENT_OS_SOURCE=REPLACE_BASICSOURCE/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$TPL_CURS" > "$tmpfile"
 
   # Step 2: discover and fill sister framework paths at bootstrap time.
-  # If a sister exists on disk, write its absolute path. If absent, leave the
-  # REPLACE: token — the Frameworks registry thin-client fallback (step 2) will
-  # auto-discover from $AGENT_OS_SOURCE/.. at runtime.
-  for fw in ui biz soc; do
-    local fw_dir_abs="${SIBLING_PARENT}/.ai.${fw}"
-    local token_upper
+  # Sister dir names: family naming (source basename with `<fw>` inserted before
+  # its last .segment, e.g. `pilo.ai.ui.logicbison` for a `pilo.ai.logicbison`
+  # source; `.ai`-prefixed sources use `.ai.<fw>`; sister-framework sources
+  # replace their own slot) then legacy `.ai.<fw>`. If a sister exists on disk,
+  # write its absolute path. If absent, leave the REPLACE: token and tell the
+  # user what was checked + how to adjust (manual cell fill; see .cursorrules
+  # § Frameworks registry).
+  local fw
+  for fw in $FRAMEWORK_SLOTS; do
+    local token_upper token fw_dir_abs fw_esc
     token_upper="$(echo "$fw" | tr '[:lower:]' '[:upper:]')"
-    local token="REPLACE:AI_${token_upper}_PATH"
-    if [[ -d "$fw_dir_abs" ]] && [[ -f "${fw_dir_abs}/skills/README.md" ]]; then
-      local fw_esc="${fw_dir_abs//\//\\/}"
+    token="REPLACE:AI_${token_upper}_PATH"
+    fw_dir_abs="$(find_sister_dir "$AI_ROOT" "$fw" "$SIBLING_PARENT" || true)"
+    if [[ -n "$fw_dir_abs" ]]; then
+      fw_esc="${fw_dir_abs//\//\\/}"
       perl -i -pe "s{${token} \\(default:? \\\`[^)]*\\)}{${fw_esc} (discovered at deploy time)}" "$tmpfile"
       if grep -q "$token" "$tmpfile"; then
         echo "  frameworks: WARN ${token} cell did not match expected template shape — left for runtime auto-discover" >&2
@@ -240,7 +252,12 @@ subst_cursorrules() {
         echo "  frameworks: resolved ${token} → ${fw_dir_abs}" >&2
       fi
     else
-      echo "  frameworks: ${token} not found on disk — leaving for runtime auto-discover" >&2
+      local checked
+      checked="$(sister_names "$fw" "$AI_ROOT" | paste -sd' ' -)"
+      echo "  frameworks: ${token} not found (checked ${checked} in $SIBLING_PARENT) —" >&2
+      echo "    if the sister exists under another dir name, fill ${token} manually in" >&2
+      echo "    the target .cursorrules; naming conventions: legacy .ai.<fw> or family" >&2
+      echo "    <source-name with <fw> before its last .segment> (e.g. pilo.ai.ui.logicbison)." >&2
     fi
   done
 

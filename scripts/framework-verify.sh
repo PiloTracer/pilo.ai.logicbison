@@ -6,6 +6,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 
+# Sister-discovery lib (unit-asserted in section 2i).
+source "${REPO_ROOT}/scripts/sister-discovery.sh"
+
 failures=0
 note() { echo "==> $*"; }
 ok() { echo "    OK: $*"; }
@@ -328,6 +331,122 @@ bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" "${CV_SMOKE}" >/dev/null \
   || die "post-update verification failed"
 ok "cursorrules-verify detects stale source/unbaked paths/open sister cells; --fix + deploy update repair them"
 rm -rf "${CV_SMOKE}" "${AV_SMOKE}"
+
+# --- 2i. Renamed source dir + sister naming variants (family vs legacy) ---
+# Regression for the .ai → pilo.ai.logicbison rename: deploy must bake the
+# renamed source into AGENT_OS_SOURCE, discover sisters under BOTH the family
+# name (pilo.ai.ui.logicbison — <fw> inserted before the last .segment) and
+# the legacy name (.ai.ui), and verify clean.
+note "deploy from renamed source dir + sister naming variants"
+RN_PARENT="$(mktemp -d)"
+RN_SRC="${RN_PARENT}/pilo.ai.logicbison"
+mkdir -p "${RN_SRC}"
+rsync -a \
+  --exclude='.git' \
+  --exclude='.work' \
+  --exclude='.github' \
+  --exclude='.private' \
+  --exclude='.credentials' \
+  "${REPO_ROOT}/" "${RN_SRC}/"
+# Fixtures: one family-named sister (pilo.ai.ui.logicbison) + one legacy (.ai.ui).
+mkdir -p "${RN_PARENT}/pilo.ai.ui.logicbison/skills" "${RN_PARENT}/.ai.ui/skills"
+printf '# UI Design OS (family fixture)\n' > "${RN_PARENT}/pilo.ai.ui.logicbison/skills/README.md"
+printf '# UI Design OS (legacy fixture)\n' > "${RN_PARENT}/.ai.ui/skills/README.md"
+# Deploy targets must pre-exist (deploy-basic requires an existing target dir).
+mkdir -p "${RN_PARENT}/family-target" "${RN_PARENT}/legacy-target"
+
+# Family scenario: renamed source + family-named sister (both on disk — the
+# family name must win over the legacy one).
+git -C "${RN_SRC}" init -q
+bash "${RN_SRC}/scripts/deploy-basic.sh" "${RN_PARENT}/family-target" >/dev/null
+grep -q "^AGENT_OS_SOURCE=${RN_SRC}\$" "${RN_PARENT}/family-target/.cursorrules" \
+  || die "renamed source: AGENT_OS_SOURCE not baked to the renamed source dir"
+grep -qE "${RN_PARENT}/pilo\.ai\.ui\.logicbison \(discovered at deploy time\)" "${RN_PARENT}/family-target/.cursorrules" \
+  || die "renamed source: AI_UI_PATH not filled with family-named sister (pilo.ai.ui.logicbison)"
+bash "${RN_SRC}/scripts/cursorrules-verify.sh" "${RN_PARENT}/family-target" >/dev/null \
+  || die "renamed source: cursorrules-verify FAILED after deploy"
+# opencode.json must reference the family-named sister next to the source.
+python3 -c "
+import json
+c=json.load(open('${RN_PARENT}/family-target/opencode.json'))
+assert 'pilo.ai.ui.logicbison' in c.get('references',{}).get('ai-ui',{}).get('path',''), c.get('references')
+assert any('pilo.ai.ui.logicbison' in p for p in c.get('skills',{}).get('paths',[])), c.get('skills')
+" || die "renamed source: opencode.json missing family-named sister paths"
+
+# Sync-paths staleness: a stale family-named sister path must be dropped by
+# --sync-paths (regression: string markers only matched legacy .ui/skills).
+python3 - "${RN_PARENT}/family-target/opencode.json" <<'PY'
+import json, sys
+p = sys.argv[1]
+with open(p) as f:
+    c = json.load(f)
+c["skills"]["paths"][0] = "./skills"                                  # force stale → sync runs
+c["skills"]["paths"].append("../pilo.ai.ui.logicbison.old/skills")    # stale family sister
+with open(p, "w") as f:
+    json.dump(c, f, indent=2)
+    f.write("\n")
+PY
+REPO_ROOT="${RN_PARENT}/family-target" AI_SOURCE="${RN_SRC}" \
+  bash "${RN_SRC}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
+python3 - "${RN_PARENT}/family-target/opencode.json" "${RN_SRC}" <<'PY'
+import json, sys
+p, src = sys.argv[1], sys.argv[2]
+paths = json.load(open(p))["skills"]["paths"]
+assert paths[0] == src + "/skills", paths
+assert not any("pilo.ai.ui.logicbison.old" in x for x in paths), paths
+assert "../pilo.ai.ui.logicbison/skills" in paths, paths
+PY
+[[ $? -eq 0 ]] || die "sync-paths kept a stale family-named sister path"
+
+# Fat-client repair: deploy-files in-place from the renamed source, then
+# cursorrules-verify --fix must re-fill a re-opened family-named cell.
+mkdir -p "${RN_PARENT}/fat-inplace"
+(
+  cd "${RN_PARENT}/fat-inplace"
+  bash "${RN_SRC}/scripts/deploy-files.sh" . >/dev/null
+  perl -i -pe "s{/[^ |]+/pilo\.ai\.ui\.logicbison \(discovered at deploy time\)}{REPLACE:AI_UI_PATH (default \`../.ai.ui\`)}" .cursorrules
+  grep -q 'REPLACE:AI_UI_PATH' .cursorrules || die "fat setup: could not re-open family sister token"
+  bash "${RN_SRC}/scripts/cursorrules-verify.sh" --fix . >/dev/null \
+    || die "fat: cursorrules-verify --fix FAILED"
+  grep -qE "${RN_PARENT}/pilo\.ai\.ui\.logicbison \(discovered at deploy time\)" .cursorrules \
+    || die "fat: --fix did not re-fill family-named sister cell"
+  bash "${RN_SRC}/scripts/cursorrules-verify.sh" . >/dev/null \
+    || die "fat: cursorrules-verify FAILED after --fix"
+)
+
+# Legacy scenario: source dir named .ai + legacy-named sister (.ai.ui).
+mkdir -p "${RN_PARENT}/.ai"
+rsync -a \
+  --exclude='.git' \
+  --exclude='.work' \
+  --exclude='.github' \
+  --exclude='.private' \
+  --exclude='.credentials' \
+  "${REPO_ROOT}/" "${RN_PARENT}/.ai/"
+bash "${RN_PARENT}/.ai/scripts/deploy-basic.sh" "${RN_PARENT}/legacy-target" >/dev/null
+grep -qE "${RN_PARENT}/\.ai\.ui \(discovered at deploy time\)" "${RN_PARENT}/legacy-target/.cursorrules" \
+  || die "legacy source: AI_UI_PATH not filled with legacy .ai.ui sister"
+bash "${RN_PARENT}/.ai/scripts/cursorrules-verify.sh" "${RN_PARENT}/legacy-target" >/dev/null \
+  || die "legacy source: cursorrules-verify FAILED after deploy"
+
+# Unit: candidate derivation (fixture dirs only — the repo's own dir name must
+# never be asserted, CI checkouts vary).
+[[ "$(sister_names ui "${RN_PARENT}/pilo.ai.logicbison")" == $'pilo.ai.ui.logicbison\n.ai.ui' ]] \
+  || die "sister_names ui pilo.ai.logicbison: wrong candidates"
+[[ "$(sister_names biz "${RN_PARENT}/pilo.ai.ui.logicbison")" == $'pilo.ai.biz.logicbison\n.ai.biz' ]] \
+  || die "sister_names biz pilo.ai.ui.logicbison: slot not replaced"
+[[ "$(sister_names cto "${RN_PARENT}/pilo.ai.ui.logicbison")" == $'pilo.ai.cto.logicbison\n.ai.cto' ]] \
+  || die "sister_names cto pilo.ai.ui.logicbison: slot replace misses cto"
+[[ "$(sister_names cto "${RN_PARENT}/pilo.ai.logicbison")" == $'pilo.ai.cto.logicbison\n.ai.cto' ]] \
+  || die "sister_names cto pilo.ai.logicbison: six-slot insertion broken"
+[[ "$(sister_names ui "${RN_PARENT}/.ai")" == ".ai.ui" ]] \
+  || die "sister_names ui .ai: legacy dedupe broken"
+[[ "$(sister_names ui "${RN_PARENT}/.ai.biz")" == ".ai.ui" ]] \
+  || die "sister_names ui .ai.biz: legacy sibling source wrong"
+[[ "$(sister_names ui "${RN_PARENT}/agent-os")" == $'agent-os.ui\n.ai.ui' ]] \
+  || die "sister_names ui agent-os: append rule broken"
+rm -rf "${RN_PARENT}"
+ok "deploy-basic + cursorrules-verify handle renamed source dir; family + legacy sister naming"
 
 # --- 3. Removed vendor integration paths ---
 note "No stale vendor integration paths"

@@ -52,7 +52,7 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | docs | `docs/` | **Documentation:** create guides, tutorials, reference docs under `.work/docs/` |
 | project-query-setup | `project-query-setup/` | **Optional integration:** guide through tools-project API key creation, MCP registration, connectivity test. OS-aware (tailors guidance per framework). |
 | ai-director | `ai-director/` | **Orchestrator:** free-text request → optimal `.ai` skill chain; new skill gap detection |
-| x-director | `x-director/` | **Cross-framework director:** orchestrates `.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc` via directors |
+| x-director | `x-director/` | **Cross-framework director:** orchestrates `.ai` + the six sibling frameworks (`.ai.biz` / `.ai.cto` / `.ai.flutter` / `.ai.mlt` / `.ai.soc` / `.ai.ui`) via directors |
 
 **Typical flow (greenfield):** `@project-bootstrap init` → `plan-foundation greenfield` → `certify plan-master-ready` → `plan-master greenfield` → `plan-master status` (implementation-ready) → `code-implementation plan` → `code-implementation start/continue/complete`.
 

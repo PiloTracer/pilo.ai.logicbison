@@ -127,7 +127,7 @@ The `.cursorrules` checks are delegated to `scripts/cursorrules-verify.sh` (sing
 | `.cursorrules` present | pass / missing |
 | `AGENT_OS_SOURCE` value + reachable | value + `test -d` result (FAIL when unfilled or unreachable) |
 | Gate-table script paths baked | ok / FAIL when literal `.ai/scripts/` remains or a baked prefix is stale |
-| Sister-framework cells (`.ai.ui/.ai.biz/.ai.soc`) | reachable / unfilled-token (warn when installed) / STALE (FAIL) |
+| Sister-framework cells (IDs `.ai.ui/.ai.biz/.ai.soc`; dirs auto-discovered as family `<source basename with <fw> before its last .segment>` e.g. `pilo.ai.ui.logicbison`, or legacy `.ai.<fw>`) | reachable / unfilled-token (warn when installed) / STALE (FAIL) |
 | Source-resolution section present | pass / missing (warn → merge candidate) |
 | `.work/` present | pass / missing |
 | Local `.ai/skills/` exists (fat-client leak) | no (good, thin) / yes (warn — mixed) |

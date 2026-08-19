@@ -52,8 +52,11 @@ Sister frameworks are siblings on disk; `.ai/` is this framework. Paths resolve 
 | `.ai.ui` (UI Design OS) | `@ui-director` | REPLACE:AI_UI_PATH (default `../.ai.ui`) | `.ai.ui/skills/README.md` |
 | `.ai.biz` (Business OS) | `@biz-director` | REPLACE:AI_BIZ_PATH (default `../.ai.biz`) | `.ai.biz/skills/README.md` |
 | `.ai.soc` (Social OS) | `@soc-director` | REPLACE:AI_SOC_PATH (default `../.ai.soc`) | `.ai.soc/skills/README.md` |
+| `.ai.cto` (CTO Professor OS) | `@cto-director` | REPLACE:AI_CTO_PATH (default `../.ai.cto`) | `.ai.cto/skills/README.md` |
+| `.ai.flutter` (Flutter Agent OS) | `@flutter-director` | REPLACE:AI_FLUTTER_PATH (default `../.ai.flutter`) | `.ai.flutter/skills/README.md` |
+| `.ai.mlt` (MLT Agent OS) | `@mlt-director` | REPLACE:AI_MLT_PATH (default `../.ai.mlt`) | `.ai.mlt/skills/README.md` |
 
-**Path resolution:** (1) use a filled path cell; `REPLACE:*`/empty → fall through. (2) Auto-discover: fat-client parent = `$REPO_ROOT/.ai/..`; thin-client parent = `$AGENT_OS_SOURCE/..`; check `${parent}/.ai.ui|.ai.biz|.ai.soc`; missing = "not installed". (3) Before routing, verify the framework dir + its `skills/README.md` exist; if absent, route to `@ai-director` prefixed `[degraded: <framework> not installed]` — never route into the void.
+**Path resolution:** (1) use a filled path cell; `REPLACE:*`/empty → fall through. (2) Auto-discover: source dir S = `$AGENT_OS_SOURCE` (thin), `$REPO_ROOT/.ai` (fat), `$REPO_ROOT` (self-hosted); parent = `S/..`; sister = `<S basename with <fw> inserted before its last .segment>` (e.g. `pilo.ai.ui.logicbison` for source `pilo.ai.logicbison`; `.ai`-prefixed sources resolve `.ai.<fw>` directly), else legacy `.ai.<fw>`; missing = "not installed". (3) Before routing, verify the framework dir + its `skills/README.md` exist; if absent, route to `@ai-director` prefixed `[degraded: <framework> not installed]` — never route into the void. If your source dir name breaks discovery (e.g. `my-framework`), fill the path cells manually — deploy output lists what it checked.
 
 ### Source resolution — fat-client vs thin-client (MANDATORY before reading any `.ai/...` path)
 

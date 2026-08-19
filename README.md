@@ -199,7 +199,7 @@ All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **project-query-setup** | Optional tools-project API key + MCP registration | `install` · `status` · `test` |
 | **tauri-development** | Domain guidance for Tauri desktop apps | *(read skill for IPC, shell, Rust conventions)* |
 | **ai-director** | Free-text orchestrator: routes to correct `.ai` skill chain | `- <free-text>` · `- <free-text> -y` (skip confirm) · `- <free-text> --dry-run` · `status` · `review-routing` · `help` |
-| **x-director** | Cross-framework director: orchestrates `.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`; auto-resolves sibling frameworks via `.cursorrules` § Frameworks registry and preflight-checks each before routing | `- <free-text>` · `- <free-text> -y` · `- <free-text> --dry-run` · `status` · `help` |
+| **x-director** | Cross-framework director: orchestrates `.ai` + the six sibling frameworks (`.ai.biz` / `.ai.cto` / `.ai.flutter` / `.ai.mlt` / `.ai.soc` / `.ai.ui`); auto-resolves sibling frameworks via `.cursorrules` § Frameworks registry and preflight-checks each before routing | `- <free-text>` · `- <free-text> -y` · `- <free-text> --dry-run` · `status` · `help` |
 
 Gates between skills: [`skills/SKILL_DEPENDENCIES.md`](skills/SKILL_DEPENDENCIES.md).
 
