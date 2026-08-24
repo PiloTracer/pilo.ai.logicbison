@@ -78,6 +78,16 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 4. App code + `.work/...` resolve locally in both modes.
 5. **Thin-client + unreachable source:** stop and report `agent-os source unreachable: $AGENT_OS_SOURCE` — do not fall back or guess.
 
+**Concrete examples (thin-client):** the source repository is self-hosted, so its skills tree lives at the source root, not under a nested `.ai/` directory.
+
+| Consumer reference | Thin-client resolves to |
+|--------------------|-------------------------|
+| `.ai/skills/session-control/skill.md` | `$AGENT_OS_SOURCE/skills/session-control/skill.md` |
+| `.ai/standards/20260517-CONVENTIONS.md` | `$AGENT_OS_SOURCE/standards/20260517-CONVENTIONS.md` |
+| `.ai/scripts/touch-scope-verify.sh` | `$AGENT_OS_SOURCE/scripts/touch-scope-verify.sh` |
+
+**Never** prepend an extra `.ai/` to the source path (e.g. do **not** read `$AGENT_OS_SOURCE/.ai/skills/...`). The `.ai/` prefix is the consumer-side namespace only.
+
 **Executable script paths are pre-resolved, not left to interpretation.** The `bash .ai/scripts/...` commands below (Change-safety gate table, Co-authored-by hook install) are rewritten to the absolute `$AGENT_OS_SOURCE/scripts/...` path by `@deploy-basic` at bootstrap/`update` time — do not re-derive them at read-time. If a thin-client `.cursorrules` still shows literal `.ai/scripts/...` text, it predates this rewrite; run `@deploy-basic update` to re-bake it.
 
 **First thin-client bootstrap** (no local skill yet): run from source (`@deploy-basic - /abs/target`) or invoke the shell from target (`bash /abs/source/scripts/deploy-basic.sh .`). Afterward the source pointer lets the local agent load every skill from source.
@@ -114,7 +124,7 @@ AGENT_OS_SOURCE=REPLACE_BASICSOURCE
 | `{STANDARDS_ROOT}` | `.work/standards/` |
 | `{INTEGRATION_ROOT}` | `.work/docs/integration/` |
 | `{CONCEPTS_ROOT}` | `.ai/concepts/` |
-| `{SKILLS_ROOT}` | `.ai/skills/` |
+| `{SKILLS_ROOT}` | `.ai/skills/` (fat-client) or `$AGENT_OS_SOURCE/skills/` (thin-client) |
 | `{OBSERVABILITY_SPEC}` | REPLACE:OBSERVABILITY_SPEC_PATH |
 | `{BOUNDARY_MAP}` | REPLACE:BOUNDARY_MAP_PATH |
 | `{AGENT_RULES_FILE}` | `.cursorrules` (this file); `AGENTS.md` unused unless owner adopts it |
@@ -301,7 +311,7 @@ Use Context7 MCP (`@upstash/context7-mcp`) for version-specific library docs whe
 | `.work/standards/` | This project's binding engineering standards (generated, not vendored) |
 | `.work/docs/integration/` | This project's vendor/API integration cache |
 | `.work/docs/` | Project docs (`guides/`, `tutorials/`, `reference/`, `features/`) |
-| `.ai/skills/` | Portable agent skills (fat-client local, or `$AGENT_OS_SOURCE` in thin-client) |
+| `.ai/skills/` | Portable agent skills (fat-client local, or `$AGENT_OS_SOURCE/skills/` in thin-client) |
 | `.ai/standards/MASTER_PLAN_STANDARD.md` | Framework-wide master-plan structural contract (shared, not project-specific) |
 | `.ai/templates/cursorrules.template` | Copy to repo-root `.cursorrules` when bootstrapping |
 

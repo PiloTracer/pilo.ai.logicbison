@@ -13,13 +13,13 @@ description: >-
 
 # deploy-basic
 
-Thin-client deploy of the `.ai` framework. The target project receives only the scaffold it owns (`.cursorrules`, `.work/`, `DOCS_TECH_STACK.md`); everything else (skills, standards, concepts, docs/guides, scripts, templates) stays in the **source** `.ai` and is loaded on demand via the `AGENT_OS_SOURCE` pointer written into `.cursorrules`.
+Thin-client deploy of the Agent OS framework. The target project receives only the scaffold it owns (`.cursorrules`, `.work/`, `DOCS_TECH_STACK.md`); everything else (skills, standards, concepts, docs/guides, scripts, templates) stays in the **source** framework and is loaded on demand via the `AGENT_OS_SOURCE` pointer written into `.cursorrules`.
 
-**Shell:** `bash <source>/.ai/scripts/deploy-basic.sh <target-path> [mode]`
+**Shell:** `bash <source>/scripts/deploy-basic.sh <target-path> [mode]` (source framework is self-hosted; `skills/` and `scripts/` live at the repo root)
 
-**Canonical path:** `.ai/skills/deploy-basic/skill.md` · **Shell:** `.ai/scripts/deploy-basic.sh`
+**Canonical path:** `.ai/skills/deploy-basic/skill.md` · **Shell:** `<source>/scripts/deploy-basic.sh`
 
-**Source not modified.** deploy-basic only writes to the **target**. The source `.ai` is read-only (script reads its templates).
+**Source not modified.** deploy-basic only writes to the **target**. The source framework is read-only (script reads its templates).
 
 **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 

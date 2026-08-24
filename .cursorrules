@@ -262,6 +262,8 @@ Use Context7 MCP (`@upstash/context7-mcp`) for version-specific library docs whe
 
 Self-hosted: the framework layer sits at repo root without the `.ai/` prefix.
 
+**Self-hosted alias rule:** skill docs and cross-framework references sometimes use the consumer-side form `.ai/<path>` (e.g. `.ai/skills/session-control/skill.md`). In this repo, resolve any `.ai/<path>` reference to the repo-root `<path>` (so `.ai/skills/` → `skills/`, `.ai/standards/` → `standards/`, etc.).
+
 - **`/` (framework layer):** agnostic — `skills/`, `standards/` (template library + `PROTECTED_SURFACES.json`), `concepts/`, workflow guides, `START_HERE.md`, `PROCESS_ROUTER.md`, `templates/`. Pointer READMEs only under `plans/`, `features/`.
 - **`.work/`:** **all project-specific memory and customization** — plans, SPECs, ADRs, prompts, `HANDOFF.md`, `PROTECTED_SURFACES.json`, binding **`.work/standards/`**, and **`.work/docs/`** (including **`.work/docs/integration/`** vendor cache). Generated filenames use the `YYYYMMDD-` prefix (except `NEXT.md`, `HANDOFF.md`).
 
