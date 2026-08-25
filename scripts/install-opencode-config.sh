@@ -8,8 +8,8 @@
 #   --force         Full regenerate from template (destructive to customizations).
 #
 # Usage:
-#   REPO_ROOT=/path/to/app AI_SOURCE=/path/.ai bash install-opencode-config.sh
-#   OLD_SOURCE=/old/path/.ai ... --sync-paths   # pass prior AGENT_OS_SOURCE when source moved
+#   REPO_ROOT=/path/to/app AI_SOURCE=/path/to/source-root bash install-opencode-config.sh
+#   OLD_SOURCE=/old/path/to/source-root ... --sync-paths   # pass prior AGENT_OS_SOURCE when source moved
 #
 set -euo pipefail
 

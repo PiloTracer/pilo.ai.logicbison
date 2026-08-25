@@ -5,11 +5,11 @@ set -euo pipefail
 AI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TPL="${AI_ROOT}/templates/work"
 
-# Repo root: git root containing .ai/, or AI_ROOT itself when this repository *is* the Agent OS tree.
+# Repo root: target git root, or AI_ROOT itself when this repository *is* the Agent OS tree.
 # Honor an explicit REPO_ROOT env override so scaffold can write into a TARGET
-# directory when bootstrap.sh is invoked from an external source .ai
+# directory when bootstrap.sh is invoked from an external source framework root
 # (in-place bootstrap via @deploy-files). e.g.
-#   REPO_ROOT=/mnt/work/Projects/tools-project bash /mnt/work/Projects/.ai/templates/bootstrap.sh
+#   REPO_ROOT=/mnt/work/Projects/tools-project bash /mnt/work/Projects/pilo.ai.logicbison/templates/bootstrap.sh
 if [[ -n "${REPO_ROOT:-}" ]]; then
   REPO_ROOT="$(cd "$REPO_ROOT" && pwd)"
 elif [[ -d "${AI_ROOT}/.git" ]]; then

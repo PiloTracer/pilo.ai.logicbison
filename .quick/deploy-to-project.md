@@ -18,7 +18,7 @@ Two modes: **fat-client** (`deploy-files` — vendored `.ai/` in target, works o
 
 ```text
 @deploy-basic - /absolute/path/to/my-project
-# from /mnt/work/Projects/.ai → bootstraps /absolute/path/to/my-project
+# from /mnt/work/Projects/pilo.ai.logicbison → bootstraps /absolute/path/to/my-project
 # Same effect as in-place; only the cwd differs.
 ```
 
@@ -31,9 +31,9 @@ No-overwrite by default. Re-sync the source pointer + rules-aware-merge the smal
 **First bootstrap (chicken-and-egg):** before the target has `.cursorrules`, no skill can load there yet. Bootstrap from the source dir or invoke the shell directly in the target:
 
 ```bash
-bash /mnt/work/Projects/.ai/scripts/deploy-basic.sh /mnt/work/Projects/tools-project
+bash /mnt/work/Projects/pilo.ai.logicbison/scripts/deploy-basic.sh /mnt/work/Projects/tools-project
 # (or, from inside the target:)
-bash /mnt/work/Projects/.ai/scripts/deploy-basic.sh .
+bash /mnt/work/Projects/pilo.ai.logicbison/scripts/deploy-basic.sh .
 ```
 
 ## Fat-client — full vendored .ai in target (works offline)
@@ -43,9 +43,9 @@ bash /mnt/work/Projects/.ai/scripts/deploy-basic.sh .
 ```text
 @deploy-files
 # from /mnt/work/Projects/tools-project → creates ./.ai/, ./.work/, ./.cursorrules
-# source defaults to the script's own .ai; supply it if asked:
-#   "source is /mnt/work/Projects/.ai"
-#   "skills at /mnt/work/Projects/.ai/skills"
+# source defaults to the script's own framework root; supply it if asked:
+#   "source is /mnt/work/Projects/pilo.ai.logicbison"
+#   "skills at /mnt/work/Projects/pilo.ai.logicbison/skills"
 ```
 
 No-overwrite by default. Rules-aware merge of existing-but-differing files:

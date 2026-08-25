@@ -1,8 +1,8 @@
 # Plans (pointer)
 
-**Project plans live in [`.work/plans/`](../.work/plans/)** (sibling `.work/` when this tree is the git root; `../../.work/plans/` when `.ai/` is a subfolder of the app repo).
+**Project plans live in [`.work/plans/`](../.work/plans/)** (sibling `.work/` when this tree is the git root; `../../.work/plans/` when the framework is a subfolder of the app repo).
 
-`.ai/` holds **agnostic** skills, standards, concepts, and workflow guides. Plans, registries, master plan, foundation docs, and `NEXT.md` are **project working artifacts**.
+This framework root holds **agnostic** skills, standards, concepts, and workflow guides. Plans, registries, master plan, foundation docs, and `NEXT.md` are **project working artifacts**.
 
 | What | Path |
 |------|------|
@@ -14,4 +14,4 @@
 
 Portable skills reference `{PLANS_ROOT}` and `{ITERATION_CARRIER}` — see `.cursorrules` placeholder map.
 
-**Bootstrap:** empty skeleton at [`.work/plans/`](../.work/plans/) (this repo) or copy from [`.ai/templates/work/plans/`](../templates/work/plans/) · `@project-bootstrap init`
+**Bootstrap:** empty skeleton at [`.work/plans/`](../.work/plans/) (this repo) or copy from [`templates/work/plans/`](../templates/work/plans/) · `@project-bootstrap init`

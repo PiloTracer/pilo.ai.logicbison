@@ -178,10 +178,10 @@ Copy into each framework's skills directory:
 
 | Framework | Target path |
 |-----------|------------|
-| `.ai` | `/mnt/work/Projects/.ai/skills/project-query-setup/skill.md` |
-| `.ai.ui` | `/mnt/work/Projects/.ai.ui/skills/project-query-setup/skill.md` |
-| `.ai.biz` | `/mnt/work/Projects/.ai.biz/skills/project-query-setup/skill.md` |
-| `.ai.soc` | `/mnt/work/Projects/.ai.soc/skills/project-query-setup/skill.md` |
+| `.ai` | `/mnt/work/Projects/pilo.ai.logicbison/skills/project-query-setup/skill.md` |
+| `.ai.ui` | `/mnt/work/Projects/pilo.ai.ui.logicbison/skills/project-query-setup/skill.md` |
+| `.ai.biz` | `/mnt/work/Projects/pilo.ai.biz.logicbison/skills/project-query-setup/skill.md` |
+| `.ai.soc` | `/mnt/work/Projects/pilo.ai.soc.logicbison/skills/project-query-setup/skill.md` |
 
 Then register in each framework's `skills/README.md`:
 
@@ -192,7 +192,7 @@ Then register in each framework's `skills/README.md`:
 And add to each framework's `.cursorrules` § Skills table:
 
 ```markdown
-| project-query-setup | `/mnt/work/Projects/.ai/skills/project-query-setup/` | Guided setup: API key creation, MCP registration, connectivity test. OS-aware (adapts guidance per OS). |
+| project-query-setup | `/mnt/work/Projects/pilo.ai.logicbison/skills/project-query-setup/` | Guided setup: API key creation, MCP registration, connectivity test. OS-aware (adapts guidance per OS). |
 ```
 
 ---

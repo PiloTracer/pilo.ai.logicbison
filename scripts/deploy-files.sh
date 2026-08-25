@@ -17,9 +17,9 @@
 # list of existing-but-differing files for agent-driven rules-aware merge.
 #
 # Source resolution: AI_ROOT is derived from this script's location, so the
-# script can be invoked from a TARGET directory using an external source .ai:
-#   bash /mnt/work/Projects/.ai/scripts/deploy-files.sh .
-# Override the source with AI_SOURCE=/abs/path/.ai if needed.
+# script can be invoked from a TARGET directory using an external source framework root:
+#   bash /mnt/work/Projects/pilo.ai.logicbison/scripts/deploy-files.sh .
+# Override the source with AI_SOURCE=/abs/path/to/source-root if needed.
 #
 # Usage:
 #   bash scripts/deploy-files.sh <target-path>              # no-overwrite (skip existing)
@@ -27,7 +27,7 @@
 #   bash scripts/deploy-files.sh <target-path> [--force]    # overwrite existing (legacy)
 #   bash scripts/deploy-files.sh <target-path> [--update]   # no-overwrite + emit merge candidates + verify
 #   bash scripts/deploy-files.sh [status] [target-path]     # read-only report (+ .cursorrules verify)
-#   AI_SOURCE=/path/.ai bash scripts/deploy-files.sh <target-path>
+#   AI_SOURCE=/path/to/source-root bash scripts/deploy-files.sh <target-path>
 #
 # Argument forms are equivalent: verbs accept the '--' prefix or bare form
 # (`update` ≡ `--update`, `status` ≡ `--status`), '-' / '--' separators are

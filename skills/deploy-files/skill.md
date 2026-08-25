@@ -1,8 +1,8 @@
 ---
 name: deploy-files
 description: >-
-  Deploy .ai (Agent OS) files into a target project. Two directions: (1) in-place
-  bootstrap — invoked from a TARGET project, copies the source .ai in without
+  Deploy Agent OS framework files into a target project. Two directions: (1) in-place
+  bootstrap — invoked from a TARGET project, copies the source framework files in without
   overwriting existing files, then scaffolds .work/ + .cursorrules; (2) outbound
   copy — invoked from the source Agent OS repo, copies into an explicit <path>.
   `update` mode additionally performs a rules-aware merge of existing-but-
@@ -17,16 +17,16 @@ description: >-
 
 Two-direction deploy of the `.ai` framework into a target project so the project can use Agent OS skills. **Default = no-overwrite**: existing target files are preserved by construction.
 
-**Shell:** `bash <source>/.ai/scripts/deploy-files.sh <target-path> [mode]`
-**Scaffold shell:** `REPO_ROOT=<target> bash <source>/.ai/templates/bootstrap.sh`
+**Shell:** `bash <source>/scripts/deploy-files.sh <target-path> [mode]`
+**Scaffold shell:** `REPO_ROOT=<target> bash <source>/templates/bootstrap.sh`
 
 **Canonical path:** `.ai/skills/deploy-files/skill.md` · **Shell:** `.ai/scripts/deploy-files.sh`
 
-**Security invariant:** The script enumerates files via `git ls-files --cached --others --exclude-standard` from the **source** `.ai` repo root, so anything `.gitignore` excludes (credentials, private context, `tmp/`, …) is never copied — enforced by construction, not a hand-maintained list. The source must be a git repo with `.ai/` as its root.
+**Security invariant:** The script enumerates files via `git ls-files --cached --others --exclude-standard` from the **source framework repo root**, so anything `.gitignore` excludes (credentials, private context, `tmp/`, …) is never copied — enforced by construction, not a hand-maintained list. The source must be a git repo with the framework files (`skills/`, `scripts/`, `templates/`, etc.) at its root.
 
-**Source not modified.** deploy-files only writes to the **target**. The source `.ai` is read-only (script enumerates it via `git ls-files`).
+**Source not modified.** deploy-files only writes to the **target**. The source framework is read-only (script enumerates it via `git ls-files`).
 
-**Scope:** `deploy-files` copies only the `.ai/` directory content (no VCS artifacts, no `.github/`). There is no full-repo deploy mode — mirror the repo via plain `git clone` out-of-band if needed.
+**Scope:** `deploy-files` copies only the framework files (`skills/`, `standards/`, `concepts/`, `docs/`, `scripts/`, `templates/`, etc.; no VCS artifacts, no `.github/`). There is no full-repo deploy mode — mirror the repo via plain `git clone` out-of-band if needed.
 
 - **Operator handoff:** every response that ends a turn follows the [Operator handoff contract](../SKILL_DEPENDENCIES.md#operator-handoff-contract) — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line when nothing is needed (Form A). Decisions and questions never mixed; empty sections omitted.
 
@@ -54,7 +54,7 @@ Two-direction deploy of the `.ai` framework into a target project so the project
 
 | Condition | Action |
 |-----------|--------|
-| Source is not a git repo, or `.ai/` is not the git root | **Block**: report; deploy-files relies on `git ls-files` as the authority |
+| Source is not a git repo, or framework files are not at the repo root | **Block**: report; deploy-files relies on `git ls-files` from the source repo root as the authority |
 | Target parent dir does not exist | **Block**: report missing path |
 | Destination exists and is not a dir | **Block**: report conflict |
 | Destination already has `.ai/` | Proceed with **no-overwrite**; report skipped count (default) |
@@ -62,11 +62,11 @@ Two-direction deploy of the `.ai` framework into a target project so the project
 
 ### Source resolution (in-place direction)
 
-When invoked from a **target** project (cwd has no `.ai/scripts/deploy-files.sh`):
+When invoked from a **target** project (cwd has no `scripts/deploy-files.sh`):
 
 1. **Auto:** if the script can be located at a known source path (user named it, or sibling `.ai` discoverable per `.cursorrules` § Frameworks registry auto-discovery from `.ai` parent), use it.
-2. **Ask once:** if source is unknown, ask the user for the source `.ai` path (e.g. `/mnt/work/Projects/.ai`). Do not guess.
-3. **Optional skills path override:** user may name a skills location (`/path/.ai/skills`); default is `<source>/.ai/skills`. Recorded in the start report only; the script enumerates the whole source, so an explicit skills path is informational unless the user wants a partial deploy (then surface as **Unverified — partial deploy unsupported by script**).
+2. **Ask once:** if source is unknown, ask the user for the source framework path (e.g. `/mnt/work/Projects/pilo.ai.logicbison`). Do not guess.
+3. **Optional skills path override:** user may name a skills location (`/path/skills`); default is `<source>/skills`. Recorded in the start report only; the script enumerates the whole source, so an explicit skills path is informational unless the user wants a partial deploy (then surface as **Unverified — partial deploy unsupported by script**).
 4. Source determined → run the shell from the **target** directory:
    ```bash
    cd <target> && bash <source>/scripts/deploy-files.sh . <mode>
@@ -78,7 +78,7 @@ When invoked from a **target** project (cwd has no `.ai/scripts/deploy-files.sh`
 
 ## I1 — Copy mode (no-overwrite by default)
 
-1. `bash <source>/.ai/scripts/deploy-files.sh "<resolved-target>"` (default) — or `--force` / `--update` per parse-invocation.
+1. `bash <source>/scripts/deploy-files.sh "<resolved-target>"` (default) — or `--force` / `--update` per parse-invocation.
 2. **File set:** `git ls-files --cached --others --exclude-standard` from the source repo root — i.e. every file **not** excluded by `.gitignore`. Anything gitignored (`.credentials/`, `.private/`, `tmp/`, …) is never copied.
 3. **Skill-level omissions** (intentional, on top of the git-based set): `.github/`, `.gitignore`, `.gitattributes`, `.cursorrules`, `scripts/deploy-files.sh` (the deploy script itself — run from source repo, not consumer concern), `agent.os.framework.md` (**framework source marker — never deployed**; a consumer carrying it would be misdetected as framework source by session-control repo-mode detection).
 4. **No-overwrite default:** `rsync --ignore-existing` skips any file already present in the target. Target-side customizations are preserved by construction. `--force` drops that flag (legacy idempotent overwrite; still no `--delete`). `--update` keeps no-overwrite and additionally emits the **merge candidate list** (existing-but-differing files) for § I3.
@@ -90,7 +90,7 @@ When invoked from a **target** project (cwd has no `.ai/scripts/deploy-files.sh`
 When invoked in-place (bare `@deploy-files` or `@deploy-files update`), after the copy pass run the `.work/` + `.cursorrules` + `DOCS_TECH_STACK.md` scaffold **into the target** using the source templates (no-overwrite — `bootstrap.sh` uses `copy_if_missing`):
 
 ```bash
-REPO_ROOT="$(pwd)" bash <source>/.ai/templates/bootstrap.sh
+REPO_ROOT="$(pwd)" bash <source>/templates/bootstrap.sh
 ```
 
 This is the same scaffold `@project-bootstrap init` performs; in-place `@deploy-files` simply chains it so the target ends with `.ai/` + `.work/` + `.cursorrules` in one invocation. **Outbound `copy - <path>` does NOT scaffold** — it leaves next-step instructions for the user to run `@project-bootstrap init` in the target (preserves the legacy contract).
@@ -149,7 +149,7 @@ After I1 (no-overwrite copy) the script:
 
 | # | Check | Result |
 |---|-------|--------|
-| 1 | Source repo is a git repo with `.ai/` as root | pass |
+| 1 | Source repo is a git repo with framework files at its root | pass |
 | 2 | Destination `.ai/` exists after copy | |
 | 3 | No `.gitignored` content in destination (`.credentials/`, `.private/`, `tmp/`, …) | |
 | 4 | `.github/` excluded from destination | |

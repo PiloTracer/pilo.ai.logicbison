@@ -16,7 +16,7 @@
 #
 # Usage:
 #   bash scripts/cursorrules-verify.sh <target-root> [--fix] [--thin|--fat]
-#   AI_SOURCE=/abs/path/.ai bash scripts/cursorrules-verify.sh <target-root>
+#   AI_SOURCE=/abs/path/to/source-root bash scripts/cursorrules-verify.sh <target-root>
 #
 # Flags accept the '--' prefix or bare form; the target path may appear in any
 # position. <target-root> = consumer repo root (the dir holding .cursorrules).

@@ -74,7 +74,7 @@ End the report with the Operator handoff close (Form B with the overwrite/keep/a
 
 ### B1 - Copy templates (only after B0 resolved)
 
-1. **Confirm repo root** - directory containing `.ai/` (or this tree when `.ai` is the git root).
+1. **Confirm repo root** - directory that will hold `.cursorrules` and `.work/` (the target repo root; when this repo is the framework source, use the repo root).
 2. **Run** (preferred):
    ```bash
    bash .ai/templates/bootstrap.sh

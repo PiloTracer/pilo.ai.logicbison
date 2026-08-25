@@ -1,8 +1,8 @@
 # ADRs (pointer)
 
-**Architectural decision records live in [`.work/decisions/`](../.work/decisions/)** in each adopting repo — not under `.ai/`.
+**Architectural decision records live in [`.work/decisions/`](../.work/decisions/)** in each adopting repo — not under the framework root.
 
-ADR template: [`.ai/templates/work/decisions/`](../templates/work/decisions/)
+ADR template: [`templates/work/decisions/`](../templates/work/decisions/)
 
 Binding **process** for ADRs during foundation planning is in [`plan-foundation` skill](../skills/plan-foundation/skill.md) P2. **Artifacts** are project working documents.
 

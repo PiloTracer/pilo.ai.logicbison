@@ -3,7 +3,7 @@ name: deploy-basic
 description: >-
   Thin-client bootstrap of Agent OS into a target project. Copies ONLY the
   minimal scaffold — .cursorrules (with AGENT_OS_SOURCE pointer to the source
-  .ai), .work/ skeleton, DOCS_TECH_STACK.md. Framework assets (skills,
+  framework root), .work/ skeleton, DOCS_TECH_STACK.md. Framework assets (skills,
   standards, concepts, docs/guides, scripts) are NOT copied; the agent resolves
   them from the source Agent OS at runtime per .cursorrules § Source resolution.
   Use deploy-basic (default), deploy-basic update, deploy-basic status, or
@@ -66,7 +66,7 @@ Thin-client deploy of the Agent OS framework. The target project receives only t
 
 | Condition | Action |
 |-----------|--------|
-| Source `agent.os.framework.md` or `templates/cursorrules.template` missing | **Block**: source is not a valid `.ai` framework root (the marker file identifies framework source; the template is needed functionally to write the target `.cursorrules`) |
+| Source `agent.os.framework.md` or `templates/cursorrules.template` missing | **Block**: source is not a valid Agent OS framework root (the marker file identifies framework source; the template is needed functionally to write the target `.cursorrules`) |
 | Target dir does not exist | **Block**: report missing path |
 | Target already has local `.ai/skills/` | **Warn** fat-client leak: target was previously bootstrapped fat; thin-client would duplicate. Ask user to confirm intent (proceed leaves the local `.ai/` in place — deploy-basic does not delete it). |
 | Target `.cursorrules` exists + lacks `AGENT_OS_SOURCE=` line | In `update` mode → flag as **MERGE CANDIDATE** (the Source-resolution section is missing); in default mode → skip (preserve) and report that source-resolution is not wired. |
@@ -184,7 +184,7 @@ REPO_ROOT="$(pwd)" bash "$(grep -oE 'AGENT_OS_SOURCE=[^ ]*' .cursorrules | cut -
 
 # After source moved — surgical path sync (preserves mcp + custom entries):
 REPO_ROOT="$(pwd)" AI_SOURCE="$(grep AGENT_OS_SOURCE= .cursorrules | cut -d= -f2-)" \
-  OLD_SOURCE=/old/path/.ai bash "$AI_SOURCE/scripts/install-opencode-config.sh" --sync-paths
+  OLD_SOURCE=/old/path/to/source-root bash "$AI_SOURCE/scripts/install-opencode-config.sh" --sync-paths
 
 # Full regenerate (destructive — drops custom mcp/instructions):
 REPO_ROOT="$(pwd)" AI_SOURCE=... bash "$AI_SOURCE/scripts/install-opencode-config.sh" --force

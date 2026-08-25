@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Agent OS master-plan-verify - mechanically enforce MASTER_PLAN_STANDARD.md
-# (.ai/standards/20260519-MASTER_PLAN_STANDARD.md) so a plan cannot be treated
+# (standards/20260519-MASTER_PLAN_STANDARD.md) so a plan cannot be treated
 # as complete/Approved by narrative alone.
 #
 # Checks:

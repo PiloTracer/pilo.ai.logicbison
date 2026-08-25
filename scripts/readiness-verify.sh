@@ -2,7 +2,7 @@
 # Agent OS readiness-verify - mechanically enforce PROBE_LEDGER honesty rules.
 #
 # Validates each probe ledger (default: all .work/**/PROBE_LEDGER.md under cwd)
-# against the rules in .ai/skills/probe-protocol.md:
+# against the rules in skills/probe-protocol.md:
 #   1. Honesty: a dimension marked confirmed/high MUST cite evidence (no empty / dash / TBD).
 #   2. Coverage math: the header "Coverage: NN%" must match the value recomputed from the
 #      table within tolerance ( Coverage = Σ weight×conf / Σ weight ; high=1 med=.5 low=0 ;

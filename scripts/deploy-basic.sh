@@ -3,13 +3,13 @@
 #
 # Copies ONLY the minimal scaffold into the target:
 #   - .cursorrules (from templates/cursorrules.template, with AGENT_OS_SOURCE
-#     token substituted to the absolute path of THIS source .ai)
+#     token substituted to the absolute path of THIS source framework root)
 #   - .work/ skeleton (HANDOFF, NEXT, UNKNOWNS, plans dirs, READMEs)
 #   - DOCS_TECH_STACK.md
 #
 # Framework assets (skills/, standards/, concepts/, docs/, scripts/, templates/)
 # are NOT copied — the target's .cursorrules carries an AGENT_OS_SOURCE pointer so
-# the agent resolves them from the source .ai at runtime (thin-client mode).
+# the agent resolves them from the source framework root at runtime (thin-client mode).
 #
 # Default = NO-OVERWRITE: existing target files are preserved by construction.
 # --update: no-overwrite + re-syncs the source pointer + lists existing-but-
@@ -18,16 +18,16 @@
 # --force: idempotent overwrite of the local scaffold surface only.
 #
 # Source resolution: AI_ROOT is derived from this script's location, so the
-# script can be invoked from a TARGET using an external source .ai:
-#   bash /mnt/work/Projects/.ai/scripts/deploy-basic.sh /mnt/work/Projects/tools-project
-# Override the source with AI_SOURCE=/abs/path/.ai if needed.
+# script can be invoked from a TARGET using an external source framework root:
+#   bash /mnt/work/Projects/pilo.ai.logicbison/scripts/deploy-basic.sh /mnt/work/Projects/tools-project
+# Override the source with AI_SOURCE=/abs/path/to/source-root if needed.
 #
 # Usage:
 #   bash scripts/deploy-basic.sh <target-path>              # no-overwrite (skip existing)
 #   bash scripts/deploy-basic.sh [status] [target-path]     # read-only report (+ verify)
 #   bash scripts/deploy-basic.sh <target-path> [--update]   # no-overwrite + repair + merge candidates
 #   bash scripts/deploy-basic.sh <target-path> [--force]    # overwrite local scaffold (legacy)
-#   AI_SOURCE=/path/.ai bash scripts/deploy-basic.sh <target-path>
+#   AI_SOURCE=/path/to/source-root bash scripts/deploy-basic.sh <target-path>
 #
 # Argument forms are equivalent: verbs accept the '--' prefix or bare form
 # (`update` ≡ `--update`, `status` ≡ `--status`), '-' / '--' separators are
@@ -157,14 +157,14 @@ if [[ ! -d "$DEST_ROOT" ]]; then
 fi
 
 # .cursorrules template + .work/ skeleton templates come from source.
-# The framework source marker identifies a valid .ai framework root.
+# The framework source marker identifies a valid Agent OS framework root.
 if [[ ! -f "${AI_ROOT}/agent.os.framework.md" ]]; then
-  echo "ERROR: source .ai missing agent.os.framework.md (framework source marker) at $AI_ROOT" >&2
+  echo "ERROR: source framework missing agent.os.framework.md (framework source marker) at $AI_ROOT" >&2
   exit 1
 fi
 TPL_CURS="${AI_ROOT}/templates/cursorrules.template"
 if [[ ! -f "$TPL_CURS" ]]; then
-  echo "ERROR: source .ai missing templates/cursorrules.template at $AI_ROOT" >&2
+  echo "ERROR: source framework missing templates/cursorrules.template at $AI_ROOT" >&2
   exit 1
 fi
 

@@ -4,7 +4,7 @@
 # Usage (from application repo root):
 #   bash .ai/scripts/install-git-hooks.sh
 #   bash scripts/install-git-hooks.sh              # self-hosted Agent OS
-#   REPO_ROOT=/path/to/app AI_SOURCE=/path/.ai bash .ai/scripts/install-git-hooks.sh
+#   REPO_ROOT=/path/to/app AI_SOURCE=/path/to/source-root bash scripts/install-git-hooks.sh
 #
 # Hook sources resolve in order:
 #   1. AI_SOURCE env (explicit)
