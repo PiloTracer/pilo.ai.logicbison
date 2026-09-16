@@ -102,7 +102,7 @@ After I1 (no-overwrite) the script:
 
 | Class | Merge rule |
 |-------|------------|
-| `.cursorrules` | Update framework sections (Skills table, Core principles, Protected files, **Source resolution** section, Frameworks registry). Preserve target-filled `REPLACE:` tokens, target customizations, target-specific protected-file paths. If target lacks the Source-resolution section entirely (fat-client template) → append it with the current `AGENT_OS_SOURCE`. Never wholesale-replace. |
+| `.cursorrules` | Update framework sections (Skills table, Core principles, Protected files, **Source resolution** section, Frameworks registry) **and apply source-side changes to any other shared framework section** (new or changed bullets/rows, e.g. a new rule in § Verification & Communication). Preserve target-filled `REPLACE:` tokens, target customizations, target-specific protected-file paths. If target lacks the Source-resolution section entirely (fat-client template) → append it with the current `AGENT_OS_SOURCE`. Never wholesale-replace. |
 | `.work/<file>` skeletons | Append new template sections absent in target; **preserve all user content** (HANDOFF rows, NEXT iteration blocks, UNKNOWNS entries). Skeletons are minimal — most merges add no new sections. Never drop target rows. |
 | `.work/<dir>/.gitkeep` + new scaffold dirs | Create any NEW scaffold dir that didn't exist (e.g. a new framework sub-dir added since last bootstrap); do not touch existing. |
 | `DOCS_TECH_STACK.md` | Preserve target stack pins; append new template-only sections if any. Never replace user values. |

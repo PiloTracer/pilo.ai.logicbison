@@ -234,6 +234,7 @@ Skills (`code-implementation`, `code-verify`) must use these commands, not hardc
 - **On failure:** report exact error, diagnose root cause, fix, re-run.
 - **Scope:** declare scope first (§ Change safety); `touch-scope-verify` + `blast-radius-check` enforce it.
 - **Communication:** be concise; surface blockers early; label uncertainty; distinguish confirmed facts / inferences / proposals.
+- **Output economy (ALWAYS APPLY):** output tokens cost money. Answer in minimal, direct prose: no preambles, intros, request restatements, reasoning narration, or closing summaries — return only the result (code, answer, or artifact). Kept despite brevity: evidence citations (`path:L<n>`), actual failing output (Core Principle 2), and the operator handoff sections below.
 - **Operator handoff (mandatory):** every response that ends a turn closes per `skills/SKILL_DEPENDENCIES.md` § Operator handoff contract — terse output; approvals under `**Needs your approval:**` citing `path:L<n>`; questions numbered under `**Needs your answer:**`; exactly one `**Next step:**` command; one line (Form A) when no input is needed. Decisions and questions never mixed; empty sections omitted.
 
 ---
