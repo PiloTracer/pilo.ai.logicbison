@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-08-19
+**Updated:** 2026-09-16
 
 ---
 
@@ -10,6 +10,7 @@
 
 | Item | Artifact |
 |------|----------|
+| Output economy rule + deploy merge-scope fix + verifier bake-check anchoring (2026-09-16) | `.cursorrules` + `templates/cursorrules.template` (Output economy ALWAYS APPLY bullet); `skills/deploy-basic/skill.md` (merge applies any shared-section change); `scripts/cursorrules-verify.sh` + `scripts/framework-verify.sh` (bake check/`--fix` anchored to `bash .ai/scripts/`; 2h assertion aligned); live deploy to `pizote` (merge applied, verify PASS); MOD-06 `.work/analysis/20260916-mod06-output-economy-rule-merge-fix.md` |
 | Follow-up 2026-08-19: Agent OS anchor helpers + release v0.6.1 | `agent_os_names` + `find_agent_os_dir` promoted into `scripts/sister-discovery.sh` (canonical; 2i unit asserts); `opencode.json` six-sister regen; `CHANGELOG.md` released as **v0.6.1** (all prior Unreleased work folded in) |
 | Six-slot sister-framework discovery + sibling parity (2026-08-19) | `scripts/sister-discovery.sh` (NEW — `FRAMEWORK_SLOTS` = ui/biz/soc/cto/flutter/mlt; legacy `.ai.<fw>` / family `pilo.ai.<fw>.logicbison`; `.ai`-prefixed-source rule); six-slot wiring in `scripts/deploy-basic.sh` + `scripts/cursorrules-verify.sh` + `scripts/install-opencode-config.sh` (incl. stale-path detection); 7-row registry in `.cursorrules` + `templates/cursorrules.template`; `skills/SKILL_DEPENDENCIES.md` + `skills/x-director/skill.md` + landing docs synced; `scripts/framework-verify.sh` smoke 2i; per-sibling direction files `docs/homogenization/{biz,cto,flutter,mlt,soc,ui}.md`; MOD-06 `.work/analysis/20260819-mod06-deploy-dirname-sister-naming.md`; all verifiers exit 0 |
 | Spring Boot stack pack + Terraform support (2026-08-19, uncommitted) | `templates/stacks/spring-boot/` (6 fragments); `java-spring-boot` option in `plan-foundation` p2-backend; `skills/infra-terraform/` (init/plan/apply/status/drift/destroy; plan-review gate, destroy hard stop; in `ANCHOR_CLEAN`); `standards/20260819-IAC_CONVENTIONS.md`; MOD-08 `concepts/declarative-infra/`; registry wiring (`.cursorrules`, template, `skills/README.md`, `ai-director/reference.md`, `SKILL_DEPENDENCIES.md` matrix + verbs, README 22 skills, MOD-01…08 sweep); MOD-06 `.work/analysis/20260819-mod06-spring-boot-terraform-support.md`; draft plan `.work/plans/20260819-v07-tech-expansion-draft-plan.md`; review `.work/feedback/20260819-uncommitted-review.md` repaired (I1–I6, G1/G2/G7); all verifiers pass, blast-radius warn (protected, owner-approved) |

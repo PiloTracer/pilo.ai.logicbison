@@ -127,11 +127,14 @@ if [[ "$FIX" -eq 1 && -f "$CURS_DEST" ]]; then
     fi
     # 2. Re-bake gate-table script paths: old absolute prefix first (so the
     #    lookbehind below can't re-match inside it), then bare literals.
+    #    Anchored on command position (bash ...) so illustrative rows like the
+    #    template's "Concrete examples" table (`.ai/scripts/foo.sh` → resolved
+    #    form) are left intact.
     before="$(mktemp)"; cp "$CURS_DEST" "$before"
     if [[ -n "$SRC_VALUE" && "$SRC_VALUE" != "$AI_ROOT" && "$SRC_VALUE" != "REPLACE_BASICSOURCE" ]]; then
       perl -i -pe "s{\Q${SRC_VALUE}\E/scripts/}{${AI_ESC}/scripts/}g" "$CURS_DEST"
     fi
-    perl -i -pe "s{(?<!/)\.ai/scripts/}{${AI_ESC}/scripts/}g" "$CURS_DEST"
+    perl -i -pe "s{(?<!/)(bash\s+)\.ai/scripts/}{\${1}${AI_ESC}/scripts/}g" "$CURS_DEST"
     cmp -s "$before" "$CURS_DEST" || echo "  [fix] re-baked script paths → $AI_ROOT/scripts/"
     rm -f "$before"
   fi
@@ -182,10 +185,11 @@ if [[ "$LAYOUT" == "thin" ]]; then
     [[ "$SRC_NOW" == "$AI_ROOT" ]] || note "AGENT_OS_SOURCE differs from this source ($AI_ROOT) — target tracks another source"
   fi
 
-  # Gate-table executables must be baked to absolute paths that exist. Only the
-  # known framework command basenames are checked (prose examples like
-  # `/abs/source/scripts/deploy-basic.sh` are intentionally not validated).
-  literal_n="$(perl -ne '$c++ if /(?<!\/)\.ai\/scripts\//; END{print $c+0}' "$CURS_DEST")"
+  # Gate-table executables must be baked to absolute paths that exist. Only
+  # command-position literals (`bash .ai/scripts/...`) are flagged; prose and
+  # illustrative table rows (e.g. the template's "Concrete examples" mapping)
+  # are intentionally not validated.
+  literal_n="$(perl -ne '$c++ if /(?<!\/)bash\s+\.ai\/scripts\//; END{print $c+0}' "$CURS_DEST")"
   if [[ "$literal_n" -gt 0 ]]; then
     fail "script paths: ${literal_n} line(s) still literal .ai/scripts/ (unbaked — run @deploy-basic update)"
   else

@@ -319,7 +319,9 @@ bash "${REPO_ROOT}/scripts/cursorrules-verify.sh" "${CV_SMOKE}" >/dev/null \
   || die "cursorrules-verify still failing after --fix"
 grep -q "^AGENT_OS_SOURCE=${REPO_ROOT}\$" "${CV_SMOKE}/.cursorrules" \
   || die "--fix did not re-sync AGENT_OS_SOURCE"
-if grep -qE '(^|[^/])\.ai/scripts/' "${CV_SMOKE}/.cursorrules"; then
+# Illustrative rows (e.g. the template's "Concrete examples" mapping) are
+# exempt — only command-position `bash .ai/scripts/` literals are failures.
+if grep -qE '(^|[^/])bash[[:space:]]+\.ai/scripts/' "${CV_SMOKE}/.cursorrules"; then
   die "--fix left unbaked .ai/scripts/ literals"
 fi
 if [[ -f "${UI_DIR}/skills/README.md" ]] && grep -q 'REPLACE:AI_UI_PATH' "${CV_SMOKE}/.cursorrules"; then
