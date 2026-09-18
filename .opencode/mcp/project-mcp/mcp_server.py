@@ -78,6 +78,12 @@ API_BASE_URL = _resolve_base_url()
 API_KEY = _resolve_api_key()
 SERVER_NAME = os.environ.get("MCP_SERVER_NAME", "tools-project-agent")
 
+# Cloudflare answers python-urllib's default User-Agent with
+# "Error 1010: browser_signature_banned", so on the hosted endpoint every tool
+# call returned HTTP 403 while the server still looked healthy -- initialize and
+# tools/list both succeeded. Identify explicitly; any non-default agent passes.
+USER_AGENT = os.environ.get("MCP_USER_AGENT", "tools-project-mcp/1.0")
+
 TOOLS: list[dict[str, Any]] = [
     {
         "name": "list_projects",
@@ -142,7 +148,7 @@ TOOL_ENDPOINTS: dict[str, str] = {
 
 def _api_get(path: str) -> dict[str, Any]:
     url = f"{API_BASE_URL}{path}"
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "User-Agent": USER_AGENT}
 
     if API_KEY:
         headers["X-Api-Key"] = API_KEY
