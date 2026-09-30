@@ -170,6 +170,8 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 | **deploy-basic** `status` | - | Read-only |
 | **project-query-setup** `install` / `key` / `test` / `register-mcp` | `python3` available (for MCP server); user has access to tools-project web UI | Optional integration — no gate blocks. On `install`: guides through key creation → key file → MCP registration → live test. |
 | **project-query-setup** `status` / `help` | - | Read-only |
+| **plan-sync** `sync` / `dry-run` | `~/.tools-project-key` or `TOOLS_PROJECT_API_KEY`; tools-project API reachable; plan file exists | Optional integration — no gate blocks. Dry-run mandatory before commit. |
+| **plan-sync** `status` / `help` | - | Read-only |
 | **dev-stack** `init` | User request / `docker-compose*.yml` present; brownfield gate refuses to silently overwrite existing `bin/start.sh` | - |
 | **dev-stack** `status` | - | Read-only |
 | **infra-terraform** `init` | Backend/state strategy chosen per `standards/20260819-IAC_CONVENTIONS.md` | - |

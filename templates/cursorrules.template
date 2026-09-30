@@ -158,6 +158,7 @@ Skills live under `.ai/skills/<id>/skill.md` (folder name = id). When a task mat
 | deploy-files | Fat-client deploy into target (in-place no-overwrite bootstrap + `update` rules-aware merge) |
 | deploy-basic | Thin-client bootstrap: `.cursorrules` + `.work/` + stack doc only; rest resolves via `AGENT_OS_SOURCE` |
 | project-query-setup | Optional tools-project API key + MCP registration + connectivity test |
+| plan-sync | Parse plan markdown → manifest v1 → POST plan-import (dry-run gate, operator confirmation) |
 | plan-foundation | P0–P6 orchestration; certify plan-master-ready |
 | plan-master | Master implementation plan; certify implementation-ready |
 | plan-verify | Plan audits: foundation, master, alignment, coverage (code→SPEC), brownfield |

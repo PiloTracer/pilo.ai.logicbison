@@ -30,7 +30,7 @@ Then in chat:
 
 ## What you get
 
-- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (22 skills in total).
+- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (23 skills in total).
 - **Standards** - binding contracts (CONVENTIONS, FEATURE_STANDARD, observability, security) keep agent output honest.
 - **`.work/`** - the project's memory: plans, SPECs, ADRs, `HANDOFF.md`, `NEXT.md`. Survives session boundaries.
 - **Gates** - `plan-master-ready`, `implementation-ready`, milestone verify; skip a step and the agent **stops** with a redirect.
@@ -174,7 +174,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
 ### Skills at a glance
 
-All **22** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
+All **23** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
 
 | Skill | One line | Typical invoke |
 |-------|----------|----------------|

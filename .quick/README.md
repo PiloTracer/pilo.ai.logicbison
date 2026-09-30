@@ -18,5 +18,6 @@ Each file is a focused, one-page reference for a specific workflow pattern:
 | [`verify-all-levels.md`](verify-all-levels.md) | Verification at every stage — pre-commit, post-commit, milestone, plans |
 | [`verify-committed-code.md`](verify-committed-code.md) | Auditing committed code and adding tests |
 | [`deploy-to-project.md`](deploy-to-project.md) | Deploying Agent OS to another project (fat-client or thin-client) |
+| [`plan-sync.md`](plan-sync.md) | Syncing plan markdown to tools-project via `@plan-sync` |
 
 **Not a replacement for skill docs.** For full protocols, gates, and edge cases, open the corresponding skill under `skills/<id>/skill.md`.

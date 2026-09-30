@@ -132,6 +132,7 @@ Replace `M{N}` with the milestone you're working on (see `NEXT.md ## Recommended
 | Concept / NFR prompts (MOD-01…08) | `@concept-run list` · `@concept-run - MOD-06` |
 | A new ADR | `.work/decisions/YYYYMMDD-NNN-<slug>.md` - see existing ADRs for shape |
 | A schema migration | `@db-migration create - <description>` (idempotent; no Alembic) |
+| Sync a plan into tools-project | `@plan-sync sync - .work/feedback/plans-import/plans/20260925-full-plan.md` (dry-run first, then confirm) |
 
 **Three readiness states (do not confuse them):**
 
