@@ -65,8 +65,8 @@ description: >-
   "source_path": ".work/feedback/plans-import/plans/20260925-full-plan.md",
   "plan_version": "v1.7",
   "project": {"name": "…", "key": "…", "description": "…"},
-  "milestones": [{"plan_ref": "M1", "key": "M1", "name": "…", "description": "…", "sort_order": 1, "status": "pending"}],
-  "tasks": [{"plan_ref": "M1-T1", "milestone_ref": "M1", "title": "…", "description": "…", "status": "pending"}],
+  "milestones": [{"plan_ref": "M1", "key": "M1", "name": "…", "summary": "One plain sentence describing the milestone goal.", "description": "…", "sort_order": 1, "status": "pending"}],
+  "tasks": [{"plan_ref": "M1-T1", "milestone_ref": "M1", "title": "Enterprise customization cascade (T3, ADR 020)", "description": "## Intent\nImplement the location scope layer cascade (org default → practice → clinic) with safety floors.\n\n## Acceptance\n- A lower scope cannot override an org safety floor\n- A blueprint import carries no PHI and lands disabled\n\n## Technical details\n- plan_ref: M12-T15\n- plan_version: 1.6\n- source: .work/feedback/plans-import/plans/20260925-full-plan.md\n- files: customization/**, platform/\n- traces: FR26, NFR19\n- complexity: L", "status": "pending"}],
   "components": []
 }
 ```
@@ -74,19 +74,45 @@ description: >-
 **Constants to embed:**
 - `manifest_version` must be `1` (server rejects anything else with 400).
 - `plan_ref`: milestones `^M\d+$`, tasks `^M\d+-T\d+$`; unique within the manifest; every task's `milestone_ref` must exist in `milestones[]`.
-- Limits: `tasks ≤ 500`, `milestones ≤ 100`; `title` 1–200 chars; `name` 1–200 chars.
+- Limits: `tasks ≤ 500`, `milestones ≤ 100`; `title` 1–120 chars; `name` 1–200 chars.
 - Task status vocabulary — accepts **plan** or app vocab; mapping applied server-side: `pending→todo`, `done→done`, `blocked→blocked`, `deferred→cancelled` (app vocab `todo|in_progress|blocked|done|cancelled` passes through).
 - Milestone status: `pending | active | blocked | done | cancelled` (default `pending`). At most one `active` per project at commit (server enforces).
+- **Milestone `summary`**: one plain sentence (the plan's milestone heading or goal line). Rendered by tools-project under the milestone name. Required for every milestone.
 
 ---
 
 ## Parsing rules (plan markdown → manifest)
 
 From the actual plan format (`.work/feedback/plans-import/plans/20260925-full-plan.md`):
-- **Milestone** = `### M<n> — <name>` heading sections (metadata: `**Objective:**`, `**Scope — in/out:**`, `**Deliverables:**`, …). Populate `plan_ref: "M<n>"`, `name`, `description` from the section body, `sort_order` = section order.
+- **Milestone** = `### M<n> — <name>` heading sections (metadata: `**Objective:**`, `**Scope — in/out:**`, `**Deliverables:**`, …). Populate `plan_ref: "M<n>"`, `name`, `description` from the section body, `sort_order` = section order. **`summary`** = one plain sentence from the milestone heading or its goal line (e.g., the `**Objective:**` first sentence). Required.
 - **Tasks** = the `#### Tasks - M<n>: …` tables: columns `| ID | Description | Files | FR/NFR | Complexity | Acceptance | Status |`. `ID` → `plan_ref` (e.g. `M1-T1`), its section → `milestone_ref`.
-- `title` = `Description` cell **truncated/edited to ≤200 chars** (plan cells can be ~1400 chars — never send them as title).
-- `description` = `## Acceptance` cell content first (the contract), then a provenance block (`plan_ref`, source file, plan version, `Files`, `FR/NFR`, `Complexity`) — SPEC R21.
+- `title` = **short human label**, ≤120 chars, no markdown emphasis markers (`**`, `__`, backticks), no trailing ellipsis. Derive from the `Description` cell: take the leading bold label or first clause before `—`/em-dash. Example: `**Enterprise customization cascade (T3, ADR 020)** — the \`location\` scope layer…` → `Enterprise customization cascade (T3, ADR 020)`.
+- `description` = compose exactly three headings in this order, no `---` rule, no inline `**Provenance:**` line:
+
+  ```markdown
+  ## Intent
+  <one plain-language sentence: what this task delivers, in the plan's own words where possible>
+
+  ## Acceptance
+  - <criterion 1>
+  - <criterion 2>
+
+  ## Technical details
+  - plan_ref: M12-T15
+  - plan_version: 1.6
+  - source: .work/feedback/plans-import/plans/20260925-full-plan.md
+  - files: customization/**, platform/
+  - traces: FR26, NFR19
+  - complexity: L
+  ```
+
+  Rules:
+  - **A1** Heading names and order are **fixed**: `## Intent`, `## Acceptance`, `## Technical details`.
+  - **A2** `## Acceptance` items are **one bullet per criterion** — split the `Acceptance` cell on `;` and sentence boundaries instead of emitting one run-on line. Never drop a criterion.
+  - **A3** `## Technical details` is a **bullet list of `- key: value` pairs** with exact keys: `plan_ref`, `plan_version`, `source`, `files`, `traces`, `complexity` (rename `fr_nfr` → `traces`; keep FR/NFR ids verbatim, comma-separated).
+  - **A4** Values stay **verbatim and lossless**: `plan_ref`, `source`, `plan_version`, FR/NFR ids, file globs, complexity — no truncation, no re-wording.
+  - **A5** `## Intent` is derived, never invented: take the plan row's own words (first clause / goal). If no separable summary, use first clause after the leading bold label.
+  - **A6** Omit a block **only** when it has no content (`## Technical details` may be absent for plan rows with no provenance; `## Acceptance` may be absent when the plan records none). Never emit an empty heading.
 - **`Complexity` must NEVER become `priority`** (SPEC R22) — complexity is description text only.
 - `Status` cell → plan status via the mapping above; unknown status → ask operator, never guess.
 - `source_path` = the plan file path as given; `plan_version` = from the plan header if present, else prompt.
@@ -163,7 +189,9 @@ Read the plan file at `<plan path>`. Extract:
 - All `plan_ref` unique, correct regex
 - All `milestone_ref` exist in milestones
 - `tasks ≤ 500`, `milestones ≤ 100`
-- `title` 1–200 chars, `name` 1–200 chars
+- `title` 1–120 chars, `name` 1–200 chars
+- Every milestone has non-empty `summary`
+- Every task `description` starts with `## Intent` and contains `## Acceptance` (when acceptance exists) and `## Technical details` (when provenance exists) — no `**Provenance:**` and no `---` line
 - All statuses mapped to valid vocab (unknown → ask)
 
 ### Step 4 — Dry-run preview
@@ -189,6 +217,8 @@ Parse response. Show table:
 | Conflicts | N | (kind, plan_ref, detail) |
 
 Print: **Nothing written yet. Obsolete = flagged, never deleted. Local statuses preserved.**
+
+**Preview sample (one task):** show the composed `title` (≤120 chars, single clause), and the `description` with `## Intent`, `## Acceptance` bullets, `## Technical details` list — so the operator can verify the new format before confirming.
 
 ### Step 5 — Operator confirmation (Form B handoff)
 
@@ -231,7 +261,7 @@ Run key resolution, test `GET /v1/agent/projects`, list project names/ids. Close
 
 ## Procedure (help mode)
 
-Show modes table, auth setup (`@project-query-setup key`), limits (500 tasks, 100 milestones), manifest version (1), endpoint (`POST /v1/projects/{id}/plan-import`), and that dry-run is mandatory before commit.
+Show modes table, auth setup (`@project-query-setup key`), limits (500 tasks, 100 milestones), manifest version (1), endpoint (`POST /v1/projects/{id}/plan-import`), and that dry-run is mandatory before commit. Note that tasks now use the three-block description format (`## Intent`, `## Acceptance`, `## Technical details`), titles are short labels (≤120 chars, no markdown), and milestones include a one-sentence `summary`.
 
 ---
 

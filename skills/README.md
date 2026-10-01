@@ -51,7 +51,7 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | project-bootstrap | `project-bootstrap/` | Bootstrap `.work/`, `.cursorrules`, `DOCS_TECH_STACK.md` from templates |
 | docs | `docs/` | **Documentation:** create guides, tutorials, reference docs under `.work/docs/` |
 | project-query-setup | `project-query-setup/` | **Optional integration:** guide through tools-project API key creation, MCP registration, connectivity test. OS-aware (tailors guidance per framework). |
-| plan-sync | `plan-sync/` | **Optional integration:** parse plan markdown → manifest v1 → POST plan-import (dry-run gate, operator confirmation). OS-aware. |
+| plan-sync | `plan-sync/` | **Optional integration:** parse plan markdown → manifest v1 → POST plan-import (dry-run gate, operator confirmation). OS-aware. Composes task descriptions as `## Intent` / `## Acceptance` / `## Technical details`; titles ≤120 chars; milestone `summary` required. |
 | ai-director | `ai-director/` | **Orchestrator:** free-text request → optimal `.ai` skill chain; new skill gap detection |
 | x-director | `x-director/` | **Cross-framework director:** orchestrates `.ai` + the six sibling frameworks (`.ai.biz` / `.ai.cto` / `.ai.flutter` / `.ai.mlt` / `.ai.soc` / `.ai.ui`) via directors |
 
