@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-09-16
+**Updated:** 2026-10-01
 
 ---
 
@@ -10,6 +10,7 @@
 
 | Item | Artifact |
 |------|----------|
+| plan-sync sync correctness (2026-10-01) | `skills/plan-sync/skill.md` — live-plan source (`.work/plans/full/*-full-plan.md`) + copy-freshness rule; `plan_version` from latest amendment (preview confirm on header mismatch); status semantics (creation-only apply, informational `status_divergence`, Action-required/Informational conflict split, post-commit app-UI follow-up checklist); SPEC ref → tools-project `.work/features/plan-sync/20260929-SPEC.md`; `skills/plan-verify/reference.md` M3 Version-currency row; `.quick/plan-sync.md` regenerated; `START_HERE.md` de-hardcoded; `framework-verify` + `skill-functional-verify` exit 0 |
 | Output economy rule + deploy merge-scope fix + verifier bake-check anchoring (2026-09-16) | `.cursorrules` + `templates/cursorrules.template` (Output economy ALWAYS APPLY bullet); `skills/deploy-basic/skill.md` (merge applies any shared-section change); `scripts/cursorrules-verify.sh` + `scripts/framework-verify.sh` (bake check/`--fix` anchored to `bash .ai/scripts/`; 2h assertion aligned); live deploy to `pizote` (merge applied, verify PASS); MOD-06 `.work/analysis/20260916-mod06-output-economy-rule-merge-fix.md` |
 | Follow-up 2026-08-19: Agent OS anchor helpers + release v0.6.1 | `agent_os_names` + `find_agent_os_dir` promoted into `scripts/sister-discovery.sh` (canonical; 2i unit asserts); `opencode.json` six-sister regen; `CHANGELOG.md` released as **v0.6.1** (all prior Unreleased work folded in) |
 | Six-slot sister-framework discovery + sibling parity (2026-08-19) | `scripts/sister-discovery.sh` (NEW — `FRAMEWORK_SLOTS` = ui/biz/soc/cto/flutter/mlt; legacy `.ai.<fw>` / family `pilo.ai.<fw>.logicbison`; `.ai`-prefixed-source rule); six-slot wiring in `scripts/deploy-basic.sh` + `scripts/cursorrules-verify.sh` + `scripts/install-opencode-config.sh` (incl. stale-path detection); 7-row registry in `.cursorrules` + `templates/cursorrules.template`; `skills/SKILL_DEPENDENCIES.md` + `skills/x-director/skill.md` + landing docs synced; `scripts/framework-verify.sh` smoke 2i; per-sibling direction files `docs/homogenization/{biz,cto,flutter,mlt,soc,ui}.md`; MOD-06 `.work/analysis/20260819-mod06-deploy-dirname-sister-naming.md`; all verifiers exit 0 |
@@ -62,6 +63,7 @@
 | **P9** | Stack-pack application helper | From review G6: `templates/stacks/` packs are manual copy-paste; consider a script or `project-bootstrap` mode that applies a pack (cf. `dev-stack`'s `bin/start.sh` precedent). |
 | **P10** | Remaining v0.7 draft-plan rows | `.work/plans/20260819-v07-tech-expansion-draft-plan.md`: `infra-aws`, `infra-ansible`, `cicd-github` skills + cloud-security-baseline/CICD_CONVENTIONS standards + MOD-09 + node-react/python stack packs — deferred; scope decision needed before scheduling (rows 5, 6, 8, 9 of the draft). |
 | **P11** | Apply per-sibling direction files | `docs/homogenization/{biz,cto,flutter,mlt,soc,ui}.md` — follow each inside the sibling repo to bring deploy skills to family parity (registry, discovery lib, six-slot loops). **Recommended next.** |
+| **P12** | Propagate plan-sync correctness fixes to consumers | On next `@deploy-basic update` / deploy — live-plan source rule, amendment-derived `plan_version`, status-semantic preview/report changes land in deployed skills (optional integration; no rush). |
 
 ---
 

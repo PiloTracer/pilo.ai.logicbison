@@ -8,7 +8,7 @@ description: >-
 
 # plan-sync
 
-**Purpose:** Parse a plan markdown file (from `.work/feedback/plans-import/plans/*.md`) into a JSON manifest v1 and import it into tools-project via the transactional `plan-import` endpoint. Dry-run preview and explicit operator confirmation are mandatory.
+**Purpose:** Parse a plan markdown file (typically the live plan `.work/plans/full/*-full-plan.md`; any plan path may be passed) into a JSON manifest v1 and import it into tools-project via the transactional `plan-import` endpoint. Dry-run preview and explicit operator confirmation are mandatory.
 
 **Deploy to:** Any Agent OS framework (`.ai`, `.ai.ui`, `.ai.biz`, `.ai.soc`, `.ai.cto`, `.ai.flutter`, `.ai.mlt`) — optional integration.
 
@@ -62,11 +62,11 @@ description: >-
 ```json
 {
   "manifest_version": 1,
-  "source_path": ".work/feedback/plans-import/plans/20260925-full-plan.md",
-  "plan_version": "v1.7",
+  "source_path": ".work/plans/full/20260925-full-plan.md",
+  "plan_version": "v1.9",
   "project": {"name": "…", "key": "…", "description": "…"},
   "milestones": [{"plan_ref": "M1", "key": "M1", "name": "…", "summary": "One plain sentence describing the milestone goal.", "description": "…", "sort_order": 1, "status": "pending"}],
-  "tasks": [{"plan_ref": "M1-T1", "milestone_ref": "M1", "title": "Enterprise customization cascade (T3, ADR 020)", "description": "## Intent\nImplement the location scope layer cascade (org default → practice → clinic) with safety floors.\n\n## Acceptance\n- A lower scope cannot override an org safety floor\n- A blueprint import carries no PHI and lands disabled\n\n## Technical details\n- plan_ref: M12-T15\n- plan_version: 1.6\n- source: .work/feedback/plans-import/plans/20260925-full-plan.md\n- files: customization/**, platform/\n- traces: FR26, NFR19\n- complexity: L", "status": "pending"}],
+  "tasks": [{"plan_ref": "M1-T1", "milestone_ref": "M1", "title": "Enterprise customization cascade (T3, ADR 020)", "description": "## Intent\nImplement the location scope layer cascade (org default → practice → clinic) with safety floors.\n\n## Acceptance\n- A lower scope cannot override an org safety floor\n- A blueprint import carries no PHI and lands disabled\n\n## Technical details\n- plan_ref: M12-T15\n- plan_version: 1.9\n- source: .work/plans/full/20260925-full-plan.md\n- files: customization/**, platform/\n- traces: FR26, NFR19\n- complexity: L", "status": "pending"}],
   "components": []
 }
 ```
@@ -78,12 +78,13 @@ description: >-
 - Task status vocabulary — accepts **plan** or app vocab; mapping applied server-side: `pending→todo`, `done→done`, `blocked→blocked`, `deferred→cancelled` (app vocab `todo|in_progress|blocked|done|cancelled` passes through).
 - Milestone status: `pending | active | blocked | done | cancelled` (default `pending`). At most one `active` per project at commit (server enforces).
 - **Milestone `summary`**: one plain sentence (the plan's milestone heading or goal line). Rendered by tools-project under the milestone name. Required for every milestone.
+- **Status application:** statuses are applied **at task creation only**. Tasks that already exist in the app keep their local status (importer R13); a differing plan status is reported as an informational `status_divergence` conflict, never auto-overwritten. Plan `done` on an existing `todo` task therefore needs a manual change in the app UI after import.
 
 ---
 
 ## Parsing rules (plan markdown → manifest)
 
-From the actual plan format (`.work/feedback/plans-import/plans/20260925-full-plan.md`):
+From the actual plan format (`.work/plans/full/*-full-plan.md`):
 - **Milestone** = `### M<n> — <name>` heading sections (metadata: `**Objective:**`, `**Scope — in/out:**`, `**Deliverables:**`, …). Populate `plan_ref: "M<n>"`, `name`, `description` from the section body, `sort_order` = section order. **`summary`** = one plain sentence from the milestone heading or its goal line (e.g., the `**Objective:**` first sentence). Required.
 - **Tasks** = the `#### Tasks - M<n>: …` tables: columns `| ID | Description | Files | FR/NFR | Complexity | Acceptance | Status |`. `ID` → `plan_ref` (e.g. `M1-T1`), its section → `milestone_ref`.
 - `title` = **short human label**, ≤120 chars, no markdown emphasis markers (`**`, `__`, backticks), no trailing ellipsis. Derive from the `Description` cell: take the leading bold label or first clause before `—`/em-dash. Example: `**Enterprise customization cascade (T3, ADR 020)** — the \`location\` scope layer…` → `Enterprise customization cascade (T3, ADR 020)`.
@@ -99,8 +100,8 @@ From the actual plan format (`.work/feedback/plans-import/plans/20260925-full-pl
 
   ## Technical details
   - plan_ref: M12-T15
-  - plan_version: 1.6
-  - source: .work/feedback/plans-import/plans/20260925-full-plan.md
+  - plan_version: 1.9
+  - source: .work/plans/full/20260925-full-plan.md
   - files: customization/**, platform/
   - traces: FR26, NFR19
   - complexity: L
@@ -115,14 +116,15 @@ From the actual plan format (`.work/feedback/plans-import/plans/20260925-full-pl
   - **A6** Omit a block **only** when it has no content (`## Technical details` may be absent for plan rows with no provenance; `## Acceptance` may be absent when the plan records none). Never emit an empty heading.
 - **`Complexity` must NEVER become `priority`** (SPEC R22) — complexity is description text only.
 - `Status` cell → plan status via the mapping above; unknown status → ask operator, never guess.
-- `source_path` = the plan file path as given; `plan_version` = from the plan header if present, else prompt.
+- `source_path` = the plan file path as given; `plan_version` = derived from the **latest amendment** line when the plan has them (e.g. `Amendment (v1.9 — …)`), else the header (`**Version:**` / `# Full Plan v…`), else prompt. When header ≠ latest amendment, surface the derived value in the preview for operator confirmation before POST (headers often lag amendments).
+- **Copy freshness:** if the path points at a copy (e.g. under `.work/feedback/plans-import/`), compare its latest amendment + task count against the live plan first — a stale copy silently syncs outdated content. Drift → stop and ask the operator to refresh the copy or pass the live plan (this skill never writes `.work/`).
 
 ---
 
 ## Mandatory safety gates
 
 1. **Always `dry_run=true` first** (SPEC R7 — the preview is what the operator approves). Client-side pre-validate against §Manifest envelope before even the dry run.
-2. Preview must show: milestones/tasks `created / updated / obsolete / reactivated` counts + full `conflicts[]` (kind, plan_ref, detail) in a readable table, and state plainly: *nothing written yet; obsolete = will be flagged, never deleted; local statuses will be preserved*.
+2. Preview must show: milestones/tasks `created / updated / obsolete / reactivated` counts + full `conflicts[]` (kind, plan_ref, detail) in a readable table **split into `Action required` (resolve before/after commit) and `Informational` (proceeds unchanged — e.g. `status_divergence`)**, and state plainly: *nothing written yet; obsolete = will be flagged, never deleted; local statuses will be preserved — plan-status-ahead-of-local is informational here and appears again in the post-commit follow-up list*.
 3. **Real POST only after explicit operator confirmation in the same session.** No confirmation → stop at preview.
 4. Re-runs are safe (idempotent upsert matched by `(project_id, plan_ref)`); a second identical import reports `updated` counts, zero creates.
 5. Never write to the plan file or anything under `.work/` (sync is one-way, invariant I1). Never edit app code — a format drift is fixed **in this skill**.
@@ -131,7 +133,7 @@ From the actual plan format (`.work/feedback/plans-import/plans/20260925-full-pl
 
 ## Report (post-commit)
 
-Print the server's `PlanImportResult`: per-entity counts, conflict list, plus a one-line pointer to the project's activity feed (one `kind: system` summary row is the audit trail). Close per the Operator handoff contract (Form B if follow-up decisions exist, else Form A).
+Print the server's `PlanImportResult`: per-entity counts, conflict list, plus a one-line pointer to the project's activity feed (one `kind: system` summary row is the audit trail). When the plan's status differs from the resulting local status for any task, print a **Follow-up in app UI** checklist (`M{N}-T{N}`: plan=<status> / app=<status> → set in the app; MCP is read-only, import preserves local status). Close per the Operator handoff contract (Form B if follow-up decisions exist, else Form A).
 
 ---
 
@@ -179,7 +181,7 @@ If `--project` argument provided:
 ### Step 3 — Parse plan markdown
 
 Read the plan file at `<plan path>`. Extract:
-- `plan_version` from header (e.g. `# Full Plan v1.7` or `**Version:** v1.7`), else prompt.
+- `plan_version` from the latest amendment (e.g. `Amendment (v1.9 …)`), else header (e.g. `# Full Plan v1.7` or `**Version:** v1.7`), else prompt; header ≠ latest amendment → show derived value in preview for confirmation.
 - Milestones from `### M<n> — <name>` sections (in order).
 - Tasks from `#### Tasks - M<n>: …` tables with columns `ID`, `Description`, `Files`, `FR/NFR`, `Complexity`, `Acceptance`, `Status`.
 - Build manifest per §Manifest envelope.
@@ -214,9 +216,10 @@ Parse response. Show table:
 | Tasks updated | N | … |
 | Tasks obsolete | N | … |
 | Tasks reactivated | N | … |
-| Conflicts | N | (kind, plan_ref, detail) |
+| Conflicts — action required | N | (kind, plan_ref, detail) — resolve before/after commit |
+| Conflicts — informational | N | (kind, plan_ref, detail) — e.g. `status_divergence`, proceeds unchanged |
 
-Print: **Nothing written yet. Obsolete = flagged, never deleted. Local statuses preserved.**
+Print: **Nothing written yet. Obsolete = flagged, never deleted. Local statuses preserved (plan-ahead statuses → follow-up list).**
 
 **Preview sample (one task):** show the composed `title` (≤120 chars, single clause), and the `description` with `## Intent`, `## Acceptance` bullets, `## Technical details` list — so the operator can verify the new format before confirming.
 
@@ -282,7 +285,7 @@ Show modes table, auth setup (`@project-query-setup key`), limits (500 tasks, 10
 
 | Doc | Path |
 |-----|------|
-| Plan import SPEC | `.work/features/plan-import/20260820-SPEC.md` (tools-project repo) |
+| Plan import SPEC | `.work/features/plan-sync/20260929-SPEC.md` (tools-project repo) |
 | MCP server (read-only) | `.opencode/mcp/project-mcp/mcp_server.py` |
 | Auth/key setup | `@project-query-setup key` |
 | Operator handoff contract | `.ai/skills/SKILL_DEPENDENCIES.md` |

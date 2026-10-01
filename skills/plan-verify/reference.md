@@ -402,6 +402,7 @@ Against `.ai/standards/20260519-MASTER_PLAN_STANDARD.md`:
 | Dimension | Question | Result |
 |-----------|----------|--------|
 | Header metadata | Status, version, dates present? | pass / fail |
+| Version currency | `**Version:**` header == latest `Amendment (v…)` line, and a `## Changelog` entry exists for the amendment (MASTER_PLAN_STANDARD amendment rule)? | pass / fail |
 | **25 mandatory H2 sections** | All `## 1.`…`## 25.` sections present, in order, per §2 (or explicit `N/A - <reason>`)? Run `bash .ai/scripts/master-plan-verify.sh` (also checks `Status: Approved` is never paired with `Integrity (P5): pending`) | pass / fail |
 | §19 roadmap | Milestones M1… with task ids `M{N}-T{N}`? | pass / fail / gap |
 | §20–§21 | Global acceptance + validation gates? | pass / fail / gap |
