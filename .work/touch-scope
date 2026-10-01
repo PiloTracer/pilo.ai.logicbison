@@ -1,39 +1,16 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-08-19",
-  "goal": "Verify @deploy* handle the framework source dir rename (.ai -> pilo.ai.logicbison); support sister frameworks under family (pilo.ai.<fw>.logicbison) and legacy (.ai.<fw>) dir names",
+  "updated": "2026-10-01",
+  "goal": "plan-sync amendment-derivation correctness: define `latest amendment` as the HIGHEST `v` number among the `**Amendment (v…)` lines, never the last block in file order (plans routinely append out of order - a positional read mislabels plan_version on every task). Root-caused live while verifying Mendarion's uncommitted carriers, whose plan appends v1.2, v1.6, v1.7, v1.8, v1.9, v1.5, v1.4, v1.3. Owner-authorized framework-source exception for this fix only; docs-only, no script behaviour change. No commit.",
   "allowed_paths": [
-    ".cursorrules",
-    "CHANGELOG.md",
-    "scripts/sister-discovery.sh",
-    "scripts/deploy-basic.sh",
-    "scripts/cursorrules-verify.sh",
-    "scripts/install-opencode-config.sh",
-    "scripts/framework-verify.sh",
-    "templates/cursorrules.template",
-    "skills/SKILL_DEPENDENCIES.md",
-    "skills/x-director/skill.md",
-    "skills/deploy-basic/skill.md",
-    "skills/README.md",
-    "README.md",
-    "PROCESS_ROUTER.md",
-    "context/README.md",
-    "opencode.json",
-    "docs/guides/workflows/README.md",
-    "docs/homogenization/biz.md",
-    "docs/homogenization/cto.md",
-    "docs/homogenization/flutter.md",
-    "docs/homogenization/mlt.md",
-    "docs/homogenization/soc.md",
-    "docs/homogenization/ui.md",
-    ".work/analysis/20260819-mod06-deploy-dirname-sister-naming.md",
+    "skills/plan-sync/skill.md",
+    ".quick/plan-sync.md",
     ".work/touch-scope",
     ".work/active-ref",
     ".work/context/HANDOFF.md",
     ".work/plans/NEXT.md"
   ],
   "allowed_patterns": [
-    ".work/analysis/**",
     "tmp/**"
   ]
 }

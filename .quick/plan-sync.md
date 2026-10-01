@@ -26,7 +26,7 @@ Optional integration: parse a plan markdown file (typically the live plan) into 
 # → reports 0 creates, N updated
 ```
 
-**Source:** pass the **live plan** (`.work/plans/full/*-full-plan.md`). If given a copy (e.g. under `.work/feedback/plans-import/`), verify latest amendment + task count against the live plan first — a stale copy silently syncs outdated content.
+**Source:** pass the **live plan** (`.work/plans/full/*-full-plan.md`). If given a copy (e.g. under `.work/feedback/plans-import/`), verify latest amendment (**highest `v`, not the last block in file order**) + task count against the live plan first — a stale copy silently syncs outdated content.
 
 ---
 
@@ -92,7 +92,7 @@ Optional integration: parse a plan markdown file (typically the live plan) into 
   - `description` = three fixed headings, in order: `## Intent`, `## Acceptance` (one bullet per criterion), `## Technical details` (`- key: value` pairs: `plan_ref`, `plan_version`, `source`, `files`, `traces`, `complexity`).
   - **`Complexity` NEVER becomes `priority`** — complexity is description text only.
   - `Status` cell → mapping above; unknown status → ask operator, never guess.
-- `source_path` = plan file path as given; `plan_version` = **latest amendment** (e.g. `Amendment (v1.9 …)`), else header (`**Version:**` / `# Full Plan v…`), else prompt. Header ≠ latest amendment → derived value shown in preview for confirmation.
+- `source_path` = plan file path as given; `plan_version` = **latest amendment** = the **highest `v` number**, never the last such block in file order (plans append out of order) (e.g. `Amendment (v1.9 …)`), else header (`**Version:**` / `# Full Plan v…`), else prompt. Header ≠ latest amendment → derived value shown in preview for confirmation.
 
 ---
 
@@ -127,6 +127,7 @@ Optional integration: parse a plan markdown file (typically the live plan) into 
 - Claiming "imported" without a live `PlanImportResult` response
 - Skipping dry-run and going straight to commit
 - Syncing a stale copy when the live plan has newer amendments/tasks (run the copy-freshness check)
+- Taking the **last `Amendment (v…)` block in file order** as the plan version (plans append out of order — use the highest `v`)
 - Asking the user to paste their API key into chat
 - Storing the key in `/tmp` or any non-`~/.tools-project-key` location
 - Logging the key value in any output

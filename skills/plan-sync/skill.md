@@ -116,8 +116,8 @@ From the actual plan format (`.work/plans/full/*-full-plan.md`):
   - **A6** Omit a block **only** when it has no content (`## Technical details` may be absent for plan rows with no provenance; `## Acceptance` may be absent when the plan records none). Never emit an empty heading.
 - **`Complexity` must NEVER become `priority`** (SPEC R22) — complexity is description text only.
 - `Status` cell → plan status via the mapping above; unknown status → ask operator, never guess.
-- `source_path` = the plan file path as given; `plan_version` = derived from the **latest amendment** line when the plan has them (e.g. `Amendment (v1.9 — …)`), else the header (`**Version:**` / `# Full Plan v…`), else prompt. When header ≠ latest amendment, surface the derived value in the preview for operator confirmation before POST (headers often lag amendments).
-- **Copy freshness:** if the path points at a copy (e.g. under `.work/feedback/plans-import/`), compare its latest amendment + task count against the live plan first — a stale copy silently syncs outdated content. Drift → stop and ask the operator to refresh the copy or pass the live plan (this skill never writes `.work/`).
+- `source_path` = the plan file path as given; `plan_version` = derived from the **latest amendment** when the plan has them (e.g. `Amendment (v1.9 — …)`), else the header (`**Version:**` / `# Full Plan v…`), else prompt. **`latest` = the highest `v` number among the `**Amendment (v…)` lines — never the last such block in file order** (plans append out of order: `v1.2, v1.6, v1.7, v1.8, v1.9, v1.5, v1.4, v1.3`), otherwise every task's `plan_version` is mislabelled. When header ≠ latest amendment, surface the derived value in the preview for operator confirmation before POST (headers often lag amendments).
+- **Copy freshness:** if the path points at a copy (e.g. under `.work/feedback/plans-import/`), compare its latest amendment (**highest `v`, not file order**) + task count against the live plan first — a stale copy silently syncs outdated content. Drift → stop and ask the operator to refresh the copy or pass the live plan (this skill never writes `.work/`).
 
 ---
 
@@ -181,7 +181,7 @@ If `--project` argument provided:
 ### Step 3 — Parse plan markdown
 
 Read the plan file at `<plan path>`. Extract:
-- `plan_version` from the latest amendment (e.g. `Amendment (v1.9 …)`), else header (e.g. `# Full Plan v1.7` or `**Version:** v1.7`), else prompt; header ≠ latest amendment → show derived value in preview for confirmation.
+- `plan_version` from the **latest amendment** — the **highest `v` number**, not the last block in file order (see §Parsing rules) — (e.g. `Amendment (v1.9 …)`), else header (e.g. `# Full Plan v1.7` or `**Version:** v1.7`), else prompt; header ≠ latest amendment → show derived value in preview for confirmation.
 - Milestones from `### M<n> — <name>` sections (in order).
 - Tasks from `#### Tasks - M<n>: …` tables with columns `ID`, `Description`, `Files`, `FR/NFR`, `Complexity`, `Acceptance`, `Status`.
 - Build manifest per §Manifest envelope.
