@@ -35,6 +35,7 @@ Rules:
 4. **One next step.** Exactly one command/action, isolated at the end in exact syntax. If multiple sequential actions exist, present only the immediate one; mention later ones only if the operator asks.
 5. **Nothing buried, nothing empty.** Never end a response with an unstated expectation; never render an empty section; never hide an operator action inside a paragraph.
 6. **Report-internal sections don't replace the close.** A template's "Follow-ups" / "Remaining" / "Recommended next" section is report content; any operator-required approval or question in it must ALSO appear in the Form B close.
+7. **Abstract work-item references are glossed and locatable.** A bare coded id (`M4-T2`, `FR-7`, `U-12`, a SPEC/plan row) forces the operator to hunt — that is the vagueness this contract exists to prevent. When a response names an abstract plan/SPEC/work item, spend one line: plain-language gloss (≤8 words) + locator in the Rule 2 format, e.g. `M4-T2 "webhook retry" — .work/plans/full/20260801-full-plan.md:L212`. One line per reference, no plan prose pasted, no bare ids without a locator. Scope: chat responses (this contract); generated documents follow the Document clarity contract.
 
 **Enforcement:** `scripts/skill-functional-verify.py` fails any `skills/*/skill.md` that does not reference this contract (`Operator handoff`).
 

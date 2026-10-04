@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-10-01
+**Updated:** 2026-10-04
 
 ---
 
@@ -10,6 +10,7 @@
 
 | Item | Artifact |
 |------|----------|
+| Response-clarity Rule 7 — gloss + link abstract plan refs (2026-10-04) | `skills/SKILL_DEPENDENCIES.md` § Operator handoff rule 7 (bare `M4-T2`/`FR-7`/`U-12` forbidden: ≤8-word gloss + `path:L<n>` locator, one line per ref; responses-only scope) + `.cursorrules` + `templates/cursorrules.template` handoff bullets + origin protocol `.work/prompts/improve-clarity-of-responses.md` Rule 7; docs-only, MOD-06 n/a; `framework-verify` + `skill-functional-verify` + `touch-scope-verify` exit 0; blast-radius warn (declared scope, owner-approved protected hits); propagates to consumers on next deploy (P1) |
 | plan-sync amendment derivation pinned (2026-10-01, 2nd session) | `skills/plan-sync/skill.md` + `.quick/plan-sync.md` — `latest amendment` = the **highest `v` number**, never the last block in file order (a plan appending `v1.2, v1.6, v1.7, v1.8, v1.9, v1.5, v1.4, v1.3` otherwise derives v1.2/v1.3 → wrong `plan_version` on every task); docs-only, no script change; `framework-verify` + `skill-functional-verify` + `touch-scope-verify` exit 0; blast-radius high-risk warn (3 areas, scoped, owner-instructed) |
 | plan-sync sync correctness (2026-10-01) | `skills/plan-sync/skill.md` — live-plan source (`.work/plans/full/*-full-plan.md`) + copy-freshness rule; `plan_version` from latest amendment (preview confirm on header mismatch); status semantics (creation-only apply, informational `status_divergence`, Action-required/Informational conflict split, post-commit app-UI follow-up checklist); SPEC ref → tools-project `.work/features/plan-sync/20260929-SPEC.md`; `skills/plan-verify/reference.md` M3 Version-currency row; `.quick/plan-sync.md` regenerated; `START_HERE.md` de-hardcoded; `framework-verify` + `skill-functional-verify` exit 0 |
 | Output economy rule + deploy merge-scope fix + verifier bake-check anchoring (2026-09-16) | `.cursorrules` + `templates/cursorrules.template` (Output economy ALWAYS APPLY bullet); `skills/deploy-basic/skill.md` (merge applies any shared-section change); `scripts/cursorrules-verify.sh` + `scripts/framework-verify.sh` (bake check/`--fix` anchored to `bash .ai/scripts/`; 2h assertion aligned); live deploy to `pizote` (merge applied, verify PASS); MOD-06 `.work/analysis/20260916-mod06-output-economy-rule-merge-fix.md` |

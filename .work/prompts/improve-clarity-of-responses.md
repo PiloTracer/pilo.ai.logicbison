@@ -1,6 +1,6 @@
 # Response Clarity Protocol
 
-**Status:** Approved · 2026-08-14 (Agent OS `.ai`) · **Portable:** yes — adopt in any OS framework via `adopt-framework-improvements.md` (Phase 1)
+**Status:** Approved · 2026-08-14 (Agent OS `.ai`) · amended 2026-10-04 (Rule 7: gloss + locator for abstract work-item ids) · **Portable:** yes — adopt in any OS framework via `adopt-framework-improvements.md` (Phase 1)
 **Enforced by (Agent OS):** `skills/SKILL_DEPENDENCIES.md` § Operator handoff contract + `scripts/skill-functional-verify.py`
 **Adoption target (any OS framework):** contract section in the target's `skills/SKILL_DEPENDENCIES.md` + a reference in every `skills/<id>/skill.md`; wire the target's skill verifier if one exists, else record the enforcement gap as a follow-up
 
@@ -32,6 +32,13 @@ If a specific command or action is required to proceed, isolate it visually at t
 ## Rule 6 — Report Sections Do Not Replace the Close
 A report template's internal sections ("Follow-ups", "Remaining", "Recommended next") are report content. Any operator-required approval or question inside them must ALSO appear in the closing labeled sections below. The close is the contract; report sections never substitute for it.
 
+## Rule 7 — Abstract References Must Be Glossed and Locatable
+A bare coded work-item id (`M4-T2`, `FR-7`, `U-12`, a plan/SPEC row) makes the user hunt for what is being referenced — vague even when accurate. Whenever a response names an abstract plan/SPEC/work item:
+- Spend one line: plain-language gloss (≤8 words) + locator in the Rule 2 format.
+- Example: `M4-T2 "webhook retry" — .work/plans/full/20260801-full-plan.md:L212`
+- One line per reference; never paste plan prose; never emit a bare id without its locator.
+- Scope: chat responses (this protocol); generated documents follow `improve-clarity-of-documentation.md`.
+
 ## Output Template — Form B (input needed)
 Use this skeleton whenever completing a task that requires further user input:
 
@@ -56,6 +63,7 @@ If the task is fully complete and no user input is required, say so in a single 
 ## Non-Negotiables
 - Never mix decisions and questions in the same list.
 - Never require the user to infer a file or line reference — always state it explicitly.
+- Never cite an abstract work-item id (`M4-T2`, `FR-7`, `U-12`) bare — gloss it in plain words and give its locator (Rule 7).
 - Never end a response with an unstated expectation — if input is needed, it must appear in a labeled section.
 - Never render a section (Approval / Answer / Next step) with nothing in it — omit unused sections entirely.
 - One next-step command per response. If multiple sequential actions exist, present only the immediate one; mention later ones only if the user asks what comes after.

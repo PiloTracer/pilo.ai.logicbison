@@ -1,10 +1,12 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-10-01",
-  "goal": "plan-sync amendment-derivation correctness: define `latest amendment` as the HIGHEST `v` number among the `**Amendment (v…)` lines, never the last block in file order (plans routinely append out of order - a positional read mislabels plan_version on every task). Root-caused live while verifying Mendarion's uncommitted carriers, whose plan appends v1.2, v1.6, v1.7, v1.8, v1.9, v1.5, v1.4, v1.3. Owner-authorized framework-source exception for this fix only; docs-only, no script behaviour change. No commit.",
+  "updated": "2026-10-04",
+  "goal": "Vague-response fix: responses that cite only abstract plan/SPEC work-item ids (M4-T2, FR-7, U-12) must stay slim but give each reference a plain-language gloss + a clickable locator (Rule 2 `path:L<n>` format). Binding contract: skills/SKILL_DEPENDENCIES.md § Operator handoff contract Rule 7 (owner-approved) + .cursorrules § Verification & Communication handoff bullet (owner-approved) + templates/cursorrules.template same bullet (owner-approved 2026-10-04) + origin protocol .work/prompts/improve-clarity-of-responses.md (non-protected, same change). Docs-only — no script behaviour change, MOD-06 n/a. No commit.",
   "allowed_paths": [
-    "skills/plan-sync/skill.md",
-    ".quick/plan-sync.md",
+    "skills/SKILL_DEPENDENCIES.md",
+    ".cursorrules",
+    "templates/cursorrules.template",
+    ".work/prompts/improve-clarity-of-responses.md",
     ".work/touch-scope",
     ".work/active-ref",
     ".work/context/HANDOFF.md",
