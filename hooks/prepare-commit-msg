@@ -16,7 +16,7 @@ SHA1="$3"
 strip_co_authored_trailers() {
   _f="$1"
   [ -f "$_f" ] || return 0
-  _tmp="$(mktemp)"
+  _tmp="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
   grep -viE '^[[:space:]]*Co-authored-by:[[:space:]]*' "$_f" > "$_tmp" 2>/dev/null || : > "$_tmp"
   mv "$_tmp" "$_f"
 }
@@ -45,11 +45,17 @@ if [ -n "$REF" ]; then
     case "$SUBJECT" in
         "$REF:"*|"$REF: "*) ;;
         *)
-            sed -i "1s/^/${REF}: /" "$COMMIT_MSG_FILE" 2>/dev/null || {
+            # Rewrite via a temp file: `sed -i` without a backup argument is
+            # GNU-only (BSD/macOS sed consumes the script as the backup suffix).
+            _tmp="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
+            if sed "1s/^/${REF}: /" "$COMMIT_MSG_FILE" > "$_tmp" 2>/dev/null && [ -s "$_tmp" ]; then
+                cat "$_tmp" > "$COMMIT_MSG_FILE"
+            else
                 _body="$(tail -n +2 "$COMMIT_MSG_FILE" 2>/dev/null || true)"
                 printf '%s: %s\n' "$REF" "$SUBJECT" > "$COMMIT_MSG_FILE"
                 [ -n "$_body" ] && printf '%s\n' "$_body" >> "$COMMIT_MSG_FILE"
-            }
+            fi
+            rm -f "$_tmp"
             ;;
     esac
 fi

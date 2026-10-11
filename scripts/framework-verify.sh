@@ -6,13 +6,21 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 
-# Sister-discovery lib (unit-asserted in section 2i).
-source "${REPO_ROOT}/scripts/sister-discovery.sh"
-
 failures=0
 note() { echo "==> $*"; }
 ok() { echo "    OK: $*"; }
 die() { echo "    FAIL: $*" >&2; failures=$((failures + 1)); }
+
+# Host portability helpers (interpreter discovery by execution probe).
+if [[ -f "${REPO_ROOT}/scripts/lib/portability.sh" ]]; then
+  source "${REPO_ROOT}/scripts/lib/portability.sh"
+fi
+if [[ -z "${PY:-}" ]]; then
+  PY="$(command -v python3 || command -v python || command -v py || true)"
+fi
+
+# Sister-discovery lib (unit-asserted in section 2i).
+source "${REPO_ROOT}/scripts/sister-discovery.sh"
 
 # Skill context budget (bytes) - the file an agent loads first must stay cheap.
 # SOFT = reported as tech debt (non-failing); HARD = ratchet ceiling (fails).
@@ -30,11 +38,49 @@ for t in git rsync awk sed grep find; do
 done
 if [[ ${#missing_tools[@]} -gt 0 ]]; then
   echo "    FAIL: missing required tool(s): ${missing_tools[*]}" >&2
-  echo "          Agent OS shell verifiers need: bash, git, rsync, awk, sed, grep, find (all POSIX/common)." >&2
+  echo "          Agent OS shell verifiers need: bash, git, rsync, awk, sed, grep, find." >&2
+  echo "          On macOS/BSD: 'brew install rsync gawk' (BSD awk also needs section 12 leniency)." >&2
   echo "          Install them, or run verification from a POSIX shell with these on PATH." >&2
   exit 3
 fi
 ok "required tools present (git, rsync, awk, sed, grep, find)"
+
+# bash >= 3.2: Agent OS scripts are deliberately bash-3.2 clean so stock macOS
+# (/bin/bash 3.2) works. This asserts that contract rather than assuming it.
+portable_require_bash
+ok "bash >= 3.2 (found ${BASH_VERSION})"
+
+# Interpreter discovery must PROBE EXECUTION, never `command -v` alone: on
+# Windows `python3` is often a Microsoft Store alias stub that exists on PATH
+# but exits non-zero. PY is used by every embedded-Python step below.
+if [[ -z "${PY:-}" ]]; then
+  PY="$(portable_require_python)"
+fi
+ok "python interpreter: ${PY}"
+
+# --- 0b. Line-ending guard (.gitattributes contract) ---------------------
+# CRLF in a shell script or hook yields "bad interpreter: /bin/sh^M", and
+# hooks/* are copied verbatim into .git/hooks/ by install-git-hooks.sh, so a
+# CRLF source hook installs a broken hook. Covers tracked + untracked-not-ignored
+# so a pre-commit run catches the file before it is committed; CI catches it at
+# blob level (local hooks are bypassable via --no-verify).
+note "Line-ending guard (LF contract)"
+crlf_hits=""
+while IFS= read -r -d '' _f; do
+  if grep -qU $'\r' "${_f}" 2>/dev/null; then
+    crlf_hits="${crlf_hits}${_f}"$'\n'
+  fi
+done < <(git ls-files -z --cached --others --exclude-standard -- \
+  '*.sh' '*.bash' '*.py' 'hooks/*' 'templates/*' 2>/dev/null || true)
+if [[ -n "${crlf_hits}" ]]; then
+  echo "    FAIL: CRLF detected in LF-mandatory files (see .gitattributes):" >&2
+  printf '%s' "${crlf_hits}" | sed 's/^/          /' >&2
+  echo "          Fix: git add --renormalize . && git commit" >&2
+  failures=$((failures + 1))
+else
+  ok "no CRLF in LF-mandatory files"
+fi
+
 
 note "Agent OS framework-verify (root=${REPO_ROOT})"
 
@@ -80,10 +126,10 @@ fi
 
 # --- 1c. Trimmed skill integrity (reference links + moved content) ---
 note "skill-functional-verify (trim integrity)"
-if python3 "${REPO_ROOT}/scripts/skill-functional-verify.py" >/dev/null; then
+if "$PY" "${REPO_ROOT}/scripts/skill-functional-verify.py" >/dev/null; then
   ok "trimmed skills: reference anchors + required protocol sections"
 else
-  die "skill-functional-verify failed - run: python3 scripts/skill-functional-verify.py"
+  die "skill-functional-verify failed - run: <python> scripts/skill-functional-verify.py"
 fi
 
 # Intake contract guard: classification is agent-judged (no executable classifier),
@@ -120,11 +166,11 @@ ok "no skill.md over hard ceiling ${SKILL_HARD_CEILING}B (${over_soft} over soft
 
 # --- 2. Consumer bootstrap smoke ---
 note "Consumer bootstrap smoke"
-SMOKE_ROOT="$(mktemp -d)"
+SMOKE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 trap 'rm -rf "${SMOKE_ROOT}"' EXIT
 
 mkdir -p "${SMOKE_ROOT}/.ai"
-rsync -a \
+rsync -a --no-group \
   --exclude='.git' \
   --exclude='.work' \
   --exclude='.github' \
@@ -154,7 +200,7 @@ rsync -a \
 
 # --- 2b. deploy-files in-place must create .cursorrules ---
 note "deploy-files in-place scaffold"
-DF_SMOKE="$(mktemp -d)"
+DF_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 mkdir -p "${DF_SMOKE}"
 (
   cd "${DF_SMOKE}"
@@ -171,13 +217,13 @@ ok "deploy-files in-place creates .cursorrules + .work/"
 
 # --- 2c. install-opencode-config via deploy-basic (thin-client) ---
 note "install-opencode-config (thin-client via deploy-basic)"
-OC_SMOKE="$(mktemp -d)"
+OC_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${OC_SMOKE}" >/dev/null
 bash "${REPO_ROOT}/scripts/golden-deploy-verify.sh" "${OC_SMOKE}" deploy-basic-thin
 if [[ ! -f "${OC_SMOKE}/opencode.json" ]]; then
   die "deploy-basic did not create opencode.json"
 fi
-python3 -c "
+"$PY" -c "
 import json
 c=json.load(open('${OC_SMOKE}/opencode.json'))
 paths=c.get('skills',{}).get('paths',[])
@@ -189,10 +235,10 @@ rm -rf "${OC_SMOKE}"
 # --- 2d. install-opencode-config --sync-paths (source moved) ---
 note "install-opencode-config --sync-paths"
 FW_ROOT="${REPO_ROOT}"
-SYNC_SMOKE="$(mktemp -d)"
+SYNC_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 bash "${FW_ROOT}/scripts/deploy-basic.sh" "${SYNC_SMOKE}" >/dev/null
 OLD_SRC="/tmp/old-agent-os-path"
-python3 << PY
+"$PY" << PY
 import json
 p = "${SYNC_SMOKE}/opencode.json"
 with open(p) as f:
@@ -206,7 +252,7 @@ with open(p, "w") as f:
 PY
 REPO_ROOT="${SYNC_SMOKE}" AI_SOURCE="${FW_ROOT}" OLD_SOURCE="${OLD_SRC}" \
   bash "${FW_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
-python3 -c "
+"$PY" -c "
 import json
 c=json.load(open('${SYNC_SMOKE}/opencode.json'))
 assert any('${FW_ROOT}' in p for p in c['skills']['paths']), c['skills']['paths']
@@ -218,11 +264,11 @@ rm -rf "${SYNC_SMOKE}"
 
 # --- 2e. install-opencode-config --sync-paths (fat-client) ---
 note "install-opencode-config --sync-paths (fat-client)"
-FC_SMOKE="$(mktemp -d)"
+FC_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 (
   cd "${FC_SMOKE}"
   bash "${REPO_ROOT}/scripts/deploy-files.sh" . >/dev/null
-  python3 << PY
+  "$PY" << PY
 import json
 p = "opencode.json"
 bad = f".ai\n${REPO_ROOT}"
@@ -237,7 +283,7 @@ with open(p, "w") as f:
     f.write("\n")
 PY
   REPO_ROOT="$(pwd)" bash "${REPO_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
-  python3 -c "
+  "$PY" -c "
 import json
 c=json.load(open('opencode.json'))
 p0=c['skills']['paths'][0]
@@ -254,11 +300,11 @@ rm -rf "${FC_SMOKE}"
 # Regression: infer_old_prefix must not treat ../.ai.ui/skills as Agent OS root and
 # rewrite sister paths to ai_root on self-hosted sync.
 note "install-opencode-config --sync-paths (self-hosted)"
-SH_SMOKE="$(mktemp -d)"
+SH_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 cp "${REPO_ROOT}/opencode.json" "${SH_SMOKE}/opencode.json"
 REPO_ROOT="${SH_SMOKE}" AI_SOURCE="${REPO_ROOT}" \
   bash "${REPO_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
-python3 -c "
+"$PY" -c "
 import json, os
 c=json.load(open('${SH_SMOKE}/opencode.json'))
 ui=c['references'].get('ai-ui', {}).get('path', '')
@@ -272,7 +318,7 @@ rm -rf "${SH_SMOKE}" "${DF_SMOKE}"
 
 # --- 2g. deploy arg normalization (bare verb ≡ --flag, '-' separator, any position) ---
 note "deploy arg-form equivalence"
-AV_SMOKE="$(mktemp -d)"
+AV_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" >/dev/null
 bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" update >/dev/null
 bash "${REPO_ROOT}/scripts/deploy-basic.sh" update "${AV_SMOKE}" >/dev/null
@@ -284,7 +330,7 @@ if bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${AV_SMOKE}" bogus >/dev/null 2>
 fi
 ok "deploy-basic: bare verbs ≡ --flags, '-'/'--' separators ignored, any arg position"
 
-FILES_SMOKE="$(mktemp -d)"
+FILES_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 bash "${REPO_ROOT}/scripts/deploy-files.sh" copy - "${FILES_SMOKE}" >/dev/null
 [[ -d "${FILES_SMOKE}/.ai/skills" ]] || die "deploy-files copy - <path> did not populate .ai/"
 [[ ! -e "${FILES_SMOKE}/.ai/agent.os.framework.md" && ! -e "${FILES_SMOKE}/agent.os.framework.md" ]] \
@@ -296,7 +342,7 @@ rm -rf "${FILES_SMOKE}"
 
 # --- 2h. cursorrules-verify detects + repairs stale thin-client state ---
 note "cursorrules-verify repair cycle"
-CV_SMOKE="$(mktemp -d)"
+CV_SMOKE="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${CV_SMOKE}" >/dev/null
 STALE="/tmp/agent-os-moved-away-$$"
 perl -i -pe "s{AGENT_OS_SOURCE=\Q${REPO_ROOT}\E}{AGENT_OS_SOURCE=${STALE}}g" "${CV_SMOKE}/.cursorrules"
@@ -340,10 +386,10 @@ rm -rf "${CV_SMOKE}" "${AV_SMOKE}"
 # name (pilo.ai.ui.logicbison — <fw> inserted before the last .segment) and
 # the legacy name (.ai.ui), and verify clean.
 note "deploy from renamed source dir + sister naming variants"
-RN_PARENT="$(mktemp -d)"
+RN_PARENT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 RN_SRC="${RN_PARENT}/pilo.ai.logicbison"
 mkdir -p "${RN_SRC}"
-rsync -a \
+rsync -a --no-group \
   --exclude='.git' \
   --exclude='.work' \
   --exclude='.github' \
@@ -368,7 +414,7 @@ grep -qE "${RN_PARENT}/pilo\.ai\.ui\.logicbison \(discovered at deploy time\)" "
 bash "${RN_SRC}/scripts/cursorrules-verify.sh" "${RN_PARENT}/family-target" >/dev/null \
   || die "renamed source: cursorrules-verify FAILED after deploy"
 # opencode.json must reference the family-named sister next to the source.
-python3 -c "
+"$PY" -c "
 import json
 c=json.load(open('${RN_PARENT}/family-target/opencode.json'))
 assert 'pilo.ai.ui.logicbison' in c.get('references',{}).get('ai-ui',{}).get('path',''), c.get('references')
@@ -377,7 +423,7 @@ assert any('pilo.ai.ui.logicbison' in p for p in c.get('skills',{}).get('paths',
 
 # Sync-paths staleness: a stale family-named sister path must be dropped by
 # --sync-paths (regression: string markers only matched legacy .ui/skills).
-python3 - "${RN_PARENT}/family-target/opencode.json" <<'PY'
+"$PY" - "${RN_PARENT}/family-target/opencode.json" <<'PY'
 import json, sys
 p = sys.argv[1]
 with open(p) as f:
@@ -390,7 +436,7 @@ with open(p, "w") as f:
 PY
 REPO_ROOT="${RN_PARENT}/family-target" AI_SOURCE="${RN_SRC}" \
   bash "${RN_SRC}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
-python3 - "${RN_PARENT}/family-target/opencode.json" "${RN_SRC}" <<'PY'
+"$PY" - "${RN_PARENT}/family-target/opencode.json" "${RN_SRC}" <<'PY'
 import json, sys
 p, src = sys.argv[1], sys.argv[2]
 paths = json.load(open(p))["skills"]["paths"]
@@ -418,7 +464,7 @@ mkdir -p "${RN_PARENT}/fat-inplace"
 
 # Legacy scenario: source dir named .ai + legacy-named sister (.ai.ui).
 mkdir -p "${RN_PARENT}/.ai"
-rsync -a \
+rsync -a --no-group \
   --exclude='.git' \
   --exclude='.work' \
   --exclude='.github' \
@@ -457,7 +503,7 @@ bash "${RN_PARENT}/.ai/scripts/cursorrules-verify.sh" "${RN_PARENT}/legacy-targe
   || die "find_agent_os_dir: family root must win over legacy .ai when both exist"
 [[ -z "$(find_agent_os_dir "${RN_PARENT}/pilo.ai.ui.logicbison" "${RN_PARENT}/does-not-exist" || true)" ]] \
   || die "find_agent_os_dir: must exit empty when no Agent OS root exists"
-AO_ONLY="$(mktemp -d)"
+AO_ONLY="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 mkdir -p "${AO_ONLY}/.ai/skills"
 printf '# Agent OS (legacy-only fixture)\n' > "${AO_ONLY}/.ai/skills/README.md"
 [[ "$(find_agent_os_dir "${AO_ONLY}/.ai" "${AO_ONLY}")" == "${AO_ONLY}/.ai" ]] \
@@ -521,7 +567,7 @@ ok "markdown link scan complete"
 
 # --- 6. readiness-verify self-test (exercise the probe-ledger linter) ---
 note "readiness-verify self-test"
-RV_ROOT="$(mktemp -d)"
+RV_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 RV_LEDGER="${RV_ROOT}/PROBE_LEDGER.md"
 
 # Honest ledger: D1 confirmed/high with a cite; computed = claimed = 100%.
@@ -555,7 +601,7 @@ rm -rf "${RV_ROOT}"
 
 # --- 7. traceability-verify self-test (exercise the FR->task linter) ---
 note "traceability-verify self-test"
-TV_ROOT="$(mktemp -d)"
+TV_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 TV_PLAN="${TV_ROOT}/x-full-plan.md"
 # Orphan: FR-02 never on a task line -> must fail.
 printf '## reqs\n- FR-01 - FR-02\n| signup | FR-01 | M2-T1 |\n' > "${TV_PLAN}"
@@ -575,7 +621,7 @@ rm -rf "${TV_ROOT}"
 
 # --- 7b. master-plan-verify self-test (exercise the MASTER_PLAN_STANDARD linter) ---
 note "master-plan-verify self-test"
-MPV_ROOT="$(mktemp -d)"
+MPV_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 MPV_PLAN="${MPV_ROOT}/x-full-plan.md"
 
 # Reproduces the reported bug shape: only 12 of 25 mandatory H2 sections present.
@@ -612,7 +658,7 @@ rm -rf "${MPV_ROOT}"
 
 # --- 8. gate-verify self-test (exercise the completion-gate evidence linter) ---
 note "gate-verify self-test"
-GV_ROOT="$(mktemp -d)"
+GV_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 GV_NEXT="${GV_ROOT}/NEXT.md"
 hdr='## Current iteration\n\n### Tasks\n| ID | Description | Files | Status | Notes |\n|----|-------------|-------|--------|-------|\n'
 # Dishonest: a done task with empty Notes -> must fail.
@@ -652,10 +698,10 @@ ok "blast-radius-check + touch-scope-verify + mod06-output-check self-tests"
 note "prepare-commit-msg co-authored strip"
 PCM="${REPO_ROOT}/hooks/prepare-commit-msg"
 pcm_before="${failures}"
-if [[ ! -x "${PCM}" ]]; then
-  die "missing or non-executable ${PCM}"
+if [[ ! -f "${PCM}" ]]; then
+  die "missing ${PCM}"
 else
-  PCM_TMP="$(mktemp)"
+  PCM_TMP="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
   printf 'feat: test subject\n\nCo-authored-by: Cursor <cursoragent@cursor.com>\n' > "${PCM_TMP}"
   sh "${PCM}" "${PCM_TMP}" message
   if grep -qiE '^[[:space:]]*Co-authored-by:' "${PCM_TMP}"; then

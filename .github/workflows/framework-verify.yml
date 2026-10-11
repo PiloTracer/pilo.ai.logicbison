@@ -13,5 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Cheap, fast gate that runs before the full suite so a CRLF commit gets
+      # an unambiguous error instead of a confusing mid-suite failure. Mirrors
+      # the framework-verify section 0b guard.
+      - name: Line-ending guard (LF contract)
+        run: |
+          fail=0
+          while IFS= read -r -d '' f; do
+            if grep -qU $'\r' "$f" 2>/dev/null; then
+              echo "::error file=$f::CRLF line ending in an LF-mandatory file (see .gitattributes)"
+              fail=1
+            fi
+          done < <(git ls-files -z --cached -- '*.sh' '*.bash' '*.py' 'hooks/*' 'templates/*')
+          if [ "$fail" -ne 0 ]; then
+            echo "Fix: git add --renormalize . && git commit"
+            exit 1
+          fi
+          echo "OK: no CRLF in LF-mandatory files"
+
       - name: Run framework-verify
         run: bash scripts/framework-verify.sh

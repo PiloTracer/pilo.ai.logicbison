@@ -156,8 +156,8 @@ fi
 #                   carrying it would be misdetected as framework source)
 SKILL_EXCLUDE_REGEX='^(\.github/|\.gitignore$|\.gitattributes$|\.cursorrules$|scripts/deploy-files\.sh$|agent\.os\.framework\.md$)'
 
-TMP_LIST="$(mktemp)"
-MERGE_CANDS="$(mktemp)"
+TMP_LIST="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
+MERGE_CANDS="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
 trap 'rm -f "$TMP_LIST" "$MERGE_CANDS"' EXIT
 
 ( cd "$AI_ROOT" \
@@ -189,10 +189,10 @@ fi
 
 if [[ "$MODE" == "force" ]]; then
   # Legacy: idempotent overwrite of existing files (still no --delete).
-  rsync -a --files-from="$TMP_LIST" "$AI_ROOT"/ "$DEST_DIR"/
+  rsync -a --no-group --files-from="$TMP_LIST" "$AI_ROOT"/ "$DEST_DIR"/
 else
   # No-overwrite (default + --update): skip files already present in target.
-  rsync -a --ignore-existing --files-from="$TMP_LIST" "$AI_ROOT"/ "$DEST_DIR"/
+  rsync -a --no-group --ignore-existing --files-from="$TMP_LIST" "$AI_ROOT"/ "$DEST_DIR"/
 fi
 
 COPIED=$((COUNT - SKIPPED))

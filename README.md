@@ -8,7 +8,21 @@
 
 **Works with:** Cursor, Claude Code, Codex, opencode, and any agent that reads project files.
 
-**Platform:** Developed and verified on **Linux** (bash, git, rsync, Docker Compose). Shell scripts and docs assume a POSIX environment. macOS, Windows (WSL2), and other OSes work when you adapt paths, line endings, and local tooling in your consumer repo — run `bash scripts/framework-verify.sh` to confirm the baseline toolchain on your host.
+**Platform:** Developed and verified on **Linux** (bash, git, rsync, Docker Compose). Shell scripts and docs assume a POSIX environment, and are deliberately **bash-3.2 clean** so stock macOS works. Run `bash scripts/framework-verify.sh` to confirm the baseline toolchain on your host — its section 0 preflight fails fast with an actionable message.
+
+| Host | Status | Notes |
+|------|--------|-------|
+| **Linux** | Primary | Toolchain as listed in `DOCS_TECH_STACK.md`. |
+| **WSL2** | Supported | Runs real Linux, so everything works. **Keep the repo in the Linux filesystem (`~/…`), not `/mnt/c/…`**: on DrvFs, `chmod`/`chown` are silently no-ops unless the drive is remounted with `metadata`, and `core.WSLCompat` defaults to `false`, so executable bits are not real. A repo under `/mnt/c` can therefore fail the change-safety gates and `hook` execution in ways that look unrelated. |
+| **macOS** | Supported | `brew install rsync gawk` (BSD `awk` differs; `rsync` is not preinstalled). Scripts avoid GNU-only flags (`sed -i` with a bare script, `mktemp` without a template, `find -quit`, `stat -c`). |
+| **Windows (native / Git Bash)** | **Not supported** | Fails at bootstrap: `rsync` does not ship with Git for Windows and `python3` is usually a Microsoft Store alias stub. Use WSL2. |
+
+**Windows adopters:** use **WSL2** and invoke the gates as `wsl bash scripts/framework-verify.sh` (or run them inside the WSL2 shell). There is no PowerShell port and one is not planned.
+
+**Line endings:** `.gitattributes` enforces LF for `*.sh`, `*.py`, `hooks/*` and `templates/**`. CRLF in any of those produces `bad interpreter: /bin/sh^M` and breaks the git hooks. `git ls-files --eol <path>` shows the truth; `framework-verify` section 0b and CI fail on violations. Fix with `git add --renormalize .` then re-run `bash scripts/install-git-hooks.sh`.
+
+**Python:** never hardcode `python3`. Resolve by *executing* a candidate, not by `command -v` (the Windows Store alias exists on `PATH` but exits non-zero). `scripts/lib/portability.sh` provides `portable_find_python` / `portable_require_python`; scripts use the resolved `$PY`.
+
 
 **Customization:** Agent OS is a starting point, not a fixed contract. You are already working with a coding agent — use the same workflow to tailor skills, standards, `.cursorrules`, and project memory to your repository, stack, and preferences. Fork, trim, or extend the framework in your consumer project (or in this repo when self-hosting) as your process evolves; after substantive changes to shared scripts, re-run `bash scripts/framework-verify.sh` to confirm the baseline still holds.
 

@@ -95,7 +95,7 @@ purge_legacy_repo_root_scaffold() {
     echo "removed (deprecated symlink): ${d}"
     return 0
   fi
-  if [[ -d "$d" ]] && [[ -z "$(find "$d" -mindepth 1 ! -name '.gitkeep' -print -quit 2>/dev/null)" ]]; then
+  if [[ -d "$d" ]] && [[ -z "$( { find "$d" -mindepth 1 ! -name '.gitkeep' -print 2>/dev/null || true; } | head -1)" ]]; then
     rm -rf "$d"
     echo "removed (deprecated repo-root scaffold): ${d}"
   fi
@@ -106,11 +106,11 @@ purge_legacy_repo_root_scaffold "${REPO_ROOT}/docs/integration"
 if [[ -d "${REPO_ROOT}/docs" ]] && [[ ! -d "${REPO_ROOT}/docs/integration" ]]; then
   :
 elif [[ -d "${REPO_ROOT}/docs" ]]; then
-  other_docs="$(find "${REPO_ROOT}/docs" -mindepth 1 -maxdepth 1 ! -name integration -print -quit 2>/dev/null || true)"
+  other_docs="$( { find "${REPO_ROOT}/docs" -mindepth 1 -maxdepth 1 ! -name integration -print 2>/dev/null || true; } | head -1)"
   if [[ -z "$other_docs" ]]; then
     int_only=1
     if [[ -d "${REPO_ROOT}/docs/integration" ]]; then
-      if [[ -n "$(find "${REPO_ROOT}/docs/integration" -mindepth 1 ! -name '.gitkeep' -print -quit 2>/dev/null)" ]]; then
+      if [[ -n "$( { find "${REPO_ROOT}/docs/integration" -mindepth 1 ! -name '.gitkeep' -print 2>/dev/null || true; } | head -1)" ]]; then
         int_only=0
       fi
     fi

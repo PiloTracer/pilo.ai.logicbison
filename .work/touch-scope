@@ -1,18 +1,32 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-10-04",
-  "goal": "Vague-response fix: responses that cite only abstract plan/SPEC work-item ids (M4-T2, FR-7, U-12) must stay slim but give each reference a plain-language gloss + a clickable locator (Rule 2 `path:L<n>` format). Binding contract: skills/SKILL_DEPENDENCIES.md § Operator handoff contract Rule 7 (owner-approved) + .cursorrules § Verification & Communication handoff bullet (owner-approved) + templates/cursorrules.template same bullet (owner-approved 2026-10-04) + origin protocol .work/prompts/improve-clarity-of-responses.md (non-protected, same change). Docs-only — no script behaviour change, MOD-06 n/a. No commit.",
+  "updated": "2026-10-09",
+  "goal": "Windows+Linux+macOS/BSD portability: land the 12-item matrix (owner-invoked via @ai-director 'proceed with the best you can do to fix all 12'). Items: (1) new .gitattributes LF contract for *.sh/*.py/hooks/*/templates/**; (2) convert 3 CRLF blobs already in HEAD + fix .gitignore mode 100755->100644; (3) hooks re-install after renormalize; (4) sed -i -> temp-file rewrite in prepare-commit-msg; (5) template all 28 bare mktemp sites (BSD needs a template); (6) find -print -quit -> portable print|head -1 in templates/bootstrap.sh; (7) [ -x ] -> [ -f ] exec-bit guards (pre-commit, blast-radius-check, framework-verify); (8) interpreter detection that PROBES EXECUTION not existence (new scripts/lib/portability.sh; $PY replaces bare python3 across 6 scripts; MCP command emits resolved interpreter; .cursorrules LINT_COMMAND; opencode.json*); (9) WSL2 DrvFs /mnt/c documentation; (10) LF guard in framework-verify section 0b + CI workflow; (11) bash>=3.2 preflight; (12) BSD awk [[:space:]] + byte-built glyphs in gate-verify/readiness-verify. Owner-authorized protected-surface edits: scripts/{framework-verify,deploy-files,deploy-basic,install-opencode-config}.sh, hooks/prepare-commit-msg, templates/cursorrules.template, .github/workflows/framework-verify.yml, opencode.json. No commit (needs in-message approval).",
   "allowed_paths": [
-    "skills/SKILL_DEPENDENCIES.md",
+    ".gitattributes",
+    ".editorconfig",
     ".cursorrules",
+    ".gitignore",
+    "README.md",
+    "opencode.json",
+    "opencode.json.template",
     "templates/cursorrules.template",
-    ".work/prompts/improve-clarity-of-responses.md",
+    "templates/bootstrap.sh",
+    "hooks/pre-commit",
+    "hooks/prepare-commit-msg",
+    "scripts/lib/portability.sh",
+    "standards/20260517-api-style-guide.md",
+    "standards/20260517-observability-spec.md",
+    ".github/workflows/framework-verify.yml",
     ".work/touch-scope",
     ".work/active-ref",
     ".work/context/HANDOFF.md",
-    ".work/plans/NEXT.md"
+    ".work/plans/NEXT.md",
+    ".work/analysis/20261009-mod06-windows-linux-portability.md"
   ],
   "allowed_patterns": [
+    "scripts/**",
+    "standards/**",
     "tmp/**"
   ]
 }

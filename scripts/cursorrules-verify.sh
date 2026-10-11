@@ -130,7 +130,7 @@ if [[ "$FIX" -eq 1 && -f "$CURS_DEST" ]]; then
     #    Anchored on command position (bash ...) so illustrative rows like the
     #    template's "Concrete examples" table (`.ai/scripts/foo.sh` → resolved
     #    form) are left intact.
-    before="$(mktemp)"; cp "$CURS_DEST" "$before"
+    before="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"; cp "$CURS_DEST" "$before"
     if [[ -n "$SRC_VALUE" && "$SRC_VALUE" != "$AI_ROOT" && "$SRC_VALUE" != "REPLACE_BASICSOURCE" ]]; then
       perl -i -pe "s{\Q${SRC_VALUE}\E/scripts/}{${AI_ESC}/scripts/}g" "$CURS_DEST"
     fi

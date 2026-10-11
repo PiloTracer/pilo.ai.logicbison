@@ -74,6 +74,26 @@ fi
 # Shared sister-framework discovery (family naming `pilo.ai.ui.logicbison` + legacy `.ai.ui`).
 source "${AI_ROOT}/scripts/sister-discovery.sh"
 
+# Host portability helpers (interpreter discovery by execution probe).
+if [[ -f "${AI_ROOT}/scripts/lib/portability.sh" ]]; then
+  source "${AI_ROOT}/scripts/lib/portability.sh"
+fi
+# Fallback resolver when lib/portability.sh is unavailable (e.g. a script
+# copied into a sandbox by a self-test). Probes EXECUTION, not existence:
+# a Microsoft Store `python3` alias stub exists on PATH but exits non-zero.
+portable_find_python() {
+  local c
+  for c in python3 python py; do
+    if [ "$c" = "py" ]; then
+      command -v py >/dev/null 2>&1 && py -3 -c "import sys" >/dev/null 2>&1 && { printf 'py -3\n'; return 0; }
+      continue
+    fi
+    command -v "$c" >/dev/null 2>&1 && "$c" -c "import sys" >/dev/null 2>&1 && { printf '%s\n' "$c"; return 0; }
+  done
+  return 1
+}
+PY="$(portable_require_python 2>/dev/null || portable_find_python || true)"
+
 # ── Status mode (read-only) ───────────────────────────────────────────
 if [[ "$MODE" == "status" ]]; then
   if [[ "$RAW_TARGET" == "." || "$RAW_TARGET" == "$PWD" ]]; then
@@ -117,7 +137,7 @@ if [[ "$MODE" == "status" ]]; then
     echo "  opencode.json: present"
     if [[ -n "${src:-}" && "$src" != "REPLACE_BASICSOURCE" && -d "$src" ]]; then
       export REPO_ROOT="$DEST_ROOT" AI_SOURCE="$src"
-      python3 << 'PYEOF' || echo "  opencode.json: could not validate paths"
+      "$PY" << 'PYEOF' || echo "  opencode.json: could not validate paths"
 import json, os
 repo = os.environ["REPO_ROOT"]
 src = os.environ["AI_SOURCE"].rstrip("/")
@@ -224,7 +244,7 @@ subst_cursorrules() {
   local SIBLING_PARENT
   SIBLING_PARENT="$(cd "$AI_ROOT/.." && pwd)"
   local tmpfile
-  tmpfile="$(mktemp)"
+  tmpfile="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
 
   # Step 1: substitute AGENT_OS_SOURCE
   perl -pe "s/AGENT_OS_SOURCE=REPLACE_BASICSOURCE/AGENT_OS_SOURCE=${AI_ROOT_ESC}/" "$TPL_CURS" > "$tmpfile"
@@ -331,7 +351,7 @@ patch_cursorrules_project_paths() {
   local f="$1"
   [[ -f "$f" ]] || return 0
   local tmp
-  tmp="$(mktemp)"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
   cp "$f" "$tmp"
   perl -i -pe '
     s{\| `standards/|\| `.work/standards/|g;
@@ -376,7 +396,7 @@ if [[ "$MODE" == "update" ]]; then
   echo "=== update merge candidates ==="
   # .cursorrules vs the freshly-substituted template
   if [[ -f "$CURS_DEST" ]]; then
-    tmp_cur="$(mktemp)"
+    tmp_cur="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
     subst_cursorrules > "$tmp_cur"
     if ! cmp -s "$tmp_cur" "$CURS_DEST"; then
       echo "  merge: .cursorrules  (differs from current template-with-source)"
@@ -401,7 +421,7 @@ if [[ "$MODE" == "update" ]]; then
   # opencode.json — stale framework paths vs current AGENT_OS_SOURCE
   if [[ -f "${DEST_ROOT}/opencode.json" && -f "$CURS_DEST" ]]; then
     export REPO_ROOT="$DEST_ROOT" AI_SOURCE="$AI_ROOT"
-    if ! python3 << 'PYEOF' 2>/dev/null; then
+    if ! "$PY" << 'PYEOF' 2>/dev/null; then
 import json, os, sys
 repo = os.environ["REPO_ROOT"]
 src = os.environ["AI_SOURCE"].rstrip("/")

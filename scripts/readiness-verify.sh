@@ -48,9 +48,14 @@ for ledger in "${ledgers[@]}"; do
 
   # awk emits one report line per violation prefixed VIOLATION:, plus a SUMMARY line.
   result="$(awk '
-    function trim(s){ gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    function trim(s){ gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+    # Glyphs built from byte values (not literals): BSD/macOS awk in a C locale
+    # compares byte-wise and can mis-handle multibyte literals in a regex.
+    function mk_star(){ return sprintf("%c%c%c", 226, 152, 133) }  # U+2605
+    function mk_emdash(){ return sprintf("%c%c%c", 226, 128, 148) } # U+2014
     function confval(c){ if(c=="high")return 1.0; if(c=="med")return 0.5; return 0.0 }
-    BEGIN{ FS="|"; num=0; den=0; rows=0; blocking_unknown=0; claimed=-1; target=85 }
+    BEGIN{ FS="|"; num=0; den=0; rows=0; blocking_unknown=0; claimed=-1; target=85
+           STAR=mk_star(); EMDASH=mk_emdash() }
     # Header coverage claim: **Coverage:** NN% (target NN%)
     /[Cc]overage:/ && claimed<0 {
       line=$0
@@ -68,12 +73,12 @@ for ledger in "${ledgers[@]}"; do
       rows++
       status=trim($4); conf=trim($5); ev=trim($6)
       gsub(/`/, "", status); gsub(/`/, "", conf)
-      weight=(dim ~ /★/)?2:1
+      weight=(index(dim, STAR) > 0)?2:1
       num += weight*confval(conf); den += weight
 
       # Rule 1: honesty - confirmed/high needs a real cite
       if (status=="confirmed" || conf=="high") {
-        if (ev=="" || ev=="-" || ev=="—" || toupper(ev)=="TBD" || ev=="n/a") {
+        if (ev=="" || ev=="-" || ev==EMDASH || toupper(ev)=="TBD" || ev=="n/a") {
           print "VIOLATION: dimension " dim " is " status "/" conf " but cites no evidence (\"" ev "\")"
         }
       }

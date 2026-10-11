@@ -51,21 +51,32 @@ for carrier in "${carriers[@]}"; do
 
   # awk emits VIOLATION: lines per offending task and a SUMMARY: line with counts.
   result="$(awk '
-    function trim(s){ gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-    BEGIN{ FS="|"; done=0; rows=0 }
+    function trim(s){ gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+    # Glyphs are built from byte values, not literals: BSD/macOS awk in a
+    # C locale compares byte-wise and can mis-handle multibyte literals in a
+    # regex. The ASCII aliases below already cover every real ledger.
+    function mk_check(){ return sprintf("%c%c%c", 226, 156, 147) }   # U+2713
+    function mk_heavychk(){ return sprintf("%c%c%c", 226, 156, 148) } # U+2714
+    function mk_emdash(){ return sprintf("%c%c%c", 226, 128, 148) }   # U+2014
+    function firstword(s){ n=split(s,a,/[[:space:]]+/); return n?a[1]:"" }
+    BEGIN{ FS="|"; done=0; rows=0
+           CHECK=mk_check(); HEAVY=mk_heavychk(); EMDASH=mk_emdash() }
     {
       id=trim($2); gsub(/`/, "", id)
       # Task rows: ID matches *-T{N} (M1-T1, AIOS-1-T3, PROJ-T2, …)
       if (id !~ /^[A-Za-z0-9][A-Za-z0-9-]*-T[0-9]+$/ || NF < 7) next
       rows++
       status=trim($5); gsub(/`/, "", status); status=tolower(status)
+      # Status cells sometimes carry a trailing glyph ("done ✓") - compare the
+      # first token so the ASCII status is authoritative.
+      sval=firstword(status)
       notes=trim($6)
-      if (status=="done" || status=="complete" || status=="✓" || status=="pass") {
+      if (sval=="done" || sval=="complete" || sval=="pass" || sval=="ok" || status==CHECK || status==HEAVY) {
         done++
         ev=tolower(notes)
         # Evidence = recorded proof a gate ran (matches .cursorrules § Completion gate).
-        has_ev = (ev ~ /exit[ ]*[0-9]/) || (ev ~ /pass|passed|tests?|lint|type|gate|green|[ ]ok|^ok|evidence|✓|✔/)
-        empty  = (notes=="" || notes=="-" || notes=="—" || tolower(notes)=="n/a" || tolower(notes)=="tbd")
+        has_ev = (ev ~ /exit[ ]*[0-9]/) || (ev ~ /pass|passed|tests?|lint|type|gate|green|[ ]ok|^ok|evidence/) || (index(notes, CHECK) > 0) || (index(notes, HEAVY) > 0)
+        empty  = (notes=="" || notes=="-" || notes==EMDASH || tolower(firstword(notes))=="n/a" || tolower(firstword(notes))=="tbd")
         if (empty) {
           print "VIOLATION: task " id " is marked \"" status "\" with no Notes - completion gate needs recorded evidence (tests/lint/type exit codes)"
         } else if (!has_ev) {

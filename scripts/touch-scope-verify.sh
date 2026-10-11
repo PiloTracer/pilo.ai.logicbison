@@ -21,6 +21,14 @@ else
 fi
 cd "${REPO_ROOT}"
 
+# Host portability helpers (interpreter discovery by execution probe).
+if [[ -f "${REPO_ROOT}/scripts/lib/portability.sh" ]]; then
+  source "${REPO_ROOT}/scripts/lib/portability.sh"
+fi
+if [[ -z "${PY:-}" ]]; then
+  PY="$(command -v python3 || command -v python || command -v py || true)"
+fi
+
 TOUCH_SCOPE="${REPO_ROOT}/.work/touch-scope"
 NEXT="${REPO_ROOT}/.work/plans/NEXT.md"
 
@@ -36,7 +44,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "${1:-}" == "--self-test" ]]; then
-  TMP="$(mktemp -d)"
+  TMP="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
   trap 'rm -rf "${TMP}"' EXIT
   mkdir -p "${TMP}/.work/plans"
   echo '{"allowed_paths":["allowed.txt"],"allowed_patterns":[]}' > "${TMP}/.work/touch-scope"
@@ -65,7 +73,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
   exit 0
 fi
 
-FILES_LIST="$(mktemp)"
+FILES_LIST="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
 trap 'rm -f "${FILES_LIST}"' EXIT
 { git diff --name-only; git diff --cached --name-only; git ls-files --others --exclude-standard; } 2>/dev/null | sort -u > "${FILES_LIST}"
 
@@ -74,12 +82,7 @@ if [[ ! -s "${FILES_LIST}" ]]; then
   exit 0
 fi
 
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "touch-scope: skip (python3 required)" >&2
-  exit 0
-fi
-
-RESULT="$(python3 << PY || true
+RESULT="$("$PY" << PY || true
 import json, re, sys, fnmatch
 from pathlib import Path
 

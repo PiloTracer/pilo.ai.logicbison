@@ -12,10 +12,12 @@ WARN_ONLY=1
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
 
 # Resolve scripts dir: self-hosted (repo root) vs fat-client (.ai/)
+# Existence tests, not `-x`: NTFS/DrvFs cannot store a POSIX exec bit, so an
+# exec-bit guard silently disables this gate on Windows and on unzipped trees.
 SCRIPTS=""
-if [ -x "${REPO_ROOT}/scripts/touch-scope-verify.sh" ]; then
+if [ -f "${REPO_ROOT}/scripts/touch-scope-verify.sh" ]; then
   SCRIPTS="${REPO_ROOT}/scripts"
-elif [ -x "${REPO_ROOT}/.ai/scripts/touch-scope-verify.sh" ]; then
+elif [ -f "${REPO_ROOT}/.ai/scripts/touch-scope-verify.sh" ]; then
   SCRIPTS="${REPO_ROOT}/.ai/scripts"
 fi
 
@@ -25,12 +27,12 @@ fi
 
 failures=0
 
-if [ -x "${SCRIPTS}/touch-scope-verify.sh" ]; then
+if [ -f "${SCRIPTS}/touch-scope-verify.sh" ]; then
   OUT=$(bash "${SCRIPTS}/touch-scope-verify.sh" --strict 2>&1) || failures=$((failures + 1))
   echo "${OUT}" | grep -qE "FAIL|undeclared" && printf '\033[33m⚠  pre-commit:\033[0m %s\n' "$(echo "${OUT}" | grep -E 'FAIL|undeclared' | head -1)"
 fi
 
-if [ -x "${SCRIPTS}/blast-radius-check.sh" ]; then
+if [ -f "${SCRIPTS}/blast-radius-check.sh" ]; then
   OUT=$(bash "${SCRIPTS}/blast-radius-check.sh" --warn-exit-0 2>&1) || true
   echo "${OUT}" | grep -qE "risk: (high|medium)" && printf '\033[33m⚠  pre-commit:\033[0m %s\n' "$(echo "${OUT}" | grep 'risk:' | head -1)"
 fi

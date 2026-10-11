@@ -8,7 +8,7 @@
 set -euo pipefail
 
 if [[ "${1:-}" == "--self-test" ]]; then
-  TMP="$(mktemp -d)"
+  TMP="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
   trap 'rm -rf "${TMP}"' EXIT
 
   # valid output

@@ -1,0 +1,21 @@
+# Line-ending contract.
+#
+# Shell scripts, hooks and templates MUST use LF. CRLF any of them and:
+#   - shebangs become `#!/bin/sh\r` -> "bad interpreter: /bin/sh^M"
+#   - `hooks/*` are copied verbatim into .git/hooks/ by install-git-hooks.sh,
+#     so a CRLF source hook installs a broken hook
+#   - anchored greps (e.g. `^AGENT_OS_SOURCE=<path>$`) fail on the trailing \r
+#
+# Deliberately NOT blanket `* text=auto eol=lf`: this framework deploys files
+# into consumer repos, and forcing LF on all consumer text (lockfiles, future
+# *.bat/*.ps1, project files) is a behaviour change they never opted into.
+# The explicit globs below cover every file class with a known CRLF hazard.
+# Verify with: bash scripts/framework-verify.sh  (LF guard section)
+
+*.sh           text eol=lf
+*.bash         text eol=lf
+*.py           text eol=lf
+hooks/*        text eol=lf
+templates/**   text eol=lf
+.gitattributes text eol=lf
+.editorconfig  text eol=lf

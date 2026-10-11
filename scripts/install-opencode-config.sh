@@ -14,6 +14,25 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Host portability helpers (interpreter discovery by execution probe).
+if [[ -f "${SCRIPT_DIR}/lib/portability.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/portability.sh"
+fi
+# Fallback resolver when lib/portability.sh is unavailable (e.g. a script
+# copied into a sandbox by a self-test). Probes EXECUTION, not existence:
+# a Microsoft Store `python3` alias stub exists on PATH but exits non-zero.
+portable_find_python() {
+  local c
+  for c in python3 python py; do
+    if [ "$c" = "py" ]; then
+      command -v py >/dev/null 2>&1 && py -3 -c "import sys" >/dev/null 2>&1 && { printf 'py -3\n'; return 0; }
+      continue
+    fi
+    command -v "$c" >/dev/null 2>&1 && "$c" -c "import sys" >/dev/null 2>&1 && { printf '%s\n' "$c"; return 0; }
+  done
+  return 1
+}
+PY="$(portable_require_python 2>/dev/null || portable_find_python || true)"
 FORCE=0
 SYNC_PATHS=0
 for arg in "$@"; do
@@ -100,9 +119,10 @@ fi
 
 export TEMPLATE DEST OS_PREFIX AI_ROOT REPO_ROOT OLD_SOURCE="${OLD_SOURCE:-}"
 export INSTALL_OPENCODE_FORCE="$FORCE" INSTALL_OPENCODE_SYNC="$SYNC_PATHS"
+export AGENT_OS_PY="$PY"
 
-python3 << 'PYEOF'
-import json, os, pathlib, sys
+"$PY" << 'PYEOF'
+import json, os, pathlib, shlex, sys
 
 template_path = os.environ["TEMPLATE"]
 dest_path = os.environ["DEST"]
@@ -206,9 +226,14 @@ def build_config():
 
     mcp = cfg.get("mcp") or {}
     if "tools-project" not in mcp:
+        # Interpreter resolved by execution probe at install time (see
+        # scripts/lib/portability.sh). `python3` is a Microsoft Store alias
+        # stub on many Windows hosts, so it must never be hardcoded here.
+        _interp = os.environ.get("AGENT_OS_PY", "").strip()
+        _cmd = shlex.split(_interp) if _interp else [sys.executable]
         mcp["tools-project"] = {
             "type": "local",
-            "command": ["python3", ".opencode/mcp/project-mcp/mcp_server.py"],
+            "command": _cmd + [".opencode/mcp/project-mcp/mcp_server.py"],
             "enabled": True,
         }
     cfg["mcp"] = mcp

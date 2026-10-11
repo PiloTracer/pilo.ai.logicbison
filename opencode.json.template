@@ -22,7 +22,7 @@
   "mcp": {
     "tools-project": {
       "type": "local",
-      "command": ["python3", ".opencode/mcp/project-mcp/mcp_server.py"],
+      "command": ["python", ".opencode/mcp/project-mcp/mcp_server.py"],
       "enabled": true
     }
   }

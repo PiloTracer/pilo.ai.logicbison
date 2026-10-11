@@ -11,6 +11,14 @@ PROFILE="${2:-}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GOLDEN="${REPO_ROOT}/scripts/fixtures/golden"
 
+# Host portability helpers (interpreter discovery by execution probe).
+if [[ -f "${REPO_ROOT}/scripts/lib/portability.sh" ]]; then
+  source "${REPO_ROOT}/scripts/lib/portability.sh"
+fi
+if [[ -z "${PY:-}" ]]; then
+  PY="$(command -v python3 || command -v python || command -v py || true)"
+fi
+
 if [[ -z "${FIXTURE}" || -z "${PROFILE}" || ! -d "${FIXTURE}" ]]; then
   echo "Usage: bash scripts/golden-deploy-verify.sh <fixture-dir> <profile>" >&2
   exit 2
@@ -71,15 +79,15 @@ case "${PROFILE}" in
     fi
     ;;
   deploy-basic-thin)
-    if [[ -f "${FIXTURE}/opencode.json" ]] && command -v python3 >/dev/null 2>&1; then
-      python3 -c "
+    if [[ -n "$PY" ]] && [[ -f "${FIXTURE}/opencode.json" ]]; then
+      "$PY" -c "
 import json, sys
 c = json.load(open('${FIXTURE}/opencode.json'))
 assert 'skills' in c and 'paths' in c['skills'], c
 assert len(c['skills']['paths']) >= 1
 " || { echo "    FAIL golden: opencode.json structure" >&2; failures=$((failures + 1)); }
       # Deep: verify each skill path entry is non-empty
-      python3 -c "
+      "$PY" -c "
 import json
 c = json.load(open('${FIXTURE}/opencode.json'))
 for p in c['skills']['paths']:

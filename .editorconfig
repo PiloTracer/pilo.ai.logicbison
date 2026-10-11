@@ -1,0 +1,24 @@
+# Editor defaults that keep the line-ending contract in .gitattributes true.
+# Editors that honour EditorConfig will not silently introduce CRLF.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Shell, Python and hooks: LF is mandatory (see .gitattributes).
+[*.{sh,bash,py}]
+end_of_line = lf
+
+[hooks/*]
+end_of_line = lf
+
+[templates/**]
+end_of_line = lf
+
+# Markdown: trailing whitespace is sometimes meaningful (hard line breaks).
+[*.md]
+trim_trailing_whitespace = false

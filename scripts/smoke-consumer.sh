@@ -4,13 +4,13 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SMOKE_ROOT="$(mktemp -d)"
+SMOKE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
 trap 'rm -rf "${SMOKE_ROOT}"' EXIT
 
 echo "Consumer smoke: ${SMOKE_ROOT}"
 
 mkdir -p "${SMOKE_ROOT}/.ai"
-rsync -a \
+rsync -a --no-group \
   --exclude='.git' \
   --exclude='.work' \
   --exclude='.github' \

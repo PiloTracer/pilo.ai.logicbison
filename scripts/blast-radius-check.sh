@@ -19,6 +19,26 @@ else
 fi
 cd "${REPO_ROOT}"
 
+# Host portability helpers (interpreter discovery by execution probe).
+if [[ -f "${REPO_ROOT}/scripts/lib/portability.sh" ]]; then
+  source "${REPO_ROOT}/scripts/lib/portability.sh"
+fi
+# Fallback resolver when lib/portability.sh is unavailable (e.g. a script
+# copied into a sandbox by a self-test). Probes EXECUTION, not existence:
+# a Microsoft Store `python3` alias stub exists on PATH but exits non-zero.
+portable_find_python() {
+  local c
+  for c in python3 python py; do
+    if [ "$c" = "py" ]; then
+      command -v py >/dev/null 2>&1 && py -3 -c "import sys" >/dev/null 2>&1 && { printf 'py -3\n'; return 0; }
+      continue
+    fi
+    command -v "$c" >/dev/null 2>&1 && "$c" -c "import sys" >/dev/null 2>&1 && { printf '%s\n' "$c"; return 0; }
+  done
+  return 1
+}
+PY="$(portable_find_python 2>/dev/null || true)"
+
 SURFACES="${REPO_ROOT}/standards/PROTECTED_SURFACES.json"
 [[ -f "${SURFACES}" ]] || SURFACES="${REPO_ROOT}/.work/PROTECTED_SURFACES.json"
 WARN_EXIT0=0
@@ -43,7 +63,7 @@ done
 
 # --- self-test (framework-verify) ---
 if [[ "${DIFF_RANGE}" == "__SELFTEST__" ]]; then
-  TMP="$(mktemp -d)"
+  TMP="$(mktemp -d "${TMPDIR:-/tmp}/aos.XXXXXX")"
   trap 'rm -rf "${TMP}"' EXIT
   git init -q "${TMP}/r"
   (
@@ -73,8 +93,8 @@ MAX_LINES_WARN=150
 MAX_LINES_FAIL=400
 MAX_AREAS_WARN=2
 MAX_AREAS_FAIL=3
-if [[ -f "${SURFACES}" ]] && command -v python3 >/dev/null 2>&1; then
-  eval "$(python3 -c "
+if [[ -n "$PY" ]] && [[ -f "${SURFACES}" ]]; then
+  eval "$("$PY" -c "
 import json
 with open('${SURFACES}') as f:
     t = json.load(f).get('thresholds', {})
@@ -118,8 +138,8 @@ AREA_COUNT="$(echo "${AREAS}" | grep -c . || echo 0)"
 
 # --- protected surface hits ---
 PROTECTED_HITS=""
-if [[ -f "${SURFACES}" ]] && command -v python3 >/dev/null 2>&1; then
-  PROTECTED_HITS="$(echo "${FILES}" | python3 -c "
+if [[ -n "$PY" ]] && [[ -f "${SURFACES}" ]]; then
+  PROTECTED_HITS="$(echo "${FILES}" | "$PY" -c "
 import json, sys, fnmatch
 files = [l.strip() for l in sys.stdin if l.strip()]
 with open('${SURFACES}') as f:
@@ -182,7 +202,7 @@ fi
 echo "risk: ${RISK}"
 if [[ "${BLOCK}" -eq 1 ]]; then
   # When every changed file is in declared scope, downgrade blocking high risk to warn.
-  if [[ -x "${SCRIPT_DIR}/touch-scope-verify.sh" ]]; then
+  if [[ -f "${SCRIPT_DIR}/touch-scope-verify.sh" ]]; then
     if bash "${SCRIPT_DIR}/touch-scope-verify.sh" >/dev/null 2>&1; then
       BLOCK=0
       WARN=1
