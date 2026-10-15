@@ -38,8 +38,9 @@ Thin-client deploy of the Agent OS framework. The target project receives only t
 | `@deploy-basic status` | report | read-only: `.cursorrules` verification (via `cursorrules-verify.sh`: `AGENT_OS_SOURCE`, gate-table script-path baking, sister-framework cells), `.work/`, fat-client leak, **`opencode.json` path drift** |
 | `@deploy-basic update` (from target) | in-place | no-overwrite + re-sync `AGENT_OS_SOURCE` + re-bake script paths + **repair sister-framework cells** (`cursorrules-verify.sh --fix`) + **`opencode.json --sync-paths`** + merge candidate list |
 | `@deploy-basic /path/to/target --update` | outbound | same as `update` — target path may appear in any position |
+| `@deploy-basic /path/to/target --force confirm-overwrite-cursorrules` | outbound | overwrite `.cursorrules` wholesale — **requires the confirmation token** when the file exists; without it the script BLOCKS (exit 1) and lists the content that would be lost |
 
-**Argument equivalence (script + this table):** verbs accept the `--` prefix or bare form — `update` ≡ `--update`, `status` ≡ `--status`, `force` ≡ `--force`. A `-` / `--` token is a separator and is dropped. The target path may appear in any position relative to the verb: `@deploy-basic "/path" update` is 100% identical to `@deploy-basic /path --update`.
+**Argument equivalence (script + this table):** verbs accept the `--` prefix or bare form — `update` ≡ `--update`, `status` ≡ `--status`, `force` ≡ `--force`. A `-` / `--` token is a separator and is dropped. The literal token `confirm-overwrite-cursorrules` is a recognized argument (never treated as a path or unknown). The target path may appear in any position relative to the verb: `@deploy-basic "/path" update` is 100% identical to `@deploy-basic /path --update`.
 
 **Default:** `status` if no verb matches. **Aliases:** `bootstrap-thin`, `thin` → bare `@deploy-basic`.
 
@@ -51,7 +52,7 @@ Thin-client deploy of the Agent OS framework. The target project receives only t
 
 | Path | Source | If target exists |
 |------|--------|-------------------|
-| `.cursorrules` | `templates/cursorrules.template` with `AGENT_OS_SOURCE=<source>` substituted | skip (preserve); `--force` overwrites |
+| `.cursorrules` | `templates/cursorrules.template` with `AGENT_OS_SOURCE=<source>` substituted | skip (preserve); `--force` overwrites **only** with the explicit `confirm-overwrite-cursorrules` token (blocked + lost-content report otherwise) |
 | `.work/README.md`, `.work/context/HANDOFF.md`, `.work/plans/NEXT.md`, `.work/plans/ASSUMPTIONS.md`, `.work/plans/RISK_REGISTRY.md`, `.work/plans/UNKNOWNS.md`, `.work/decisions/README.md`, `.work/prompts/README.md`, `.work/features/README.md`, `.work/docs/README.md`, `.work/docs/features/README.md` | `templates/work/*.template` (suffix stripped) | skip (preserve) |
 | `.work/plans/{foundation,full,operations,proposals,archives}/.gitkeep`, `.work/{analysis,scripts}/`, `.work/docs/{guides,tutorials,reference,integration}/.gitkeep`, `.work/standards/.gitkeep` | created empty (directories populated later with README.md or generated content) | skip (preserve) |
 | `DOCS_TECH_STACK.md` | `templates/DOCS_TECH_STACK.md.template` | skip (preserve) |
@@ -77,11 +78,11 @@ Thin-client deploy of the Agent OS framework. The target project receives only t
 
 1. Resolve source `AI_ROOT` (explicit `AI_SOURCE` env, else script's parent). Validate `agent.os.framework.md` (framework source marker) and `templates/cursorrules.template` exist.
 2. Resolve target = `REPO_ROOT` of the consumer (cwd for in-place, or the named path for outbound).
-3. Write `.cursorrules` into the target from the template, substituting `AGENT_OS_SOURCE=REPLACE_BASICSOURCE` → `AGENT_OS_SOURCE=<absolute AI_ROOT>`. **No-overwrite** if `.cursorrules` exists; `--force` overwrites.
+3. Write `.cursorrules` into the target from the template, substituting `AGENT_OS_SOURCE=REPLACE_BASICSOURCE` → `AGENT_OS_SOURCE=<absolute AI_ROOT>`. **No-overwrite** if `.cursorrules` exists; `--force` overwrites **only** when the operator names `confirm-overwrite-cursorrules` — otherwise BLOCKED (exit 1) with the content that would be lost.
 4. Run the `.work/` + `DOCS_TECH_STACK.md` scaffold via `BOOTSTRAP_SKIP_CURSERRULES=1 REPO_ROOT=<target> bash <source>/templates/bootstrap.sh` (bootstrap's `copy_if_missing` enforces no-overwrite; the env flag keeps it from re-writing `.cursorrules` that we just wrote with the substituted pointer).
 5. Report: source pointer value, `.work/` presence, fat-client leak check, next steps. End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 
-**Idempotent re-run.** Safe to re-run; no-overwrite preserves target customizations. The source pointer is re-synced only in `update` mode (or `--force`).
+**Idempotent re-run.** Safe to re-run; no-overwrite preserves target customizations. The source pointer is re-synced only in `update` mode (or `--force confirm-overwrite-cursorrules`).
 
 ---
 
@@ -150,7 +151,7 @@ End the status report with the Operator handoff close (Form A `Next: …` or For
 | 3 | Source-resolution section present in target `.cursorrules` | |
 | 4 | `.work/` skeleton present (HANDOFF, NEXT, UNKNOWNS at minimum); empty `.work/standards/` + `.work/docs/integration/` present | |
 | 5 | **No local `.ai/` directory created** (thin-client invariant) | |
-| 6 | No-overwrite honored (existing target files preserved; `--force` only when explicitly requested) | |
+| 6 | No-overwrite honored (existing target files preserved; `--force` only with the explicit `confirm-overwrite-cursorrules` token) | |
 | 7 | `update`: source pointer re-synced if stale; **opencode `--sync-paths`** run; merge candidate list produced; no wholesale replaces | |
 | 8 | Fat-client leak checked (no unexpected local `.ai/skills/`) | |
 | 9 | User informed that skills load from `$AGENT_OS_SOURCE` at runtime + next steps | |
@@ -204,7 +205,7 @@ Cursor / Claude Code / Codex: `.cursorrules` is sufficient for skills; use `@pro
 | Invoked from target with no source pointer yet (greenfield, no `.cursorrules`) | The skill itself can't be loaded in thin-client mode before bootstrap. Tell the user to run the shell directly: `bash /abs/path/to/source/scripts/deploy-basic.sh .` — chicken-and-egg escape (see `.cursorrules` § Source resolution). |
 | Bootstrap target already has `.ai/skills/` (fat-client) | Warn; ask: convert to thin (delete local `.ai/`)?, keep mixed (skills resolve local-first per fat-client rule — unexpected)?, or abort? Do not silently leave a mixed state. |
 | `update` finds `.cursorrules` with no `AGENT_OS_SOURCE` line | Fat-client template detected → flag as merge candidate; agent appends the Source-resolution section with current source value. |
-| Source moved since last bootstrap | `update` re-syncs `AGENT_OS_SOURCE` in `.cursorrules` **and** runs `install-opencode-config.sh --sync-paths`. Run `@deploy-basic status` to confirm opencode paths match. If still stale → merge candidate or `--force` (operator opt-in). |
+| Source moved since last bootstrap | `update` re-syncs `AGENT_OS_SOURCE` in `.cursorrules` **and** runs `install-opencode-config.sh --sync-paths`. Run `@deploy-basic status` to confirm opencode paths match. If still stale → merge candidate, or `--force confirm-overwrite-cursorrules` (operator opt-in; blocks without the token). |
 
 ---
 

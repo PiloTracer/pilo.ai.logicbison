@@ -12,21 +12,26 @@
 # the agent resolves them from the source framework root at runtime (thin-client mode).
 #
 # Default = NO-OVERWRITE: existing target files are preserved by construction.
+# An existing .cursorrules is never replaced without the explicit operator
+# token `confirm-overwrite-cursorrules` (a wholesale replace would destroy
+# every sister framework's block in the file).
 # --update: no-overwrite + re-syncs the source pointer + lists existing-but-
-# differing local-surface files (.cursorrules, .work/*.template outputs,
-# DOCS_TECH_STACK.md) as merge candidates for agent rules-aware merge.
-# --force: idempotent overwrite of the local scaffold surface only.
+#   differing local-surface files (.cursorrules, .work/*.template outputs,
+#   DOCS_TECH_STACK.md) as merge candidates for agent rules-aware merge.
+# --force: overwrite the local scaffold surface (legacy) — requires the
+#   confirmation token when .cursorrules already exists.
 #
 # Source resolution: AI_ROOT is derived from this script's location, so the
 # script can be invoked from a TARGET using an external source framework root:
-#   bash /mnt/work/Projects/pilo.ai.logicbison/scripts/deploy-basic.sh /mnt/work/Projects/tools-project
+#   bash /path/to/agent-os-source/scripts/deploy-basic.sh /path/to/target-project
 # Override the source with AI_SOURCE=/abs/path/to/source-root if needed.
 #
 # Usage:
 #   bash scripts/deploy-basic.sh <target-path>              # no-overwrite (skip existing)
 #   bash scripts/deploy-basic.sh [status] [target-path]     # read-only report (+ verify)
 #   bash scripts/deploy-basic.sh <target-path> [--update]   # no-overwrite + repair + merge candidates
-#   bash scripts/deploy-basic.sh <target-path> [--force]    # overwrite local scaffold (legacy)
+#   bash scripts/deploy-basic.sh <target-path> --force confirm-overwrite-cursorrules
+#                                                           # overwrite scaffold (explicit opt-in)
 #   AI_SOURCE=/path/to/source-root bash scripts/deploy-basic.sh <target-path>
 #
 # Argument forms are equivalent: verbs accept the '--' prefix or bare form
@@ -41,16 +46,18 @@ set -euo pipefail
 # '-' and '--' (skill parse-table separators) are ignored.
 MODE=""
 RAW_TARGET=""
+CONFIRM_OVERWRITE=0
 for arg in "$@"; do
   [[ "$arg" == "-" || "$arg" == "--" ]] && continue
   tok="${arg#--}"
   case "$tok" in
     status|update|force|skip) MODE="$tok" ;;
+    confirm-overwrite-cursorrules) CONFIRM_OVERWRITE=1 ;;
     /*|./*|../*|~*|*/*|.)
       if [[ -z "$RAW_TARGET" ]]; then RAW_TARGET="$arg"
       else echo "ERROR: multiple target paths: '$RAW_TARGET' and '$arg'" >&2; exit 2; fi ;;
     *) echo "ERROR: unknown argument: $arg" >&2
-       echo "Usage: $0 [status] <target-path> [--force|--update] (path must contain '/'; use ./name for local dirs)" >&2
+       echo "Usage: $0 [status] <target-path> [--force confirm-overwrite-cursorrules|--update] (path must contain '/'; use ./name for local dirs)" >&2
        exit 2 ;;
   esac
 done
@@ -203,7 +210,7 @@ WORK_DIRS=(
 
 echo "=== deploy-basic → $DEST_ROOT (thin-client bootstrap) ==="
 echo "  source: $AI_ROOT"
-echo "  mode:   $MODE (no-overwrite by default)"
+echo "  mode:   $MODE (no-overwrite by default; force needs confirm-overwrite-cursorrules)"
 
 # ── Pre-check: fat-client leak ───────────────────────────────────────
 # If the target already has a local .ai/skills/ directory, warn and block
@@ -307,8 +314,19 @@ if [[ -f "$CURS_DEST" ]]; then
   existing_source="$(grep -E '^AGENT_OS_SOURCE=' "$CURS_DEST" 2>/dev/null | head -1 | cut -d= -f2- || true)"
 fi
 
-# Step 1: .cursorrules (no-overwrite by default; --force overwrites).
+# Step 1: .cursorrules (no-overwrite by default; --force overwrites — and only
+# after the operator has named `confirm-overwrite-cursorrules`, because a
+# wholesale replace destroys every sister framework's block in the file).
 if [[ "$MODE" == "force" ]]; then
+  if [[ -f "$CURS_DEST" && "$CONFIRM_OVERWRITE" -ne 1 ]]; then
+    lost="$(grep -oE '(SOC_DESIGN_OS_BEGIN|UI_DESIGN_OS_BEGIN|FLUTTER_AGENT_OS_BEGIN|Core Principles|Source resolution)' "$CURS_DEST" 2>/dev/null | sort -u | paste -sd, - | sed 's/,/, /g' || true)"
+    echo "  BLOCKED: --force would replace .cursorrules wholesale ($(wc -l < "$CURS_DEST") lines)"
+    [[ -n "$lost" ]] && echo "    content that would be LOST: ${lost}"
+    echo "    to proceed, name the confirmation token explicitly:"
+    echo "      bash ${AI_ROOT}/scripts/deploy-basic.sh ${DEST_ROOT} --force confirm-overwrite-cursorrules"
+    echo "    otherwise use --update (self-heal + merge candidates) — the normal, non-destructive path."
+    exit 1
+  fi
   write_cursorrules force
 else
   if [[ -f "$CURS_DEST" ]]; then

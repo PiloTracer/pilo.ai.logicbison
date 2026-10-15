@@ -14,6 +14,12 @@
 #                installed on disk; rewrite stale baked sister absolute paths
 #                when the sister moved together with the source
 #
+# Also reports (no auto-repair): a renamed/absent "Frameworks registry"
+# heading (x-director's authoritative discovery source degrades — F-07a), a
+# declared sister whose local memory directory is missing (F-06), and
+# distinguishes "not declared in the registry" from "cell format unrecognised"
+# (F-07b).
+#
 # Usage:
 #   bash scripts/cursorrules-verify.sh <target-root> [--fix] [--thin|--fat]
 #   AI_SOURCE=/abs/path/to/source-root bash scripts/cursorrules-verify.sh <target-root>
@@ -95,8 +101,31 @@ baked_sister_paths() {
   # Escape every ERE metachar (not just dots) — source basenames may contain
   # any character; an unescaped `(` or `|` would corrupt the pattern.
   names_re="$(sister_names "$fw" "$AI_ROOT" | sed 's/[.[\*^$()+?{|]/\\&/g' | paste -sd'|' -)"
-  grep -oE '/[^ |]+/[^ |]+' "$CURS_DEST" 2>/dev/null \
+  # Markdown decoration must not defeat the basename anchor: registry cells
+  # are normally written with backticks (`/abs/path`) and prose may italicise
+  # a path — exclude `` ` `` and `*` from the token class, then strip trailing
+  # punctuation (the old `[^ |]+` class kept the closing backtick, so a
+  # correctly-filled, backticked registry cell never matched `/basename$` —
+  # audit 20261015 F-07b). Parenthetical EXAMPLES (`(e.g. \`/path/to/.ai.ui\`)`)
+  # are documentation, not cells — filtered line-wise BEFORE token extraction
+  # (grep -o would otherwise lose the line context).
+  grep -vE '\(e\.g\.|\(i\.e\.' "$CURS_DEST" 2>/dev/null \
+    | grep -oE '/[^ |`*]+/[^ |`*]+' \
+    | sed -E 's/[.,;:)]+$//' \
     | grep -E "/(${names_re})$" | sort -u || true
+}
+
+# Path cell of the first table row whose id column carries a backticked
+# `.ai.<fw>` id (awk field 4), whitespace trimmed; empty when no such row.
+# Used only to distinguish "no id row" from "row present without a static
+# absolute path" (variable cells like `{WORK_ROOT}/.ai.cto`) — the message
+# split demanded by audit 20261015 F-07b. Real-world tables vary in column
+# order, so the path extraction above stays whole-file; this is a disambiguator,
+# not the primary parser.
+registry_cell_value() {
+  awk -F'|' -v fw="$1" \
+    '$2 ~ ("`\\.ai\\." fw "`") { v=$4; gsub(/^[ \t]+|[ \t]+$/, "", v); print v; exit }' \
+    "$CURS_DEST" 2>/dev/null
 }
 
 # ── Layout detection (unless forced) ──────────────────────────────────
@@ -219,6 +248,18 @@ else
   fi
 fi
 
+# Frameworks registry heading — a hard string dependency of x-director's
+# authoritative path resolution (step 1). Deployers/adopters rename it, and the
+# rename silently drops discovery from authoritative to heuristic
+# (audit 20261015 F-07a) — report it as a warning, naming the degradation.
+if grep -q 'Frameworks registry' "$CURS_DEST" 2>/dev/null; then
+  ok "Frameworks registry heading: present"
+elif grep -qE '^##+ Source pointers' "$CURS_DEST" 2>/dev/null; then
+  warn "Frameworks registry heading: renamed (a 'Source pointers' heading is present) — x-director's authoritative registry lookup degrades to heuristic auto-discovery; keep the literal string 'Frameworks registry' in the heading"
+else
+  warn "Frameworks registry heading: absent — cross-framework discovery degrades to heuristic on-disk auto-discovery (x-director)"
+fi
+
 # Sister framework cells (both layouts).
 for fw in $FRAMEWORK_SLOTS; do
   FWU="$(echo "$fw" | tr '[:lower:]' '[:upper:]')"
@@ -235,8 +276,23 @@ for fw in $FRAMEWORK_SLOTS; do
   fi
   baked="$(baked_sister_paths "$fw")"
   if [[ -z "$baked" ]]; then
-    note ".ai.${fw}: custom cell value (non-standard — verify manually)"
+    # Two different empty-baked states must not share one message
+    # (audit 20261015 F-07b): "no registry id row at all" vs "row exists but
+    # the path cell holds no static absolute framework path".
+    cell_value="$(registry_cell_value "$fw")"
+    if [[ -n "$cell_value" ]]; then
+      note ".ai.${fw}: a framework-id row exists but holds no static absolute path (cell: ${cell_value}) — verify manually"
+    else
+      note ".ai.${fw}: not declared in Frameworks registry (no id row) — routing relies on runtime auto-discovery"
+    fi
     continue
+  fi
+  # F-06: a declared framework with a real path but no local memory directory
+  # is an undefined state — routing resolves a source with nowhere to persist
+  # project memory. Warn, name both facts, and offer the two resolutions.
+  declared_path="${baked%%$'\n'*}"
+  if [[ ! -d "${DEST_ROOT}/.work.${fw}" ]]; then
+    warn ".ai.${fw}: declared at ${declared_path} but local memory .work.${fw}/ is missing — a resolved source has nowhere to persist project memory (create the skeleton via @${fw}-bootstrap, or remove the registry row)"
   fi
   while IFS= read -r b; do
     [[ -z "$b" ]] && continue
