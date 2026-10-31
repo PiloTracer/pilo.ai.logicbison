@@ -125,21 +125,32 @@ If `Connection refused` — API is not running. Stop and tell user.
 **Detect which coding agent config files exist in this project:**
 
 ```bash
-for cfg in opencode.json .cursor/mcp.json .claude/settings.json .claude/mcp.json codex.json; do
+for cfg in opencode.json .cursor/mcp.json .mcp.json .claude/settings.json .claude/mcp.json .claude/settings.local.json codex.json; do
   test -f "$cfg" && echo "FOUND: $cfg"
 done
 test -f .cursor/mcp.json && echo "CURSOR_MCP=yes" || true
+test -f .mcp.json && echo "CLAUDE_PROJECT_MCP=yes" || true
 test -f .claude/settings.json && echo "CLAUDE_CONFIG=yes" || true
 test -f .claude/mcp.json && echo "CLAUDE_MCP=yes" || true
+test -f .claude/settings.local.json && echo "CLAUDE_LOCAL=yes" || true
 test -f opencode.json && echo "OPENCODE=yes" || true
+# DSH profiles live outside the repo (operator-level):
+ls "$HOME"/.dsh/profiles/*/cordis.patch.yml >/dev/null 2>&1 && echo "DSH_PROFILE=yes" || true
 ```
+
+Registration is per client, but the server is the same stdio process for every harness. The full matrix (opencode / Cursor / Claude Code / DSH / Codex / other) is in [`reference.md`](reference.md) §2b.
 
 **Copy the MCP server file (all branches):**
 
 ```bash
 mkdir -p .opencode/mcp/project-mcp
-cp /mnt/work/Projects/tools-project/.opencode/mcp/project-mcp/mcp_server.py \
-   .opencode/mcp/project-mcp/
+# Normally already present (deploy-basic/deploy-files copy it no-overwrite).
+# Fallback: copy from the Agent OS source root — never hardcode a machine path.
+test -f .opencode/mcp/project-mcp/mcp_server.py || \
+  cp "$AGENT_OS_SOURCE/.opencode/mcp/project-mcp/mcp_server.py" .opencode/mcp/project-mcp/
+chmod 755 .opencode/mcp/project-mcp/mcp_server.py
+grep -q 'SERVER_VERSION = "1.1.0"' .opencode/mcp/project-mcp/mcp_server.py \
+  || echo "WARN: MCP copy is not 1.1.0 — refresh it"
 ```
 
 **Check for previously approved registrations:**
@@ -224,28 +235,61 @@ PYEOF
 python3 -c "import json; json.load(open('.cursor/mcp.json')); print('.cursor/mcp.json: valid')"
 ```
 
-**Branch C — `.claude/settings.json` or `.claude/mcp.json` exists (Claude Code):**
-Register in Claude Code MCP format:
+**Branch C — Claude Code config exists (`.mcp.json`, `.claude/mcp.json`, or `.claude/settings.json`):**
+Register in `mcpServers`. Prefer the project-scoped `.mcp.json`; fall back to `.claude/mcp.json`, then `.claude/settings.json`:
 
 ```bash
 python3 << 'PYEOF'
 import json, os
-path = '.claude/mcp.json' if os.path.exists('.claude/mcp.json') else '.claude/settings.json'
-os.makedirs('.claude', exist_ok=True)
+
+path = ('.mcp.json' if os.path.exists('.mcp.json')
+        else '.claude/mcp.json' if os.path.exists('.claude/mcp.json')
+        else '.claude/settings.json')
+os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
 cfg = json.load(open(path)) if os.path.exists(path) else {}
 cfg.setdefault('mcpServers', {})['tools-project'] = {
     "command": "python3",
     "args": [".opencode/mcp/project-mcp/mcp_server.py"],
-    "type": "stdio"
 }
 with open(path, 'w') as f:
     json.dump(cfg, f, indent=2)
     f.write('\n')
+
+# Project-scoped servers must also be enabled (Claude Code defaults to ask).
+local = '.claude/settings.local.json'
+if os.path.exists(local):
+    with open(local) as f:
+        s = json.load(f)
+    enabled = s.setdefault('enabledMcpjsonServers', [])
+    if 'tools-project' not in enabled:
+        enabled.append('tools-project')
+        with open(local, 'w') as f:
+            json.dump(s, f, indent=2)
+            f.write('\n')
+
+print(f"{path}: valid")
 PYEOF
-python3 -c "import json; json.load(open('${path}')); print('${path}: valid')"
 ```
 
-**Branch D — No known agent config detected (no confirmation needed — no files modified):**
+**Branch D — DeepSeek Harness (DSH) profile detected (`DSH_PROFILE=yes`):**
+
+DSH registration is operator-level: the profile lives outside the repository. Do **not** write it without explicit approval in the same message. Print the exact entry and ask the operator to apply it, then restart the harness:
+
+```yaml
+# ~/.dsh/profiles/<profile>/cordis.patch.yml
+- id: mcp-tools-project
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: tools-project
+    transport: stdio
+    command: python3
+    args: ['.opencode/mcp/project-mcp/mcp_server.py']
+    cwd: <absolute path to this repo>
+```
+
+The server reads `~/.tools-project-key`; never put the key in the YAML. Tool names arrive namespaced (`mcp__tools-project__get_ticket_detail`).
+
+**Branch E — No known agent config detected (no confirmation needed — no files modified):**
 Output the MCP registration details so the operator's own coding agent can register itself:
 
 > ⓘ **MCP server ready — registration needed for your coding agent.**
@@ -267,9 +311,10 @@ Output the MCP registration details so the operator's own coding agent can regis
 > - **opencode:** `opencode.json` → `"mcp"` block
 > - **Cursor:** `.cursor/mcp.json` → `"mcpServers"` block
 > - **Claude Code:** `.claude/mcp.json` or `.claude/settings.json` → `"mcpServers"` block
+> - **DSH:** `~/.dsh/profiles/<profile>/cordis.patch.yml` → `dsh-mcp-client` entry (see `reference.md` §2b)
 > - **Other:** check your tool's MCP integration docs
 
-End the Branch D output with the Operator handoff close (Form B — the registration hand-off to the operator's agent enumerated under `**Needs your approval:**` — + one `**Next step:**` command) per SKILL_DEPENDENCIES.md.
+End the Branch E output with the Operator handoff close (Form B — the registration hand-off to the operator's agent enumerated under `**Needs your approval:**` — + one `**Next step:**` command) per SKILL_DEPENDENCIES.md.
 
 ### Step 7 — Verify with completion checklist
 
@@ -282,7 +327,7 @@ Run each check and report the result:
 | 3 | API reachable | `curl -s <url>/healthz` returns 200 | pass / fail |
 | 4 | Auth works | `curl -s <url>/v1/agent/projects -H "X-Api-Key: $(tail -n1 ~/.tools-project-key)"` returns projects | pass / fail |
 | 5 | MCP server file present | `test -f .opencode/mcp/project-mcp/mcp_server.py` (or consuming project) | pass / skip |
-| 6 | MCP registered in coding agent config | Check the detected agent config for `tools-project` entry (opencode: `mcp.tools-project`, Cursor/Claude: `mcpServers.tools-project`) | pass / skip |
+| 6 | MCP registered in coding agent config | Check the detected agent config for `tools-project` (opencode: `mcp.tools-project`; Cursor/Claude: `mcpServers.tools-project`; Claude project config also listed in `enabledMcpjsonServers`) | pass / skip |
 | 7 | python3 available | `which python3` | pass / fail |
 
 End the checklist report with the Operator handoff close (Form A `Next: …` when all pass, or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**` when any check needs operator action) per SKILL_DEPENDENCIES.md.
@@ -301,7 +346,9 @@ to the skill's preamble:
 
   Prerequisites: tools-project MCP server registered
   (provides list_projects, get_project_context,
-  get_task_info, get_ticket_info, search_entities tools)
+  get_task_info, get_ticket_info, search_entities,
+  plus get_ticket_detail, list_ticket_activities and
+  get_attachment on a 1.1.0 API)
 
 Reference: .work/docs/agent-query-api.md
 Tutorial:  .work/docs/tutorials/LLM-2-API_SETUP.md
@@ -346,11 +393,11 @@ End the test report with the Operator handoff close (Form A `Next: …` or Form 
 
 ## Help protocol
 
-Show the 5 MCP tools available and their descriptions. Then show one domain-specific example for the current OS:
+Show the 8 MCP tools available and their descriptions (5 core; the 3 ticket-context tools need a `1.1.0` API). Then show one domain-specific example for the current OS:
 
 | OS | Example |
 |----|---------|
-| Engineering | "What's the status of ticket TPR-T-12?" → `get_ticket_info(ref="TPR-T-12")` |
+| Engineering | "What's the status of ticket TPR-T-12?" → `get_ticket_info(ref="TPR-T-12")`; evidence → `get_ticket_detail(ticket="TPR-T-12")` → `list_ticket_activities` → `get_attachment` |
 | UI Design | "What projects need UI work?" → `list_projects` + `get_task_info(status="todo")` |
 | Business | "Which clients need attention?" → `list_projects` + `get_project_context()` per project |
 | Security | "Find tickets related to rate limiting" → `search_entities(q="rate limit")` |

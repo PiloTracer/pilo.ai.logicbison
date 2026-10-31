@@ -56,7 +56,7 @@ Thin-client deploy of the Agent OS framework. The target project receives only t
 | `.work/README.md`, `.work/context/HANDOFF.md`, `.work/plans/NEXT.md`, `.work/plans/ASSUMPTIONS.md`, `.work/plans/RISK_REGISTRY.md`, `.work/plans/UNKNOWNS.md`, `.work/decisions/README.md`, `.work/prompts/README.md`, `.work/features/README.md`, `.work/docs/README.md`, `.work/docs/features/README.md` | `templates/work/*.template` (suffix stripped) | skip (preserve) |
 | `.work/plans/{foundation,full,operations,proposals,archives}/.gitkeep`, `.work/{analysis,scripts}/`, `.work/docs/{guides,tutorials,reference,integration}/.gitkeep`, `.work/standards/.gitkeep` | created empty (directories populated later with README.md or generated content) | skip (preserve) |
 | `DOCS_TECH_STACK.md` | `templates/DOCS_TECH_STACK.md.template` | skip (preserve) |
-| `opencode.json` | `opencode.json.template` via `install-opencode-config.sh` | **Bootstrap:** create if missing. **Update:** `--sync-paths` only (framework paths); never `--force` unless operator requests. **`.opencode/` MCP dir:** never touched — use `@project-query-setup`. |
+| `opencode.json` | `opencode.json.template` via `install-opencode-config.sh` | **Bootstrap:** create if missing. **Update:** `--sync-paths` only (framework paths); never `--force` unless operator requests. **MCP:** the client file is copied to `.opencode/mcp/project-mcp/mcp_server.py` (no-overwrite on bootstrap; `--update`/`--force` refresh it); `install-opencode-config.sh` registers `tools-project` only when that file exists (so no broken entry) and repairs a stale `python` alias to the probed interpreter. Other clients: `@project-query-setup register-mcp`. |
 | **Local `.ai/` directory** | **never created** | n/a — thin-client only; skills resolve from `$AGENT_OS_SOURCE` |
 
 **Explicitly NOT copied (stay in source, loaded at runtime):** `skills/**`, source `standards/**` (the framework's template/example docs), `concepts/**`, `docs/guides/**` (workflow guides), `scripts/**`, `templates/**`, `SKILL_DEPENDENCIES.md`, root `README.md`, `PROCESS_ROUTER.md`, `START_HERE.md`, `.github/`, `.gitignore`, `.gitattributes`, and `agent.os.framework.md` (the **framework source marker** — never written to a target; a consumer carrying it would be misdetected as framework source). Do not confuse framework source `standards/` with `.work/standards/` — the latter is the target's **own** future deliverables under project memory, never sourced from or synced with the framework.
@@ -91,7 +91,7 @@ Thin-client deploy of the Agent OS framework. The target project receives only t
 After I1 (no-overwrite) the script:
 
 1. **Repairs the source pointer + baked paths** via `cursorrules-verify.sh --fix --thin` (idempotent, in-place, preserves all other target edits and filled `REPLACE:` tokens): re-syncs a stale `AGENT_OS_SOURCE` (e.g. source moved), re-bakes gate-table script paths (literal `.ai/scripts/` or stale absolute prefix → current `$AGENT_OS_SOURCE/scripts/`), and **repairs sister-framework cells** — fills still-open `REPLACE:AI_*_PATH` tokens for sisters now installed on disk, re-points stale baked sister absolutes.
-2. **Syncs `opencode.json` framework paths** via `install-opencode-config.sh --sync-paths` (updates `instructions`, `references`, `skills.paths` when they point at the old source; **preserves** `mcp` blocks and operator-added entries). If paths remain stale → listed as merge candidate.
+2. **Syncs `opencode.json` framework paths** via `install-opencode-config.sh --sync-paths` (updates `instructions`, `references`, `skills.paths` when they point at the old source; **preserves** custom `mcp` entries and operator additions, while repairing/adding the built-in `tools-project` entry when the client file is present). If paths remain stale → listed as merge candidate.
 3. **Lists merge candidates** among the local surface: existing-but-differing files vs the current source templates (substituted). Candidates:
    - `.cursorrules` (differs from current `template-with-source`)
    - `.work/<file>` (target has user content; templates are skeletons)
@@ -194,7 +194,7 @@ REPO_ROOT="$(pwd)" AI_SOURCE=... bash "$AI_SOURCE/scripts/install-opencode-confi
 bash "$AI_SOURCE/scripts/deploy-basic.sh" --status .
 ```
 
-Cursor / Claude Code / Codex: `.cursorrules` is sufficient for skills; use `@project-query-setup register-mcp` for MCP. See `deploy-files` skill § Coding-agent config for the full matrix.
+Cursor / Claude Code / Codex / DSH / other clients: `.cursorrules` is sufficient for skills; use `@project-query-setup register-mcp` for MCP. See `deploy-files` skill § Coding-agent config for the full matrix.
 
 ---
 

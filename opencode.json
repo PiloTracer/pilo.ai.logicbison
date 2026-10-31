@@ -57,7 +57,7 @@
     "tools-project": {
       "type": "local",
       "command": [
-        "python",
+        "python3",
         ".opencode/mcp/project-mcp/mcp_server.py"
       ],
       "enabled": true

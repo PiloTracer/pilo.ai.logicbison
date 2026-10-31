@@ -95,10 +95,11 @@ Agent OS is **tool-agnostic** — skills are markdown; each agent needs its own 
 
 | Agent | File | Bootstrap action |
 |-------|------|------------------|
-| opencode | `opencode.json` | Auto-created from `opencode.json.template` when missing (`install-opencode-config.sh` runs from bootstrap / deploy). **Review paths** after fat vs thin deploy. |
-| Cursor | `.cursorrules` | Created by scaffold. Optional MCP: `.cursor/mcp.json` via `@project-query-setup`. |
+| opencode | `opencode.json` | Auto-created from `opencode.json.template` when missing (`install-opencode-config.sh` runs from bootstrap / deploy). **Review paths** after fat vs thin deploy. MCP registers only when `.opencode/mcp/project-mcp/mcp_server.py` exists (deploy copies it). |
+| Cursor | `.cursorrules` | Created by scaffold. MCP: `.cursor/mcp.json` via `@project-query-setup`. |
 | Claude Code | `.claude/mcp.json` | MCP via `@project-query-setup`. Skills follow `.cursorrules` or manual skill path config. |
-| Codex / other | per tool | Mirror `.cursorrules` content + skill directory paths in the tool's config format. |
+| DSH | `~/.dsh/profiles/<profile>/cordis.patch.yml` | MCP via `dsh-mcp-client` (see `@project-query-setup` reference §2b); skills via `.cursorrules`. |
+| Codex / other | per tool | Mirror `.cursorrules` content + skill directory paths in the tool's config format; MCP uses the same stdio command. |
 
 **opencode path cheat sheet:**
 

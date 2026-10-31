@@ -10,7 +10,7 @@
 
 ## What this gives you
 
-5 MCP tools that any agent can call:
+8 MCP tools that any agent can call (5 core; the last 3 need an `agent_api_version 1.1.0` API and return `404` on `1.0.0`):
 
 | Tool | What it does | Parameters |
 |------|-------------|------------|
@@ -19,6 +19,9 @@
 | `get_task_info` | List tasks, filterable by ref or status | `ref`, `status`, `limit` |
 | `get_ticket_info` | List tickets, filterable by ref or status | `ref`, `status`, `limit` |
 | `search_entities` | Cross-entity search (projects, tasks, tickets, clients, prospects) | `q`, `limit` |
+| `get_ticket_detail` | Ticket + people + counts + attachments + newest activity page + linked commits | `ticket` (UUID/ref) or `url` |
+| `list_ticket_activities` | Paginated comment/activity thread | `ticket`, `limit`, `offset`, `order`, `kind` |
+| `get_attachment` | Screenshot/PDF/text bytes; image block, text block, or saved path + sha256 | `attachment_id` |
 
 ---
 
@@ -26,13 +29,13 @@
 
 ### 1. Deploy the MCP server
 
-Copy from tools-project into the consuming project:
+`@deploy-basic` (thin) and `@deploy-files` (fat) copy the client file to the consumer-root path automatically:
 
-```bash
-mkdir -p .opencode/mcp/project-mcp
-cp /mnt/work/Projects/tools-project/.opencode/mcp/project-mcp/mcp_server.py \
-   .opencode/mcp/project-mcp/
 ```
+.opencode/mcp/project-mcp/mcp_server.py
+```
+
+Manual fallback only (file missing): copy it from the Agent OS source's `.opencode/mcp/project-mcp/mcp_server.py`, or re-run the deploy's `update` mode.
 
 ### 2. Register in opencode.json
 
@@ -47,6 +50,33 @@ cp /mnt/work/Projects/tools-project/.opencode/mcp/project-mcp/mcp_server.py \
   }
 }
 ```
+
+### 2b. Register per client (one server, many harnesses)
+
+The server is plain stdio; only the registration file differs. `<python>` is the interpreter that executes on the host (`python3`, `python`, or `py -3`) — the deploy/install scripts probe it, never assume it.
+
+| Client | Registration file | Shape |
+|--------|-------------------|-------|
+| **opencode** | `opencode.json` → `mcp` | `{"type":"local","command":["<python>",".opencode/mcp/project-mcp/mcp_server.py"],"enabled":true}` |
+| **Cursor** | `.cursor/mcp.json` → `mcpServers` | `{"command":"<python>","args":[".opencode/mcp/project-mcp/mcp_server.py"]}` |
+| **Claude Code** | `.mcp.json` (project; enable in `.claude/settings.local.json`) or `.claude/mcp.json` → `mcpServers` | Cursor shape; project-scoped servers must be enabled |
+| **DeepSeek Harness (DSH)** | `~/.dsh/profiles/<profile>/cordis.patch.yml` | YAML entry, see below |
+| **Codex / other** | tool's own MCP config | same command + args; consult the tool |
+
+DSH is operator-level (outside the repository) — apply to the active profile and restart the harness:
+
+```yaml
+- id: mcp-tools-project
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: tools-project
+    transport: stdio
+    command: python3
+    args: ['.opencode/mcp/project-mcp/mcp_server.py']
+    cwd: /abs/path/to/the/repo
+```
+
+The server reads `~/.tools-project-key`; never put the key in the YAML/JSON. `serverName: tools-project` is what namespaces the tools (`mcp__tools-project__get_ticket_detail`).
 
 ### 3. Create the key file
 

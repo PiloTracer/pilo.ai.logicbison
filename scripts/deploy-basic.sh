@@ -354,6 +354,31 @@ if [[ "$MODE" == "update" ]] && [[ -f "$CURS_DEST" ]] && ! grep -q 'AGENT_OS_SOU
   echo "    (agent merges the section from the current template; preserves target REPLACE tokens)"
 fi
 
+# MCP client artifact: one stdio server shared by every harness. Placed before
+# the scaffold so install-opencode-config sees the file and registers it. The
+# consumer-root path is the one every client config uses; no-overwrite by
+# default; --update and --force refresh it (framework-owned client artifact).
+MCP_SRC="${AI_ROOT}/.opencode/mcp/project-mcp/mcp_server.py"
+MCP_DEST="${DEST_ROOT}/.opencode/mcp/project-mcp/mcp_server.py"
+if [[ -f "$MCP_SRC" ]]; then
+  mkdir -p "$(dirname "$MCP_DEST")"
+  if [[ ! -f "$MCP_DEST" ]]; then
+    cp "$MCP_SRC" "$MCP_DEST"
+    chmod 755 "$MCP_DEST"
+    echo "  mcp: copied .opencode/mcp/project-mcp/mcp_server.py"
+  elif [[ "$MODE" == "force" ]]; then
+    cp "$MCP_SRC" "$MCP_DEST"
+    chmod 755 "$MCP_DEST"
+    echo "  mcp: refreshed .opencode/mcp/project-mcp/mcp_server.py (--force)"
+  elif [[ "$MODE" == "update" ]] && ! cmp -s "$MCP_SRC" "$MCP_DEST"; then
+    cp "$MCP_SRC" "$MCP_DEST"
+    chmod 755 "$MCP_DEST"
+    echo "  mcp: refreshed .opencode/mcp/project-mcp/mcp_server.py (--update)"
+  else
+    echo "  mcp: present (.opencode/mcp/project-mcp/mcp_server.py)"
+  fi
+fi
+
 # Step 2: .work/ skeleton + DOCS_TECH_STACK.md via bootstrap.sh (no-overwrite).
 # Tell bootstrap.sh not to write .cursorrules (we did it ourselves with the
 # AGENT_OS_SOURCE substitution).

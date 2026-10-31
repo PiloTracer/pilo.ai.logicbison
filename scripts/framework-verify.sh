@@ -229,7 +229,24 @@ c=json.load(open('${OC_SMOKE}/opencode.json'))
 paths=c.get('skills',{}).get('paths',[])
 assert any('${REPO_ROOT}' in p for p in paths), paths
 "
+"$PY" - <<PY
+import json, os, shutil
+c=json.load(open('${OC_SMOKE}/opencode.json'))
+cmd=(c.get('mcp') or {}).get('tools-project',{}).get('command')
+assert cmd, 'tools-project not registered by deploy-basic'
+assert shutil.which(cmd[0]) or os.path.isabs(cmd[0]), f'interpreter not executable: {cmd[0]}'
+srv=os.path.join('${OC_SMOKE}', '.opencode/mcp/project-mcp/mcp_server.py')
+assert os.path.isfile(srv), 'mcp server missing at consumer root'
+assert 'SERVER_VERSION = "1.1.0"' in open(srv, encoding='utf-8').read(), 'stale mcp server copy'
+PY
 ok "deploy-basic creates thin-client opencode.json with AGENT_OS_SOURCE paths"
+ok "deploy-basic: MCP server at consumer root + executable registration (1.1.0)"
+printf "# stale copy\n" > "${OC_SMOKE}/.opencode/mcp/project-mcp/mcp_server.py"
+bash "${REPO_ROOT}/scripts/deploy-basic.sh" "${OC_SMOKE}" update >/dev/null
+if ! cmp -s "${REPO_ROOT}/.opencode/mcp/project-mcp/mcp_server.py" "${OC_SMOKE}/.opencode/mcp/project-mcp/mcp_server.py"; then
+  die "deploy-basic update did not refresh the MCP client artifact"
+fi
+ok "deploy-basic --update refreshes the MCP client artifact"
 rm -rf "${OC_SMOKE}"
 
 # --- 2d. install-opencode-config --sync-paths (source moved) ---
@@ -246,6 +263,11 @@ with open(p) as f:
 for i, path in enumerate(c["skills"]["paths"]):
     if "${FW_ROOT}" in path:
         c["skills"]["paths"][i] = path.replace("${FW_ROOT}", "${OLD_SRC}")
+c.setdefault("mcp", {})["tools-project"] = {
+    "type": "local",
+    "command": ["python", ".opencode/mcp/project-mcp/mcp_server.py"],
+    "enabled": True,
+}
 with open(p, "w") as f:
     json.dump(c, f, indent=2)
     f.write("\n")
@@ -253,13 +275,17 @@ PY
 REPO_ROOT="${SYNC_SMOKE}" AI_SOURCE="${FW_ROOT}" OLD_SOURCE="${OLD_SRC}" \
   bash "${FW_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
 "$PY" -c "
-import json
+import json, shutil
 c=json.load(open('${SYNC_SMOKE}/opencode.json'))
 assert any('${FW_ROOT}' in p for p in c['skills']['paths']), c['skills']['paths']
 assert 'tools-project' in c.get('mcp', {}), 'mcp block must be preserved'
+cmd=c['mcp']['tools-project']['command']
+assert cmd[-1].endswith('mcp_server.py'), cmd
+assert cmd[0] != 'python' or shutil.which('python'), f'bare python not repaired: {cmd}'
 "
 bash "${FW_ROOT}/scripts/deploy-basic.sh" --status "${SYNC_SMOKE}" 2>&1 | grep -q "skills.paths\[0\].*ok"
 ok "install-opencode-config --sync-paths realigns stale paths and preserves mcp"
+ok "install-opencode-config --sync-paths repairs the python -> probed interpreter"
 rm -rf "${SYNC_SMOKE}"
 
 # --- 2e. install-opencode-config --sync-paths (fat-client) ---
@@ -284,16 +310,22 @@ with open(p, "w") as f:
 PY
   REPO_ROOT="$(pwd)" bash "${REPO_ROOT}/scripts/install-opencode-config.sh" --sync-paths >/dev/null
   "$PY" -c "
-import json
+import json, os, shutil
 c=json.load(open('opencode.json'))
 p0=c['skills']['paths'][0]
 assert p0 == '.ai/skills', p0
 assert all(chr(10) not in x for x in c['instructions']), c['instructions']
 assert c['references']['ai']['path'] == '.ai'
 assert 'custom-block' in c.get('mcp', {}), 'mcp must be preserved'
+assert os.path.isfile('.opencode/mcp/project-mcp/mcp_server.py'), 'mcp server not at consumer root'
+assert not os.path.exists('.ai/.opencode/mcp/project-mcp/mcp_server.py'), 'mcp server leaked under .ai/'
+cmd=(c.get('mcp') or {}).get('tools-project',{}).get('command')
+assert cmd, 'tools-project not registered for fat-client'
+assert shutil.which(cmd[0]) or os.path.isabs(cmd[0]), cmd[0]
 "
 )
 ok "install-opencode-config --sync-paths repairs fat-client paths"
+ok "deploy-files: MCP server at consumer root, not under .ai/"
 rm -rf "${FC_SMOKE}"
 
 # --- 2f. install-opencode-config --sync-paths (self-hosted) ---

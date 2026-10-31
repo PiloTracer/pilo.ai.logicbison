@@ -154,7 +154,10 @@ fi
 #                   not consumer concern)
 #   agent.os.framework.md — framework source marker; never deployed (a consumer
 #                   carrying it would be misdetected as framework source)
-SKILL_EXCLUDE_REGEX='^(\.github/|\.gitignore$|\.gitattributes$|\.cursorrules$|scripts/deploy-files\.sh$|agent\.os\.framework\.md$)'
+#   .opencode/mcp/ — the MCP client artifact is copied to the consumer ROOT
+#                   below (not under .ai/), because every client config points
+#                   at <repo>/.opencode/mcp/project-mcp/mcp_server.py
+SKILL_EXCLUDE_REGEX='^(\.github/|\.gitignore$|\.gitattributes$|\.cursorrules$|scripts/deploy-files\.sh$|agent\.os\.framework\.md$|\.opencode/mcp/)'
 
 TMP_LIST="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
 MERGE_CANDS="$(mktemp "${TMPDIR:-/tmp}/aos.XXXXXX")"
@@ -198,6 +201,34 @@ fi
 COPIED=$((COUNT - SKIPPED))
 echo "  copied: $COPIED files (git-ignored content excluded by policy)"
 echo "  skipped (exists): $SKIPPED files"
+
+# MCP client artifact: every harness registers the same stdio server, and every
+# config points at the consumer-root path (never <target>/.ai/.opencode/...).
+# The file is inert until a client registers it; --update/--force refresh it.
+CONSUMER_ROOT="$DEST_DIR"
+if [[ "$DEST_DIR" == */.ai ]]; then
+  CONSUMER_ROOT="$(dirname "$DEST_DIR")"
+fi
+MCP_SRC="${AI_ROOT}/.opencode/mcp/project-mcp/mcp_server.py"
+MCP_DEST="${CONSUMER_ROOT}/.opencode/mcp/project-mcp/mcp_server.py"
+if [[ -f "$MCP_SRC" ]]; then
+  mkdir -p "$(dirname "$MCP_DEST")"
+  if [[ ! -f "$MCP_DEST" ]]; then
+    cp "$MCP_SRC" "$MCP_DEST"
+    chmod 755 "$MCP_DEST"
+    echo "  mcp: copied .opencode/mcp/project-mcp/mcp_server.py (consumer root)"
+  elif [[ "$MODE" == "force" ]]; then
+    cp "$MCP_SRC" "$MCP_DEST"
+    chmod 755 "$MCP_DEST"
+    echo "  mcp: refreshed .opencode/mcp/project-mcp/mcp_server.py (--force)"
+  elif [[ "$MODE" == "update" ]] && ! cmp -s "$MCP_SRC" "$MCP_DEST"; then
+    cp "$MCP_SRC" "$MCP_DEST"
+    chmod 755 "$MCP_DEST"
+    echo "  mcp: refreshed .opencode/mcp/project-mcp/mcp_server.py (--update)"
+  else
+    echo "  mcp: present (.opencode/mcp/project-mcp/mcp_server.py)"
+  fi
+fi
 
 if [[ "$MODE" == "update" ]] && [[ -s "$MERGE_CANDS" ]]; then
   MERGE_N="$(wc -l < "$MERGE_CANDS" | tr -d ' ')"

@@ -103,7 +103,8 @@ Scaffold honor table (no-overwrite):
 | Project-root `standards/.gitkeep`, `docs/integration/.gitkeep` | skip (preserve) — **deprecated paths; use `.work/standards/` + `.work/docs/integration/`** (bootstrap no longer creates repo-root dirs) |
 | `.cursorrules` | skip (preserve) |
 | `DOCS_TECH_STACK.md` | skip (preserve) |
-| `opencode.json` | create if missing via `install-opencode-config.sh`; on `--update` run `--sync-paths` only (`.opencode/` MCP dir never touched) |
+| `opencode.json` | create if missing via `install-opencode-config.sh`; on `--update` run `--sync-paths` only (repairs/adds `tools-project` when the client file exists; custom `mcp` entries preserved) |
+| `.opencode/mcp/project-mcp/mcp_server.py` | copied **to the consumer root** (not under `.ai/`); `--update`/`--force` refresh a differing copy |
 
 ---
 
@@ -112,7 +113,7 @@ Scaffold honor table (no-overwrite):
 After I1 (no-overwrite copy) the script:
 
 1. Prints a **merge candidate list** for differing files under `.ai/` (the vendored fat-client copy — never `.work/standards/` or `.work/docs/integration/`, which are project memory and never merge candidates).
-2. Runs **`install-opencode-config.sh --sync-paths`** on the consumer repo root (fat-client `.ai/skills` paths; preserves custom `mcp` entries).
+2. Runs **`install-opencode-config.sh --sync-paths`** on the consumer repo root (fat-client `.ai/skills` paths; preserves custom `mcp` entries, and repairs/adds the built-in `tools-project` entry when the client file is present).
 3. Runs **`cursorrules-verify.sh --fix`** on the consumer root when a `.cursorrules` exists — repairs sister-framework cells (fills installed-sister tokens, re-points stale baked absolutes) — and reports the verification verdict. (Thin-client source-pointer/script-path repair is `@deploy-basic update`'s domain.)
 4. The **agent** performs rules-aware merge for each `.ai/` merge candidate (agent work, not script work).
 
@@ -182,7 +183,8 @@ Agent OS skills and standards are **tool-agnostic** — they are plain markdown 
 | **opencode** | `opencode.json` (repo root) | `instructions`, `skills.paths`, optional `mcp` |
 | **Cursor** | `.cursorrules` (repo root) | Agent rules; optional `.cursor/mcp.json` for MCP |
 | **Claude Code** | `.claude/settings.json` or `.claude/mcp.json` | MCP registration |
-| **Codex / other** | per tool docs | Provide skill paths + rules equivalent to `.cursorrules` |
+| **DSH** | `~/.dsh/profiles/<profile>/cordis.patch.yml` | `dsh-mcp-client` entry (see `project-query-setup` reference) |
+| **Codex / other** | per tool docs | Provide skill paths + rules equivalent to `.cursorrules`; MCP uses the same stdio command |
 
 **After deploy (operator checklist):**
 
@@ -193,5 +195,5 @@ Agent OS skills and standards are **tool-agnostic** — they are plain markdown 
    # thin-client (no local .ai/): bash "$AGENT_OS_SOURCE/scripts/install-opencode-config.sh"
    ```
    Review paths: **fat-client** → `.ai/skills`, `.ai/START_HERE.md`; **thin-client** → absolute `$AGENT_OS_SOURCE/skills`.
-3. **MCP (optional):** `@project-query-setup install` detects `opencode.json`, `.cursor/mcp.json`, etc. and registers `tools-project` after operator confirmation.
+3. **MCP:** deploy copies the client file to `.opencode/mcp/project-mcp/mcp_server.py` (consumer root, not under `.ai/`). `install-opencode-config.sh` registers it for opencode only when the file exists; for Cursor / Claude Code / DSH / other clients run `@project-query-setup register-mcp` (same stdio command, same key file).
 4. **Verify:** invoke `@session-control start` from your agent — it should load `.ai/skills/session-control/skill.md` (fat) or `$AGENT_OS_SOURCE/skills/session-control/skill.md` (thin).

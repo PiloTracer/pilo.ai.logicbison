@@ -17,13 +17,5 @@
     "paths": [
       "REPLACE:AGENT_OS_ROOT/skills"
     ]
-  },
-
-  "mcp": {
-    "tools-project": {
-      "type": "local",
-      "command": ["python", ".opencode/mcp/project-mcp/mcp_server.py"],
-      "enabled": true
-    }
   }
 }

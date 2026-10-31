@@ -133,6 +133,73 @@ old_source = os.environ.get("OLD_SOURCE", "").strip()
 force = os.environ.get("INSTALL_OPENCODE_FORCE") == "1"
 sync_paths = os.environ.get("INSTALL_OPENCODE_SYNC") == "1"
 
+# Client artifact shared by every harness (opencode, Cursor, Claude Code, DSH,
+# Codex, ...): one stdio server at the consumer-root path. Only the registration
+# differs per client. The interpreter comes from the bash execution probe
+# (scripts/lib/portability.sh) — never hardcode `python`/`python3` here.
+MCP_REL = ".opencode/mcp/project-mcp/mcp_server.py"
+MCP_SERVER = os.path.join(repo_root, MCP_REL)
+_AGENT_OS_PY = os.environ.get("AGENT_OS_PY", "").strip()
+INTERP = shlex.split(_AGENT_OS_PY) if _AGENT_OS_PY else [sys.executable]
+BARE_INTERPRETERS = {"python", "python3", "py"}
+
+
+def normalize_mcp_entry(entry):
+    """Repair the framework-owned command to launch the probed interpreter.
+
+    Only bare aliases are rewritten; an absolute/venv interpreter or a custom
+    wrapper is preserved. Keeps the script path and any flags. Returns True when
+    the entry changed.
+    """
+    if not isinstance(entry, dict):
+        return False
+    cmd = entry.get("command")
+    if not isinstance(cmd, list) or not cmd or not all(isinstance(x, str) for x in cmd):
+        return False
+    if os.path.basename(cmd[0]) not in BARE_INTERPRETERS:
+        return False
+
+    tail = cmd[1:]
+    # `py -3` is one interpreter; do not carry `-3` into a python3 command.
+    if cmd[0] == "py" and tail[:1] == ["-3"]:
+        tail = tail[1:]
+
+    prefix_len = len(INTERP) - 1
+    if cmd[0] == INTERP[0] and (prefix_len == 0 or cmd[1:1 + prefix_len] == INTERP[1:]):
+        return False
+
+    new_cmd = INTERP + tail
+    if new_cmd == cmd:
+        return False
+    entry["command"] = new_cmd
+    return True
+
+
+def repair_or_add_mcp(cfg):
+    """Add the registration when the client file exists; repair a stale alias.
+
+    Adding is gated on the file being present so `project-bootstrap` (which does
+    not ship the MCP file) never writes a broken registration. An existing entry
+    is preserved when the file is absent; the operator repairs it via
+    `@project-query-setup install`.
+    """
+    changed = False
+    mcp = dict(cfg.get("mcp") or {})
+    entry = mcp.get("tools-project")
+    if entry is None:
+        if os.path.isfile(MCP_SERVER):
+            mcp["tools-project"] = {
+                "type": "local",
+                "command": INTERP + [MCP_REL],
+                "enabled": True,
+            }
+            changed = True
+    elif normalize_mcp_entry(entry):
+        changed = True
+    if mcp:
+        cfg["mcp"] = mcp
+    return changed
+
 
 def join(rel):
     if os_prefix == ".":
@@ -224,19 +291,20 @@ def build_config():
         if key in refs:
             cfg["skills"]["paths"].append(refs[key]["path"] + "/skills")
 
-    mcp = cfg.get("mcp") or {}
-    if "tools-project" not in mcp:
-        # Interpreter resolved by execution probe at install time (see
-        # scripts/lib/portability.sh). `python3` is a Microsoft Store alias
-        # stub on many Windows hosts, so it must never be hardcoded here.
-        _interp = os.environ.get("AGENT_OS_PY", "").strip()
-        _cmd = shlex.split(_interp) if _interp else [sys.executable]
+    mcp = dict(cfg.get("mcp") or {})
+    entry = mcp.get("tools-project")
+    if entry is None and os.path.isfile(MCP_SERVER):
         mcp["tools-project"] = {
             "type": "local",
-            "command": _cmd + [".opencode/mcp/project-mcp/mcp_server.py"],
+            "command": INTERP + [MCP_REL],
             "enabled": True,
         }
-    cfg["mcp"] = mcp
+    elif entry is not None:
+        normalize_mcp_entry(entry)
+    if mcp:
+        cfg["mcp"] = mcp
+    else:
+        cfg.pop("mcp", None)
     return cfg
 
 
@@ -366,6 +434,9 @@ def write_cfg(cfg, label):
         f.write("\n")
     json.load(open(dest_path))
     print(label)
+    mcp_entry = (cfg.get("mcp") or {}).get("tools-project")
+    if mcp_entry:
+        print("  mcp: tools-project -> " + " ".join(str(x) for x in mcp_entry.get("command", [])))
 
 
 def sanitize_corrupted_strings(cfg):
@@ -465,6 +536,8 @@ if sync_paths:
         cfg = json.load(f)
 
     changed = sanitize_corrupted_strings(cfg)
+    if repair_or_add_mcp(cfg):
+        changed = True
     if is_fat_client_prefix() or os_prefix == ".":
         # Fat-client (.ai/) and self-hosted (.) — rebuild framework sections from
         # build_config(); never prefix-replace (self-hosted infer_old_prefix used

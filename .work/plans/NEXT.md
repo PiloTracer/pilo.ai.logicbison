@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-10-09
+**Updated:** 2026-10-30
 
 ---
 
@@ -10,6 +10,7 @@
 
 | Item | Artifact |
 |------|----------|
+| **tools-project MCP P0 + pizote deploy (2026-10-30)** | Interpreter probe in `opencode.json.template` + `install-opencode-config.sh` (repairs bare `python`), client refreshed to `1.1.0`/8 tools, consumer-root placement + `--update` refresh in `deploy-basic.sh`/`deploy-files.sh`, Claude `.mcp.json` + DSH registration matrix, `framework-verify` MCP assertions. Deployed to pizote; live detail/activities/attachment verified. P1 (`update` verb, UA/self-check, doc mirror) open. |
 | **Windows/Linux/macOS/BSD portability — 12-item matrix (2026-10-09)** | `.gitattributes` (new; LF for `*.sh`/`*.py`/`hooks/*`/`templates/**`) + `.editorconfig` (new); 3 CRLF blobs → LF + `.gitignore` mode `100755`→`100644`; hooks re-installed; `sed -i` → temp-file rewrite (`hooks/prepare-commit-msg`); 28 bare `mktemp` templated; `find -quit` → portable (`templates/bootstrap.sh`); `[ -x ]` → `[ -f ]` (**removed a silent pre-commit gate bypass**); `scripts/lib/portability.sh` (new — interpreter resolved by *execution probe*; rejects the Microsoft Store `python3` stub) wired into 6 scripts + MCP command + `.cursorrules` `LINT_COMMAND`; WSL2 DrvFs `/mnt/c` + host matrix docs (`README.md`); LF guard in `framework-verify` §0b + CI; `bash>=3.2` preflight; BSD `awk` `[[:space:]]` + byte-built glyphs (`gate-verify`, `readiness-verify`); `rsync --no-group` ×5 (fixed pre-existing exit-23 on this host). MOD-06 `.work/analysis/20261009-mod06-windows-linux-portability.md` = **merge_with_conditions** (WSL2-only decision + "exec bit not fixed" caveat need owner record). `framework-verify` exit 0, `skill-functional-verify` PASS, `touch-scope` pass, blast-radius high-risk **warn**. **Committed + pushed as `74d3b48`.** |
 | Core Principle 9 — brevity cap + escalation gate (2026-10-09) | `.cursorrules` + `templates/cursorrules.template`: ≤150-word chat budget; ask before expanding scope or dumping long answers; old `Output economy (ALWAYS APPLY)` bullet demoted to a pointer. Owner request after repeated over-long responses. **Committed + pushed as `74d3b48`.** |
 | Response-clarity Rule 7 — gloss + link abstract plan refs (2026-10-04) | `skills/SKILL_DEPENDENCIES.md` § Operator handoff rule 7 (bare `M4-T2`/`FR-7`/`U-12` forbidden: ≤8-word gloss + `path:L<n>` locator, one line per ref; responses-only scope) + `.cursorrules` + `templates/cursorrules.template` handoff bullets + origin protocol `.work/prompts/improve-clarity-of-responses.md` Rule 7; docs-only, MOD-06 n/a; `framework-verify` + `skill-functional-verify` + `touch-scope-verify` exit 0; blast-radius warn (declared scope, owner-approved protected hits); propagates to consumers on next deploy (P1) |
