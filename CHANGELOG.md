@@ -4,6 +4,9 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 
 ## [Unreleased]
 
+### Added
+- **`env-sync` skill + `scripts/env-sync.sh`** — aligns every `.env*` file to the `.env.example` key layout: each reference key lands on the same line in every target, target-only keys are preserved in one shared trailing block, and a missing key becomes a comment placeholder (never `KEY=`, which would flip *unset* to *empty*). Values are never modified or printed: `apply` compares SHA-256 value fingerprints before and after the atomic write, backs up every target outside the repo (mode 700), and restores all backups on any mismatch; `verify --backup` is the independent audit. `status` (`compare`/`diff`) prints a side-by-side table (`ok:N` / `at:N` / `--` / `set|empty` / `same|diff`) without exposing values. Fail-closed on duplicate keys, multiline values, unparsable lines, CRLF, or a broken reference. Registered in `skills/README.md`, `skills/SKILL_DEPENDENCIES.md`, root `README.md` (24 skills), and `ai-director` routing.
+
 ## [0.6.1] - 2026-08-19
 
 ### Added

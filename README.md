@@ -44,7 +44,7 @@ Then in chat:
 
 ## What you get
 
-- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (23 skills in total).
+- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (24 skills in total).
 - **Standards** - binding contracts (CONVENTIONS, FEATURE_STANDARD, observability, security) keep agent output honest.
 - **`.work/`** - the project's memory: plans, SPECs, ADRs, `HANDOFF.md`, `NEXT.md`. Survives session boundaries.
 - **Gates** - `plan-master-ready`, `implementation-ready`, milestone verify; skip a step and the agent **stops** with a redirect.
@@ -188,7 +188,7 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
 ### Skills at a glance
 
-All **23** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
+All **24** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
 
 | Skill | One line | Typical invoke |
 |-------|----------|----------------|
@@ -205,6 +205,7 @@ All **23** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **concept-run** | Run MOD-01…08 architecture/NFR prompts | `list` · `status` · `run - MOD-06` (required for agent-assisted code) |
 | **db-migration** | Idempotent numbered SQL scripts (no Alembic chain) | `init` · `create - <description>` · `run` · `status` · `verify` |
 | **dev-stack** | Generate or update isolated Docker `bin/start.sh` | `init` · `status` |
+| **env-sync** | Align every `.env*` key to `.env.example` line-for-line; values untouched; side-by-side compare | `status` · `verify` · `apply` |
 | **infra-terraform** | Terraform IaC lifecycle: plan-review gates, remote state + locking, drift, destroy discipline | `init` · `plan` · `apply` · `status` · `drift` |
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
 | **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |

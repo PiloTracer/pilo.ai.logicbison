@@ -145,6 +145,7 @@ Skills live under `skills/<id>/skill.md` (folder name = id). When a task matches
 | tauri-development | Tauri desktop: IPC security, shell/webview, Rust backend, events |
 | code-repair | Fix verify/SPEC/migration findings |
 | dev-stack | Isolated Docker Compose dev stack helper |
+| env-sync | Align every `.env*` key to `.env.example` line-for-line; values untouched; side-by-side `status`, strict `verify`, backup-verified `apply` |
 | process-router | Read-only process Q&A router |
 | feature-spec | Author, review, amend feature SPECs |
 | concept-run | Run MOD-01…MOD-08 concept prompts |

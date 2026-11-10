@@ -44,6 +44,7 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | code-verify | `code-verify/` | Verification: milestone, uncommitted, last commit/push |
 | code-repair | `code-repair/` | Remediate verifier/migration/SPEC findings; mandatory re-verify |
 | dev-stack | `dev-stack/` | Isolated Docker Compose helper (`bin/start.sh`); safe `.env` handling |
+| env-sync | `env-sync/` | **Env layout:** align every `.env*` key to `.env.example` line-for-line; values untouched; side-by-side `status`, strict `verify`, backup-verified `apply` |
 | process-router | `process-router/` | Read-only router: process questions → skill, guide, or standard (no writes) |
 | feature-spec | `feature-spec/` | Author, review, amend feature SPECs per FEATURE_STANDARD |
 | concept-run | `concept-run/` | Run MOD-01…MOD-08 concept prompts; attach output to PR/NEXT/SPEC |

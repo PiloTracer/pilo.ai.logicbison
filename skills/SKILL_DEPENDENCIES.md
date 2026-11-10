@@ -254,9 +254,9 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 
 | Canonical verb | Meaning | Skills that implement it |
 |----------------|---------|---------------------------|
-| `status` | Read-only: report current state | plan-foundation, plan-master, plan-verify, plan-repair, session-control, code-implementation, code-verify, code-repair, feature-spec, db-migration, concept-run, dev-stack, project-bootstrap, docs, infra-terraform |
+| `status` | Read-only: report current state | plan-foundation, plan-master, plan-verify, plan-repair, session-control, code-implementation, code-verify, code-repair, feature-spec, db-migration, concept-run, dev-stack, env-sync, project-bootstrap, docs, infra-terraform |
 | `repair` | Fix reported issues; re-verify | code-repair, plan-repair |
-| `verify` | Audit planning artifacts (foundation / master / alignment) | plan-verify |
+| `verify` | Audit planning artifacts (foundation / master / alignment); `env-sync`: strict `.env*` layout gate | plan-verify, env-sync |
 | `probe` | Adaptive gap-driven interrogation loop; scores knowledge/plan coverage, asks targeted questions, fills gaps into registries. **New verb** (distinct from `status` read-only, `continue` resume-phase, `integrity` auto-sweep). Engine: [`probe-protocol.md`](probe-protocol.md) | plan-foundation, plan-master |
 | `commit` | Git commit/push without close | session-control |
 | `context` | Read-only full context load + uncommitted-aware summary; no writes | session-control |
@@ -294,6 +294,8 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 | `route` / `help` | Read-only Q&A | process-router |
 
 **Alias policy:** When a verb is renamed, the old name is kept as an alias for **at least one minor version**. Aliases are listed inline in each skill's parse-invocation table and in the matrix above.
+
+**`env-sync` verbs:** `status` (side-by-side, read-only; aliases `compare`, `diff`), `verify` (strict layout gate, exit 1 on drift; alias `check`), `apply` (backup-verified layout rewrite; aliases `sync`, `fix`). `apply` is the only writer and the same-message permission for `.env*` edits.
 
 ---
 

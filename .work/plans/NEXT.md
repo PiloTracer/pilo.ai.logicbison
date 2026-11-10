@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-10-30
+**Updated:** 2026-11-10
 
 ---
 
@@ -10,6 +10,7 @@
 
 | Item | Artifact |
 |------|----------|
+| **env-sync skill + `.env` layout script (2026-11-10)** | `skills/env-sync/` + `scripts/env-sync.sh` (align `.env*` keys to `.env.example` line-for-line; `status`/`verify`/`apply`; backup + SHA-256 value preservation + restore-on-fail); registered in 24-skill prose + `.cursorrules` + template; live apply on `/mnt/work/Projects/system-news` verified (2 files, 105 values unchanged, `verify --backup` PASS); MOD-06 `.work/analysis/20261110-mod06-env-sync-skill.md`; committed AIOS-1. |
 | **tools-project MCP P0 + pizote deploy (2026-10-30)** | Interpreter probe in `opencode.json.template` + `install-opencode-config.sh` (repairs bare `python`), client refreshed to `1.1.0`/8 tools, consumer-root placement + `--update` refresh in `deploy-basic.sh`/`deploy-files.sh`, Claude `.mcp.json` + DSH registration matrix, `framework-verify` MCP assertions. Deployed to pizote; live detail/activities/attachment verified. P1 (`update` verb, UA/self-check, doc mirror) open. |
 | **Windows/Linux/macOS/BSD portability — 12-item matrix (2026-10-09)** | `.gitattributes` (new; LF for `*.sh`/`*.py`/`hooks/*`/`templates/**`) + `.editorconfig` (new); 3 CRLF blobs → LF + `.gitignore` mode `100755`→`100644`; hooks re-installed; `sed -i` → temp-file rewrite (`hooks/prepare-commit-msg`); 28 bare `mktemp` templated; `find -quit` → portable (`templates/bootstrap.sh`); `[ -x ]` → `[ -f ]` (**removed a silent pre-commit gate bypass**); `scripts/lib/portability.sh` (new — interpreter resolved by *execution probe*; rejects the Microsoft Store `python3` stub) wired into 6 scripts + MCP command + `.cursorrules` `LINT_COMMAND`; WSL2 DrvFs `/mnt/c` + host matrix docs (`README.md`); LF guard in `framework-verify` §0b + CI; `bash>=3.2` preflight; BSD `awk` `[[:space:]]` + byte-built glyphs (`gate-verify`, `readiness-verify`); `rsync --no-group` ×5 (fixed pre-existing exit-23 on this host). MOD-06 `.work/analysis/20261009-mod06-windows-linux-portability.md` = **merge_with_conditions** (WSL2-only decision + "exec bit not fixed" caveat need owner record). `framework-verify` exit 0, `skill-functional-verify` PASS, `touch-scope` pass, blast-radius high-risk **warn**. **Committed + pushed as `74d3b48`.** |
 | Core Principle 9 — brevity cap + escalation gate (2026-10-09) | `.cursorrules` + `templates/cursorrules.template`: ≤150-word chat budget; ask before expanding scope or dumping long answers; old `Output economy (ALWAYS APPLY)` bullet demoted to a pointer. Owner request after repeated over-long responses. **Committed + pushed as `74d3b48`.** |
@@ -69,6 +70,7 @@
 | **P10** | Remaining v0.7 draft-plan rows | `.work/plans/20260819-v07-tech-expansion-draft-plan.md`: `infra-aws`, `infra-ansible`, `cicd-github` skills + cloud-security-baseline/CICD_CONVENTIONS standards + MOD-09 + node-react/python stack packs — deferred; scope decision needed before scheduling (rows 5, 6, 8, 9 of the draft). |
 | **P11** | Apply per-sibling direction files | `docs/homogenization/{biz,cto,flutter,mlt,soc,ui}.md` — follow each inside the sibling repo to bring deploy skills to family parity (registry, discovery lib, six-slot loops). **Recommended next.** |
 | **P12** | Propagate plan-sync correctness fixes to consumers | On next `@deploy-basic update` / deploy — live-plan source rule, amendment-derived `plan_version`, status-semantic preview/report changes land in deployed skills (optional integration; no rush). |
+| **P13** | env-sync follow-ups | Add an `env-sync` regression case to `scripts/framework-verify.sh` (protected) and propagate the skill to consumers on the next deploy (ties into P1). Keep the system-news backup until its stack passes, then delete it. |
 
 ---
 

@@ -1,15 +1,22 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-10-30",
-  "goal": "tools-project MCP P0 remediation (F1-F3) from .work/reports/20261030-tools-project-mcp-integration-audit.md: (F1) portable interpreter — template no longer hardcodes `python`, install script builds from the execution probe and repairs bare aliases; (F2) refresh the client copy to 1.1.0 / 8 tools; (F3) deploy-basic/deploy-files place the server at the consumer-root `.opencode/mcp/...` and register only when present. Tool-agnostic registration docs incl. DSH (owner answer: must work on any harness). No tools-project files changed.",
+  "updated": "2026-11-10",
+  "goal": "Add the env-sync skill + scripts/env-sync.sh: align every .env* file to the .env.example key layout (same key line in every file), preserve all values byte-for-byte (SHA-256 before/after), keep target-only keys in a shared aligned block, use comment placeholders for missing keys, and provide a side-by-side read-only comparison. Tested on a byte-identical copy of /mnt/work/Projects/system-news with backups; the live project stayed read-only. Owner answered the protected-registry approval with \"follow your best recommendation\" (2026-11-10): .cursorrules + template rows added, and the live system-news apply is approved with a persistent backup.",
   "allowed_paths": [
     ".work/touch-scope",
-    ".work/reports/20261030-tools-project-mcp-integration-audit.md",
-    ".work/analysis/20261030-mod06-tools-project-mcp-p0.md",
-    "opencode.json",
-    "opencode.json.template",
-    ".opencode/mcp/project-mcp/mcp_server.py",
-    ".quick/deploy-to-project.md"
+    ".work/context/HANDOFF.md",
+    ".work/active-ref",
+    ".work/analysis/20261110-mod06-env-sync-skill.md",
+    "README.md",
+    "CHANGELOG.md",
+    "skills/README.md",
+    "skills/SKILL_DEPENDENCIES.md",
+    "skills/ai-director/reference.md",
+    "skills/ai-director/skill.md",
+    "scripts/env-sync.sh",
+    ".cursorrules",
+    "templates/cursorrules.template",
+    ".work/plans/NEXT.md"
   ],
   "allowed_patterns": [
     "scripts/**",

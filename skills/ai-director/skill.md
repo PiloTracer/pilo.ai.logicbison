@@ -124,6 +124,7 @@ Read `{HANDOFF}` and `{ITERATION_CARRIER}` for context. Classify the request int
 | `concept` | "run MOD prompt", "architecture check", "NFR concept" | `concept-run` |
 | `db-migration` | "schema change", "migration", "new table", "alter column" | `db-migration` |
 | `dev-stack` | "Docker setup", "dev environment", "compose config" | `dev-stack` |
+| `env-sync` | "make .env files consistent", "align env files", "compare .env files side by side", "env drift" | `env-sync` |
 | `tauri-development` | "Tauri", "desktop app", "IPC setup", "shell strategy", "webview config", "bridge server" | `tauri-development` |
 | `process-router` | "how do I...?", "where is...?", "what skill...?" | `process-router` |
 | `deploy` | "deploy framework to another project", "copy to repo" | `deploy-files` / `deploy-basic` |
