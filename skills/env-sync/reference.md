@@ -15,32 +15,30 @@ the test recipe used to prove value preservation.
    reference. Each reference key line is replaced by the target's own original
    line for that key — prefix (`export `) and everything after `=` (inline
    comment included) are kept exactly.
-2. **Placeholder for a missing key.** A reference key absent from the target
-   becomes, at the same line number:
+2. **Empty assignment for a missing key.** A reference key absent from the
+   target becomes, at the same line number:
 
    ```text
-   # env-sync: KEY not set in this file
+   KEY=
    ```
 
-   It is a comment, so the variable stays *unset* (adding `KEY=` would change
-   runtime behaviour from unset to empty).
-3. **One trailing extras block** when any target has a key the reference lacks:
-
-   ```text
-   <blank>
-   # --- env-sync: keys not in .env.example (preserved; keep aligned) ---
-   KEY_ONE=...
-   ```
-
-   Extra keys use one shared order (first-seen across sorted target names), so
-   they also land on identical lines in every target; a target lacking an extra
-   gets the same placeholder comment.
+   (with `export ` retained when the reference line exports it). The key is now
+   a real assignment, so every reference key can be grepped in every file.
+   Caveat: this can change runtime behaviour from *unset* to *empty*; the
+   operator chose this over comment placeholders (2026-11-10), and `apply` backs
+   up first. Existing values are never modified.
+3. **No extras block.** The reference must already contain every key used by any
+   `.env*` file. A key found only in a target is a hard error: `apply` aborts,
+   `status`/`verify` report it. Add it to `.env.example` first, with a comment
+   explaining where it is enabled or disabled (environment-only keys must exist
+   in every file, empty where unused), then re-run. This is what keeps the total
+   line count and the key-to-line map identical in every file.
 
 Consequences:
 
-- Every reference key is on the same line number in every target.
-- Every extra key is on the same line number in every target.
-- All rewritten files have the same total line count for a given reference.
+- Every key is on the same line number in every file, present as a real
+  assignment (`set` or `empty`) — no comment placeholders, no trailing block.
+- All files have the same total line count and the same key set.
 - A file that is already structurally aligned is **not rewritten**, so custom
   local comments survive when no key needs to move.
 
@@ -48,7 +46,8 @@ Consequences:
 
 | Item | Preserved? |
 |------|-----------|
-| Value text after `=` | **Yes, byte-for-byte** (verified by SHA-256 before/after) |
+| Existing value text after `=` | **Yes, byte-for-byte** (verified by SHA-256 before/after) |
+| Missing key | Added as an empty assignment (`KEY=`); this can flip *unset* → *empty* (operator decision) |
 | `export ` prefix per line | Yes, copied with the target's line |
 | Inline comment on a value line | Yes (part of the value line) |
 | File mode | Yes (`chmod` to the original mode before the atomic rename) |
@@ -61,6 +60,7 @@ Consequences:
 | Finding | Why it must stop |
 |---------|------------------|
 | Reference missing or with no `KEY=value` line | No layout authority |
+| Key present only in a target (undeclared) | The reference must own the key set; add it there with a comment first |
 | Duplicate key in one file | Ambiguous value |
 | Line that is not blank / comment / `KEY=value` | Cannot place it safely |
 | Unterminated quote or trailing `\` | Multiline value; a line rewrite would corrupt it |
@@ -71,7 +71,7 @@ Consequences:
 
 ## 2. Side-by-side table legend
 
-`status` prints one row per reference key (then extra keys). Columns: `KEY`,
+`status` prints one row per reference key. Columns: `KEY`,
 `REF` (the reference line), one column per target file, `VALUES`.
 
 | Cell | Meaning |
@@ -79,7 +79,7 @@ Consequences:
 | `ok:12 set` | Key exists on canonical line 12; value non-empty |
 | `ok:12 empty` | Canonical line, empty value (`KEY=`) — preserved as-is |
 | `at:9 set` | Key exists but on line 9; must move to the reference line |
-| `--` | Key not set in this file (a placeholder line is expected) |
+| `--` | Key not set in this file (drift; `apply` materializes `KEY=`) |
 | `VALUES same` | Every file that has the key has an identical value fingerprint |
 | `VALUES diff` | At least two present values differ (expected across environments) |
 | `VALUES n/a` | Fewer than two files have the key — nothing to compare |
@@ -90,12 +90,14 @@ the extracted values; it is a comparison aid, not a reversible encoding.
 Per-file summary rows:
 
 ```text
-  .env.dev           ALIGNED (10 placeholder, 0 misplaced, 2 extra keys)
-  .env.prd           DRIFT   missing 7 (placeholder), 3 misplaced, 2 extra keys
+  .env.dev           ALIGNED (missing 0, misplaced 0, undeclared 0)
+  .env.prd           DRIFT   (missing 7, misplaced 3, undeclared 0)
 ```
 
-`ALIGNED` means every expected key is on its canonical line or has the
-placeholder there, and no unexpected assignment exists.
+`ALIGNED` means every reference key is a real assignment on its canonical line,
+no unexpected assignment exists, and the file has the reference's exact line
+count. Empty (`KEY=`) counts as present. `UNDECLARED` keys are listed below the
+summary and fail `verify`.
 
 ---
 
@@ -140,15 +142,18 @@ only regular files at the top level of `--dir` (symlinks are not followed).
 `apply` runs these gates in order, and **writes nothing** if any pre-write gate
 fails:
 
-1. **Parse** the reference and every target; any issue stops the run.
+1. **Parse** the reference and every target; any issue stops the run. A key
+   present only in a target is an undeclared-key error and also stops the run
+   before any write.
 2. **Plan** — compute which files need a rewrite and how many keys are missing /
    misplaced.
 3. **Backup** every target with `cp -p` into the backup dir (mode 700), and
    record a SHA-256 manifest.
 4. **Generate** into a private work dir and parse the generated file; it must be
    valid.
-5. **Compare value fingerprints** (original map vs generated map) — every key
-   must carry the same SHA-256; no key may be lost or added.
+5. **Compare value fingerprints** (original map vs generated map) — every
+   original key must survive with the same SHA-256; an added key is allowed only
+   when it is a missing reference key and its assignment is empty.
 6. **Alignment check** on the generated file before the move.
 7. **Atomic replace** in the target directory (`.env-sync-tmp.<pid>/` on the
    same filesystem), preserving the original mode.
@@ -176,7 +181,7 @@ preserved.
 |-----------|-----------|
 | Only the reference exists | `status`/`verify` report zero targets; `apply` is a no-op |
 | A target is already aligned with custom comments | Skipped (no write); comments kept |
-| A key exists only in `.env.prd` | Preserved as an extra key; placeholder in other targets |
+| A key exists only in `.env.prd` | Hard error until it is added to `.env.example` with a comment; then it is empty in the other files |
 | Value is empty (`KEY=`) | Preserved; `VALUES` shows `empty` |
 | Value contains `=`, spaces, `$`, quotes, `#`, tabs | Preserved byte-for-byte; hash-compared |
 | `export KEY=value` | Preserved with its `export ` prefix |
@@ -216,9 +221,12 @@ ref = parse(base/'proj/.env.example')
 for name in ('.env.dev', '.env.prd'):
     old, new = parse(base/'orig'/name), parse(base/'proj'/name)
     assert all(new.get(k, (0, ''))[1] == v[1] for k, v in old.items()), name
-    for k, (line, _) in ref.items():
-        if k in new: assert new[k][0] == line, (name, k)
-print('values + alignment: PASS')
+    for k in ref:
+        assert k in new, (name, k, 'missing')
+        assert new[k][0] == ref[k][0], (name, k, 'line')
+    for k in set(new) - set(old):
+        assert new[k][1] == '', (name, k, 'added non-empty')
+print('values + alignment + empty materialization: PASS')
 PY
 ```
 
@@ -227,6 +235,7 @@ Negative checks worth running before trusting a change:
 ```bash
 # duplicate key in the reference -> exit 2, writes nothing
 # CRLF / unterminated quote in a target -> exit 1, writes nothing
+# target-only key -> apply aborts, verify FAIL (add it to .env.example first)
 # tamper one value after apply -> verify --backup reports VALUE DRIFT
 ```
 
@@ -252,7 +261,7 @@ Negative checks worth running before trusting a change:
 |---------------|--------------|
 | `status` drift | Show the summary; propose `apply` only if the operator asked |
 | `verify` exit 1 | Treat as a gate failure; list the drifting files; do not claim aligned |
-| `apply` aborted pre-write | Quote the issue line, fix the cause (or ask), rerun; nothing was written |
+| `apply` aborted pre-write | Quote the issue line; for undeclared keys, add them to `.env.example` with a comment first, then rerun; nothing was written |
 | `apply` FAIL (restored) | Report `FAIL (restored)` with the backup path; do not retry blindly |
 | `verify --backup` VALUE DRIFT | A value changed after apply; investigate, do not overwrite the backup |
 | Reference invalid | Blocked: the operator must repair `.env.example` (layout authority) first |

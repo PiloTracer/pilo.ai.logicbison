@@ -8,9 +8,10 @@
 #     after every write; any mismatch aborts and restores the backups.
 #   * Keys that exist only in a target file are preserved, appended in one
 #     shared block so they also align across files.
-#   * A key missing from a target file becomes a comment placeholder
-#     (`# env-sync: KEY not set in this file`) - never an empty assignment,
-#     which would change runtime semantics from "unset" to "empty".
+#   * A key missing from a target file is materialized as an empty assignment
+#     (`KEY=`) on its canonical line (operator decision 2026-11-10). This can
+#     change runtime semantics from "unset" to "empty" - `apply` is the only
+#     writer and backs up first.
 #   * Nothing is printed from a value; status/verify only report line,
 #     presence and same/diff fingerprints.
 #
@@ -34,9 +35,6 @@ FILES_ARG=""
 BACKUP_ARG=""
 DRY_RUN=0
 MODE=""
-
-PLACEHOLDER_PREFIX="# env-sync: "
-PLACEHOLDER_SUFFIX=" not set in this file"
 
 usage() {
   cat <<'EOF'
@@ -70,6 +68,7 @@ say() { printf '%s\n' "$*"; }
 
 # --- hashing ----------------------------------------------------------------
 HASH_IMPL=""
+EMPTY_HASH=""
 detect_hash() {
   if command -v sha256sum >/dev/null 2>&1; then HASH_IMPL="sha256sum"
   elif command -v shasum >/dev/null 2>&1; then HASH_IMPL="shasum"
@@ -115,14 +114,12 @@ trap cleanup EXIT INT TERM
 # parse_env FILE MAP
 #   MAP:              LINE<TAB>KEY<TAB>VALUESHA<TAB>set|empty
 #   MAP.issues:       KIND<TAB>LINE<TAB>MESSAGE
-#   MAP.placeholders: LINE<TAB>KEY  (our own placeholder comments)
 #   Exit 0 valid, 1 issues found.
 parse_env() {
   local file="$1" map="$2" line trimmed work key val first last
-  local n=0 invalid=0 seen="" h state crlf=0 rest nbs=0 idx=0 dq sq
+  local n=0 invalid=0 seen="" h state crlf=0 nbs=0 idx=0 dq sq
   : > "${map}"
   : > "${map}.issues"
-  : > "${map}.placeholders"
 
   while IFS= read -r line || [ -n "${line}" ]; do
     n=$((n + 1))
@@ -133,20 +130,7 @@ parse_env() {
     trimmed="${line#"${line%%[![:space:]]*}"}"
     case "${trimmed}" in
       '') continue ;;
-      '#'*)
-        rest="${trimmed#"${PLACEHOLDER_PREFIX}"}"
-        if [ "${rest}" != "${trimmed}" ]; then
-          case "${rest}" in
-            *"${PLACEHOLDER_SUFFIX}")
-              key="${rest%"${PLACEHOLDER_SUFFIX}"}"
-              if [[ "${key}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-                printf '%s\t%s\n' "${n}" "${key}" >> "${map}.placeholders"
-              fi
-              ;;
-          esac
-        fi
-        continue
-        ;;
+      '#'*) continue ;;
     esac
 
     work="${trimmed}"
@@ -265,20 +249,10 @@ discover_targets() {
 REF_COUNT=0
 REF_LINES=0
 REF_BASE=""
-EXTRAS_COUNT=0
-
-# KEY<TAB>CANONICAL_LINE for every reference key, then every extra key
+# KEY<TAB>CANONICAL_LINE for every reference key. The reference is the sole
+# key set: a key that appears only in a target is an error (see apply/verify).
 build_expected() {
-  local extras="$1" i=0 key
-  : > "${WORK_DIR}/expected.tsv"
   awk -F'\t' '{ print $2 "\t" $1 }' "${WORK_DIR}/ref.map" > "${WORK_DIR}/expected.tsv"
-  if [ -s "${extras}" ]; then
-    while IFS= read -r key; do
-      [ -z "${key}" ] && continue
-      i=$((i + 1))
-      printf '%s\t%s\n' "${key}" "$((REF_LINES + 2 + i))" >> "${WORK_DIR}/expected.tsv"
-    done < "${extras}"
-  fi
 }
 
 line_of_key() { # MAP KEY -> line or empty
@@ -287,15 +261,11 @@ line_of_key() { # MAP KEY -> line or empty
 
 # file_aligned TARGET MAP -> 0 aligned, 1 needs rewrite
 file_aligned() {
-  local target="$1" map="$2" key exp got actual
+  local map="$2" key exp got
   while IFS=$'\t' read -r key exp; do
     got="$(line_of_key "${map}" "${key}")"
-    if [ -n "${got}" ]; then
-      [ "${got}" = "${exp}" ] || return 1
-    else
-      actual="$(sed -n "${exp}p" "${target}")"
-      [ "${actual}" = "${PLACEHOLDER_PREFIX}${key}${PLACEHOLDER_SUFFIX}" ] || return 1
-    fi
+    [ -n "${got}" ] || return 1
+    [ "${got}" = "${exp}" ] || return 1
   done < "${WORK_DIR}/expected.tsv"
 
   while IFS=$'\t' read -r ln key _h _st; do
@@ -309,12 +279,12 @@ file_aligned() {
 # generate_canonical TARGET OUT
 generate_canonical() {
   local target="$1" out="$2"
-  awk -v reffile="${REF}" -v extras="${WORK_DIR}/extras" -v refbase="${REF_BASE}" '
+  awk -v reffile="${REF}" '
     function is_assign(l,  t,p,k) {
       t = l
-      sub(/^[ \t]+/, "", t)
+      sub(/^[ 	]+/, "", t)
       if (t == "" || t ~ /^#/) return ""
-      sub(/^export[ \t]+/, "", t)
+      sub(/^export[ 	]+/, "", t)
       p = index(t, "=")
       if (p == 0) return ""
       k = substr(t, 1, p - 1)
@@ -329,12 +299,6 @@ generate_canonical() {
         refline[nref] = l
       }
       close(reffile)
-      nextras = 0
-      while ((getline k < extras) > 0) {
-        sub(/\r$/, "", k)
-        if (k != "") extra[++nextras] = k
-      }
-      close(extras)
     }
     {
       sub(/\r$/, "", $0)
@@ -345,35 +309,35 @@ generate_canonical() {
       for (i = 1; i <= nref; i++) {
         l = refline[i]
         k = is_assign(l)
-        if (k != "" && (k in raw)) print raw[k]
-        else if (k != "") print "# env-sync: " k " not set in this file"
-        else print l
-      }
-      if (nextras > 0) {
-        print ""
-        print "# --- env-sync: keys not in " refbase " (preserved; keep aligned) ---"
-        for (i = 1; i <= nextras; i++) {
-          k = extra[i]
+        if (k != "") {
           if (k in raw) print raw[k]
-          else print "# env-sync: " k " not set in this file"
-        }
+          else print ((l ~ /^[ \t]*export[ \t]+/) ? "export " : "") k "="
+        } else print l
       }
     }
   ' "${target}" > "${out}"
 }
 
-# compare_maps ORIG NEW -> 0 when the same keys carry the same fingerprints
-compare_maps() {
+# verify_preserved ORIG NEW -> 0 when every original value survives and every
+# added key is an empty assignment on an expected key (the materialized-missing
+# case). Added non-empty values are rejected: they would be silent value drift.
+verify_preserved() {
   local orig="$1" new="$2"
-  [ "$(awk 'END { print NR }' "${orig}")" = "$(awk 'END { print NR }' "${new}")" ] || return 1
-  awk -F'\t' 'NR == FNR { h[$2] = $3; next }
-               !($2 in h) || h[$2] != $3 { bad = 1 }
-               END { exit bad }' "${orig}" "${new}"
+  # every key/value in ORIG must survive in NEW (read NEW first, test ORIG)
+  awk -F'\t' 'NR == FNR { n[$2] = $3; next }
+               !($2 in n) || n[$2] != $3 { bad = 1 }
+               END { exit bad }' "${new}" "${orig}" || return 1
+  awk -F'\t' -v empty="${EMPTY_HASH}" 'NR == FNR { h[$2] = 1; next }
+               !($2 in h) && $3 != empty { bad = 1 }
+               END { exit bad }' "${orig}" "${new}" || return 1
+  awk -F'\t' -v expfile="${WORK_DIR}/expected.tsv" '
+    BEGIN { while ((getline l < expfile) > 0) { split(l, f, "\t"); e[f[1]] = 1 } }
+    !($2 in e) { bad = 1 } END { exit bad }' "${new}"
 }
 
 # --- status / verify --------------------------------------------------------
 render_report() {
-  local mode="$1" i=0 name key idx
+  local mode="$1" i=0 name
   : > "${WORK_DIR}/records.tsv"
 
   while IFS=$'\t' read -r idx key _h _st; do
@@ -381,46 +345,33 @@ render_report() {
   done < "${WORK_DIR}/ref.map"
 
   i=0
-  if [ -s "${WORK_DIR}/extras" ]; then
-    while IFS= read -r key; do
-      [ -z "${key}" ] && continue
-      i=$((i + 1))
-      printf 'E\t%s\t%s\n' "${i}" "${key}" >> "${WORK_DIR}/records.tsv"
-    done < "${WORK_DIR}/extras"
-  fi
-  EXTRAS_COUNT="${i}"
-
-  i=0
   for name in ${TARGETS[@]+"${TARGETS[@]}"}; do
     i=$((i + 1))
     printf 'F\t%s\t%s\n' "${i}" "${name}" >> "${WORK_DIR}/records.tsv"
     awk -F'\t' -v i="${i}" '{ printf "K\t%s\t%s\t%s\t%s\t%s\n", i, $1, $2, $3, $4 }' \
       "${WORK_DIR}/maps/${name}" >> "${WORK_DIR}/records.tsv"
-    while IFS=$'\t' read -r ln key; do
-      printf 'P\t%s\t%s\t%s\n' "${i}" "${ln}" "${key}" >> "${WORK_DIR}/records.tsv"
-    done < "${WORK_DIR}/maps/${name}.placeholders"
+    awk -F'\t' -v i="${i}" -v rf="${WORK_DIR}/refkeys" '
+      BEGIN { while ((getline k < rf) > 0) ref[k] = 1 }
+      !($2 in ref) { printf "U\t%s\t%s\n", i, $2 }' \
+      "${WORK_DIR}/maps/${name}" >> "${WORK_DIR}/records.tsv"
   done
 
   local rc=0
   awk -F'\t' -v mode="${mode}" -v refbase="${REF_BASE}" -v dir="${DIR}" \
       -v reflines="${REF_LINES}" '
     $1 == "R" { nr++; rline[$3] = $2; rorder[nr] = $3 }
-    $1 == "E" { nextras++; extra[nextras] = $3 }
     $1 == "F" { nf++; fname[$2] = $3 }
     $1 == "K" { tline[$2, $4] = $3; tstate[$2, $4] = $6; thash[$2, $4] = $5 }
-    $1 == "P" { ph[$2, $4] = $3 }
+    $1 == "U" { ucount[$2]++; uname[$2] = uname[$2] " " $3; nu++ }
     END {
-      for (i = 1; i <= nextras; i++) extraline[extra[i]] = reflines + 2 + i
-      nkeys = nr + nextras
-
       kw = 3
       for (i = 1; i <= nr; i++) if (length(rorder[i]) > kw) kw = length(rorder[i])
-      for (i = 1; i <= nextras; i++) if (length(extra[i]) > kw) kw = length(extra[i])
       fw = 17
 
       if (mode == "status") {
         printf "env-sync status - %s\n", dir
-        printf "reference: %s (%d keys)  targets: %d  extra keys: %d\n\n", refbase, nr, nf, nextras
+        printf "reference: %s (%d keys, %d lines)  targets: %d\n", refbase, nr, reflines, nf
+        printf "layout: every file must carry exactly these keys on these lines\n\n"
         printf "%-*s  %-4s", kw, "KEY", "REF"
         for (f = 1; f <= nf; f++) printf "  %-*s", fw, fname[f]
         printf "  %-6s\n", "VALUES"
@@ -429,16 +380,14 @@ render_report() {
         for (f = 1; f <= nf; f++) { printf "  "; for (i = 0; i < fw; i++) printf "-" }
         printf "  ------\n"
 
-        for (i = 1; i <= nkeys; i++) {
-          if (i <= nr) { key = rorder[i]; refcell = rline[key] "" }
-          else { key = extra[i - nr]; refcell = "--" }
-          printf "%-*s  %-4s", kw, key, refcell
+        for (i = 1; i <= nr; i++) {
+          key = rorder[i]
+          printf "%-*s  %-4s", kw, key, rline[key] ""
           present = 0; first = ""; same = 1
           for (f = 1; f <= nf; f++) {
             if ((f, key) in tline) {
               ln = tline[f, key]
-              canon = (i <= nr) ? rline[key] : extraline[key]
-              pre = (ln == canon) ? "ok:" : "at:"
+              pre = (ln == rline[key]) ? "ok:" : "at:"
               cell = pre ln " " tstate[f, key]
               present++
               if (first == "") first = thash[f, key]
@@ -458,35 +407,26 @@ render_report() {
 
       bad = 0
       for (f = 1; f <= nf; f++) {
-        drift = 0; misplaced = 0; ph_ok = 0; extras_n = 0
+        drift = 0; misplaced = 0; undecl = (f in ucount) ? ucount[f] : 0
         for (i = 1; i <= nr; i++) {
           key = rorder[i]
           if ((f, key) in tline) {
             if (tline[f, key] != rline[key]) misplaced++
-          } else if ((f, key) in ph && ph[f, key] + 0 == rline[key] + 0) {
-            ph_ok++
           } else {
             drift++
           }
         }
-        for (i = 1; i <= nextras; i++) {
-          key = extra[i]
-          if ((f, key) in tline) {
-            extras_n++
-            if (tline[f, key] != extraline[key]) misplaced++
-          } else if ((f, key) in ph && ph[f, key] + 0 == extraline[key] + 0) {
-            ph_ok++
-          } else {
-            drift++
-          }
-        }
-        if (drift || misplaced) { bad = 1; status = "DRIFT" } else { status = "ALIGNED" }
+        if (drift || misplaced || undecl) { bad = 1; status = "DRIFT" } else { status = "ALIGNED" }
         if (mode == "status")
-          printf "  %-18s %-7s missing %d (placeholder), %d misplaced, %d extra keys\n", \
-                 fname[f], status, ph_ok, misplaced, extras_n
+          printf "  %-18s %-7s missing %d, misplaced %d, undeclared %d\n", \
+                 fname[f], status, drift, misplaced, undecl
         else
-          printf "  %-18s %-7s (%d placeholder, %d misplaced, %d extra keys)\n", \
-                 fname[f], status, ph_ok, misplaced, extras_n
+          printf "  %-18s %-7s (missing %d, misplaced %d, undeclared %d)\n", \
+                 fname[f], status, drift, misplaced, undecl
+      }
+      if (nu > 0) {
+        printf "\nUndeclared keys (not in %s; add them there with a comment, then re-run):\n", refbase
+        for (f = 1; f <= nf; f++) if (f in uname) printf "  %s:%s\n", fname[f], uname[f]
       }
       if (mode == "verify") {
         if (bad) { printf "verify: FAIL\n"; exit 1 }
@@ -501,9 +441,28 @@ render_report() {
 CHANGED=()
 BACKUP_DIR=""
 
+print_undeclared() {
+  local name keys
+  for name in ${TARGETS[@]+"${TARGETS[@]}"}; do
+    keys="$(awk -F'\t' -v rf="${WORK_DIR}/refkeys" '
+      BEGIN { while ((getline k < rf) > 0) ref[k] = 1 }
+      !($2 in ref) { printf "%s ", $2 }' "${WORK_DIR}/maps/${name}")"
+    [ -n "${keys}" ] && say "  ${name}: ${keys% }"
+  done
+}
+
 apply_run() {
   local name target new key exp got before_missing=0 before_misplaced=0
-  local planned=0 total_values=0 mode failed manifest_hash manifest_name
+  local planned=0 total_values=0 added_total=0 mode failed manifest_hash manifest_name
+
+  if [ -s "${WORK_DIR}/undeclared" ]; then
+    say "apply: ABORTED - key(s) exist in a target but not in ${REF_BASE}:"
+    print_undeclared
+    say "  add them to ${REF} with a comment explaining where they are enabled/disabled, then re-run."
+    say "  no files written (all files must share one key set and one line layout)."
+    say "RESULT: FAIL (reference incomplete)"
+    return 1
+  fi
 
   for name in ${TARGETS[@]+"${TARGETS[@]}"}; do
     file_aligned "${DIR}/${name}" "${WORK_DIR}/maps/${name}" || planned=$((planned + 1))
@@ -511,6 +470,7 @@ apply_run() {
 
   if [ "${planned}" -eq 0 ]; then
     say "apply: all ${#TARGETS[@]} target file(s) already aligned - nothing to write"
+    say "layout: ${REF_LINES} lines, ${REF_COUNT} keys - identical in every target"
     say "RESULT: PASS"
     return 0
   fi
@@ -526,6 +486,7 @@ apply_run() {
         [ "${got}" = "${exp}" ] || before_misplaced=$((before_misplaced + 1))
       fi
     done < "${WORK_DIR}/expected.tsv"
+    added_total=$((added_total + before_missing))
     say "  ${name}: rewrite (missing ${before_missing}, misplaced ${before_misplaced})"
   done
 
@@ -560,7 +521,7 @@ apply_run() {
       print_issues "${WORK_DIR}/maps/new.${name}" "${name} (generated)"
       return 1
     fi
-    if ! compare_maps "${WORK_DIR}/maps/${name}" "${WORK_DIR}/maps/new.${name}"; then
+    if ! verify_preserved "${WORK_DIR}/maps/${name}" "${WORK_DIR}/maps/new.${name}"; then
       say "apply: ABORTED - value fingerprint mismatch for ${name} (nothing written)"
       return 1
     fi
@@ -613,7 +574,7 @@ apply_run() {
       failed=1
       continue
     fi
-    if ! compare_maps "${WORK_DIR}/maps/${name}" "${WORK_DIR}/maps/after.${name}"; then
+    if ! verify_preserved "${WORK_DIR}/maps/${name}" "${WORK_DIR}/maps/after.${name}"; then
       say "apply: FAIL - value fingerprint changed in ${name}"
       failed=1
       continue
@@ -643,7 +604,8 @@ apply_run() {
       || say "WARNING: backup hash drift for ${manifest_name} (${BACKUP_DIR})"
   done < "${BACKUP_DIR}/manifest.txt"
 
-  say "apply: rewrote ${#CHANGED[@]} file(s); ${total_values} key values verified unchanged"
+  say "apply: rewrote ${#CHANGED[@]} file(s); ${total_values} keys present, existing values unchanged, ${added_total} added empty"
+  say "layout: ${REF_LINES} lines, ${REF_COUNT} keys - identical in every target"
   say "backup: ${BACKUP_DIR}"
   say "RESULT: PASS"
   return 0
@@ -667,7 +629,7 @@ verify_backup() {
       bad=1
       continue
     fi
-    if ! compare_maps "${WORK_DIR}/backup.${base}" "${WORK_DIR}/current.${base}"; then
+    if ! verify_preserved "${WORK_DIR}/backup.${base}" "${WORK_DIR}/current.${base}"; then
       say "  ${base}: VALUE DRIFT (backup vs current)"
       bad=1
       continue
@@ -718,6 +680,7 @@ main() {
   REF_BASE="$(basename "${REF}")"
 
   detect_hash
+  EMPTY_HASH="$(value_hash "")"
   WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/env-sync-work.XXXXXX")" \
     || die "cannot create temporary work dir"
   mkdir -p "${WORK_DIR}/maps"
@@ -741,18 +704,20 @@ main() {
     fi
   done
 
-  # extras union, first-seen order across sorted targets
+  # keys present in a target but absent from the reference are a hard error:
+  # the reference must own the full key set (with a comment explaining where
+  # each environment-specific key is enabled/disabled).
   awk -F'\t' '{ print $2 }' "${WORK_DIR}/ref.map" | LC_ALL=C sort -u > "${WORK_DIR}/refkeys"
-  : > "${WORK_DIR}/extras"
+  : > "${WORK_DIR}/undeclared"
   if [ "${#TARGETS[@]}" -gt 0 ]; then
     for name in ${TARGETS[@]+"${TARGETS[@]}"}; do
       awk -F'\t' '{ print $2 }' "${WORK_DIR}/maps/${name}"
     done | awk -v rf="${WORK_DIR}/refkeys" '
       BEGIN { while ((getline k < rf) > 0) ref[k] = 1 }
       !($0 in ref) && !($0 in seen) { seen[$0] = 1; print }
-    ' > "${WORK_DIR}/extras"
+    ' > "${WORK_DIR}/undeclared"
   fi
-  build_expected "${WORK_DIR}/extras"
+  build_expected
 
   if [ "${#TARGETS[@]}" -eq 0 ]; then
     say "env-sync ${MODE} - ${DIR}"

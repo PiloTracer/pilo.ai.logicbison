@@ -1,7 +1,7 @@
 {
   "ref": "AIOS-1",
   "updated": "2026-11-10",
-  "goal": "Add the env-sync skill + scripts/env-sync.sh: align every .env* file to the .env.example key layout (same key line in every file), preserve all values byte-for-byte (SHA-256 before/after), keep target-only keys in a shared aligned block, use comment placeholders for missing keys, and provide a side-by-side read-only comparison. Tested on a byte-identical copy of /mnt/work/Projects/system-news with backups; the live project stayed read-only. Owner answered the protected-registry approval with \"follow your best recommendation\" (2026-11-10): .cursorrules + template rows added, and the live system-news apply is approved with a persistent backup.",
+  "goal": "Add the env-sync skill + scripts/env-sync.sh: align every .env* file to the .env.example key layout (same key line in every file), preserve all values byte-for-byte (SHA-256 before/after), keep target-only keys in a shared aligned block, use comment placeholders for missing keys, and provide a side-by-side read-only comparison. Tested on a byte-identical copy of /mnt/work/Projects/system-news with backups; the live project stayed read-only. Owner answered the protected-registry approval with \"follow your best recommendation\" (2026-11-10): .cursorrules + template rows added, and the live system-news apply is approved with a persistent backup. Follow-up (operator 2026-11-10): materialize missing keys as empty assignments instead of comment placeholders; update script/docs/tests and re-apply the live system-news trio with a second backup.",
   "allowed_paths": [
     ".work/touch-scope",
     ".work/context/HANDOFF.md",

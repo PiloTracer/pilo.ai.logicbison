@@ -34,19 +34,23 @@ codes, test recipe:** `reference.md`
 - **Never print or read values into chat.** No `cat`, `source`, or value diff.
   `status`/`verify` report line numbers, `set`/`empty`, and same/diff
   fingerprints only. `.cursorrules` § Data Privacy applies.
-- **Missing key → placeholder comment**, never `KEY=`. Adding an empty
-  assignment changes runtime semantics from *unset* to *empty*. The placeholder
-  keeps the line number and says so in plain text.
+- **Missing key → empty assignment** (`KEY=`) on its canonical line (operator
+  decision 2026-11-10). Every reference key is present in every file, so the
+  layout is greppable and strictly aligned. Caveat: this can change runtime
+  semantics from *unset* to *empty*; `apply` backs up first and is the only
+  writer, and existing values are still never modified.
 - **Back up before writing.** Default backup dir is outside the repo
   (`$TMPDIR/env-sync-backup.*`, mode 700, copies keep the original mode). Use
   `--backup-dir` when the operator needs the backup to survive a reboot.
 - **Fail closed, never guess.** Refuse (no writes) on a broken reference,
   duplicate keys, multiline/continued values, unparsable lines, or CRLF input.
   Report the exact line and stop.
-- **Extras are preserved, not dropped.** Keys present in a target but absent
-  from the reference are kept in one shared trailing block so they align across
-  files, and listed in the report for the operator to promote into
-  `.env.example` or delete deliberately.
+- **The reference owns the key set.** A key present in any target but absent
+  from `.env.example` is a hard error: `apply` aborts, `status`/`verify` report
+  it. Add it to `.env.example` first, with a comment explaining where it is
+  enabled or disabled (environment-only keys must exist in every file, empty
+  where unused). This is what guarantees **identical line counts and identical
+  key-to-line maps** in every file — no trailing extras block.
 - **`status`/`verify` are read-only. `apply` is the only writer** and is itself
   the same-message permission to modify `.env*` files (which are protected
   files). Never rewrite `.env*` outside an explicit `apply` invocation.
@@ -113,12 +117,13 @@ gate.
 |------|---------|
 | `ok:N` | key is on canonical line `N` |
 | `at:N` | key exists but sits on line `N` (must move) |
-| `--` | key is not set in that file (placeholder line expected) |
+| `--` | key is not set in that file (drift; `apply` materializes `KEY=`) |
 | `set` / `empty` | value is non-empty / empty — the value itself is never shown |
 | `VALUES same/diff/n/a` | value fingerprints across files that have the key |
 
-4. Flag anything that needs a decision: missing keys (placeholder), extra keys
-   (target-only), and any `INVALID` file. Do not propose value edits.
+4. Flag anything that needs a decision: missing keys (they become `KEY=` on
+   apply), **undeclared keys** (must be promoted into `.env.example` with a
+   comment first), and any `INVALID` file. Do not propose value edits.
 
 ---
 
@@ -136,6 +141,10 @@ A5 backup proof → A6 report.
 4. If a target is invalid (duplicate key, multiline value, CRLF, unparsable
    line), **stop** with the exact `path:L<n>` and the fix. Do not edit the file
    to make it parse unless the operator asked for that separately.
+5. If `status` reports **undeclared** keys (present in a target, absent from the
+   reference), **stop before `apply`**. Add each key to `.env.example` with a
+   comment explaining where it is enabled/disabled, then re-run. Never accept a
+   trailing extras block: line counts and key lines must stay identical.
 
 ### A2 — Review gate
 
@@ -179,16 +188,16 @@ are unchanged and the layout is aligned. Include the result in the report.
 ```markdown
 ## env-sync applied - <project>
 
-**Directory:** <path> · **Reference:** .env.example (<N> keys)
+**Directory:** <path> · **Reference:** .env.example (<N> keys, <L> lines)
 **Result:** PASS | FAIL (restored)
+**Layout:** <L> lines, <N> keys - identical in every file
 
 | File | Before | After | Values |
 |------|--------|-------|--------|
-| .env.dev | missing 10, misplaced 48 | aligned (10 placeholder) | 51 unchanged |
-| .env.prd | missing 7, misplaced 51 | aligned (7 placeholder) | 54 unchanged |
+| .env.dev | missing 10, misplaced 48 | aligned (10 empty) | 51 unchanged |
+| .env.prd | missing 7, misplaced 51 | aligned (7 empty) | 54 unchanged |
 
-**Extra keys (target-only):** CADDY_HTTP_PORT, CADDY_HTTPS_PORT — promote to
-`.env.example` or remove deliberately.
+**Undeclared keys:** none (the reference owns the key set)
 **Backup:** <path> (mode 600 copies, 700 dir)
 **Proof:** `verify` PASS; `verify --backup` PASS
 ```
@@ -231,10 +240,10 @@ never claim success from a partial layout.
 
 - Editing a value (or an `.env.example` placeholder) to make files "match".
 - Printing raw values, `cat`-ing `.env*`, `source`-ing them, or diffing values.
-- Adding `KEY=` for a missing key — use the placeholder comment.
+- Leaving a key absent from a file when the operator asked for a full layout — apply materializes `KEY=`.
 - Running `apply` without a backup or without a post-write `verify`.
-- Treating `.env.example` as a target or rewriting the reference.
-- Dropping target-only keys, or silently leaving them unaligned.
+- Expecting `apply` to rewrite `.env.example` (it never does) or adding an environment-only key to a target without promoting it to the reference first.
+- Leaving a target-only key out of `.env.example`, or accepting an extras block that breaks the identical line count.
 - Continuing after a `duplicate` / `multiline` / `CRLF` finding.
 - Claiming aligned without `verify` output as evidence.
 
