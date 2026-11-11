@@ -1,8 +1,9 @@
 # env-sync — reference
 
 Detailed contract for `@env-sync` and `scripts/env-sync.sh`: layout model,
-side-by-side table legend, safety guarantees, exit codes, failure handling, and
-the test recipe used to prove value preservation.
+side-by-side table legend, safety guarantees, exit codes, failure handling, the
+`scripts/env-sync-test.sh` regression suite, and the manual recipe used to prove
+value and layout preservation.
 
 ---
 
@@ -12,9 +13,9 @@ the test recipe used to prove value preservation.
 `.env*` file, a rewrite produces:
 
 1. **Reference lines, in order.** Comments and blank lines are copied from the
-   reference. Each reference key line is replaced by the target's own original
-   line for that key — prefix (`export `) and everything after `=` (inline
-   comment included) are kept exactly.
+   reference **byte-for-byte**. Each reference key line is replaced by the
+   target's own original line for that key — prefix (`export `) and everything
+   after `=` (inline comment included) are kept exactly.
 2. **Empty assignment for a missing key.** A reference key absent from the
    target becomes, at the same line number:
 
@@ -31,16 +32,21 @@ the test recipe used to prove value preservation.
    `.env*` file. A key found only in a target is a hard error: `apply` aborts,
    `status`/`verify` report it. Add it to `.env.example` first, with a comment
    explaining where it is enabled or disabled (environment-only keys must exist
-   in every file, empty where unused), then re-run. This is what keeps the total
-   line count and the key-to-line map identical in every file.
+   in every file, empty where unused), then re-run.
 
 Consequences:
 
 - Every key is on the same line number in every file, present as a real
   assignment (`set` or `empty`) — no comment placeholders, no trailing block.
-- All files have the same total line count and the same key set.
-- A file that is already structurally aligned is **not rewritten**, so custom
-  local comments survive when no key needs to move.
+- Every non-key line (comment or blank) is byte-identical at the same line
+  number in every file, and all files have the reference's exact line count.
+- A file is **aligned** only when all of the above is true. `layout:N` counts
+  the comment/blank-line mismatches plus the line-count difference; `layout 0`
+  is required for `ALIGNED`.
+- A file that is already aligned is **not rewritten**. A target-only comment is
+  therefore preserved only if it already matches the reference exactly; any
+  comment/blank/line-count difference is drift and triggers a rewrite from the
+  reference skeleton. Put shared comments in `.env.example`.
 
 ### What is preserved
 
@@ -52,8 +58,9 @@ Consequences:
 | Inline comment on a value line | Yes (part of the value line) |
 | File mode | Yes (`chmod` to the original mode before the atomic rename) |
 | `.env.example` / reference file | Never written |
-| Custom comments in a file that needs a rewrite | No — regenerated from the reference; the drift report lists the file |
-| Custom comments in an already-aligned file | Yes — file is skipped |
+| Custom comments in a file that needs a rewrite | No — regenerated from the reference; `layout:N` counts the difference |
+| Custom comments that already match the reference | Yes — the file is skipped |
+| Custom comments that differ from the reference | No — comment drift is drift; the file is rewritten from the reference |
 
 ### What is rejected (no writes)
 
@@ -87,16 +94,23 @@ Consequences:
 Values are never printed. `same`/`diff` is computed from SHA-256 fingerprints of
 the extracted values; it is a comparison aid, not a reversible encoding.
 
-Per-file summary rows:
+Per-file summary rows add `layout:N`:
 
 ```text
-  .env.dev           ALIGNED (missing 0, misplaced 0, undeclared 0)
-  .env.prd           DRIFT   (missing 7, misplaced 3, undeclared 0)
+  .env.dev           ALIGNED (missing 0, misplaced 0, layout 0, undeclared 0)
+  .env.prd           DRIFT   (missing 7, misplaced 3, layout 4, undeclared 0)
 ```
 
-`ALIGNED` means every reference key is a real assignment on its canonical line,
-no unexpected assignment exists, and the file has the reference's exact line
-count. Empty (`KEY=`) counts as present. `UNDECLARED` keys are listed below the
+`layout:N` is the number of non-key reference lines (comments, blanks) that do
+not match at their line number, plus the absolute line-count difference. It is
+the part of the 1-to-1 contract that key-only tools miss: a file can have every
+key on the right line and still fail because a comment was edited, a blank line
+was added, or the reference gained a comment block.
+
+`ALIGNED` means `missing 0`, `misplaced 0`, `layout 0`, `undeclared 0`: every
+reference key is a real assignment on its canonical line, every non-key line
+matches the reference, the line count is exact, and no unexpected assignment
+exists. Empty (`KEY=`) counts as present. `UNDECLARED` keys are listed below the
 summary and fail `verify`.
 
 ---
@@ -122,15 +136,16 @@ env-sync.sh help
 | `--dry-run` | off | `apply` validates and prints the plan; writes nothing |
 
 Default target discovery excludes the reference and backup/temp suffixes
-(`*.bak`, `*.orig`, `*.rej`, `*.swp`, `*.tmp`, `*~`, `.env-sync*`) and considers
-only regular files at the top level of `--dir` (symlinks are not followed).
+(`*.bak`, `*.orig`, `*.rej`, `*.swp`, `*.tmp`, `*.keep`, `*.save`, `*.old`,
+`*.backup`, `*.dist`, `*~`, `.env-sync*`) and considers only regular files at the
+top level of `--dir` (symlinks are not followed).
 
 ### Exit codes
 
 | Code | Meaning |
 |------|---------|
 | `0` | pass / aligned / no-op |
-| `1` | drift (`verify`), invalid input, aborted, or restored after failure |
+| `1` | drift (keys or layout), invalid input, aborted, or restored after failure |
 | `2` | usage error, missing/unparseable reference, no hashing tool |
 
 `status` renders the drift table but exits `0`; use `verify` as the gate.
@@ -146,7 +161,7 @@ fails:
    present only in a target is an undeclared-key error and also stops the run
    before any write.
 2. **Plan** — compute which files need a rewrite and how many keys are missing /
-   misplaced.
+   misplaced, plus the `layout` (comment/blank/line-count) difference.
 3. **Backup** every target with `cp -p` into the backup dir (mode 700), and
    record a SHA-256 manifest.
 4. **Generate** into a private work dir and parse the generated file; it must be
@@ -154,15 +169,17 @@ fails:
 5. **Compare value fingerprints** (original map vs generated map) — every
    original key must survive with the same SHA-256; an added key is allowed only
    when it is a missing reference key and its assignment is empty.
-6. **Alignment check** on the generated file before the move.
+6. **Alignment + skeleton check** on the generated file before the move: exact
+   line count, byte-identical non-key lines, and every key on its reference line.
 7. **Atomic replace** in the target directory (`.env-sync-tmp.<pid>/` on the
    same filesystem), preserving the original mode.
-8. **Post-write verify** — parse, value fingerprints, alignment. Any failure
-   restores **all** changed files from the backup and exits `1`.
+8. **Post-write verify** — parse, value fingerprints, alignment, and skeleton.
+   Any failure restores **all** changed files from the backup and exits `1`.
 9. **Backup integrity** — re-hash the backup copies against the manifest.
 
 `verify --backup DIR` re-runs the value comparison between each backup file and
-its current counterpart; it is the independent audit of an earlier apply.
+its current counterpart and re-checks the current layout; it is the independent
+audit of an earlier apply.
 
 ### Restoring manually
 
@@ -180,18 +197,31 @@ preserved.
 | Situation | Behaviour |
 |-----------|-----------|
 | Only the reference exists | `status`/`verify` report zero targets; `apply` is a no-op |
-| A target is already aligned with custom comments | Skipped (no write); comments kept |
+| A target is already aligned with comments that match the reference | Skipped (no write); comments kept |
+| A target has a comment that differs from the reference | `layout` drift; `apply` rewrites the file from the reference, dropping the target-only text |
 | A key exists only in `.env.prd` | Hard error until it is added to `.env.example` with a comment; then it is empty in the other files |
 | Value is empty (`KEY=`) | Preserved; `VALUES` shows `empty` |
 | Value contains `=`, spaces, `$`, quotes, `#`, tabs | Preserved byte-for-byte; hash-compared |
 | `export KEY=value` | Preserved with its `export ` prefix |
-| Reference has trailing comments after the last key | Extra-key block is appended after them; line numbers account for the full reference |
+| Reference has trailing comments after the last key | They are part of the layout; every target must have them at the same lines |
+| Target has extra trailing blank/comment lines | `layout` drift; `apply` removes them to match the reference line count |
+| A commented-out assignment differs (`# KEY=old` vs `# KEY=`) | Comment drift; the reference text wins. Commented values are comments, not data |
+| Reference gains a comment block between keys | Keys after it shift; `apply` inserts the comments and moves the target keys to the new canonical lines |
 | `.env` symlink | Not followed by default (regular files only); name the real file with `--files` |
 | Apply interrupted | Backup dir remains; work/temp dirs are cleaned by the EXIT trap |
 
 ---
 
 ## 6. Test recipe (reproducible)
+
+Run the self-contained regression suite first (dummy values, no live secrets):
+
+```bash
+bash scripts/env-sync-test.sh
+# env-sync-test: PASS (56 checks)
+```
+
+Manual recipe against a copy of the real trio:
 
 ```bash
 # 1. Copy the real env trio and keep pristine originals
@@ -207,17 +237,24 @@ bash scripts/env-sync.sh apply --dir /tmp/envtest/proj --backup-dir /tmp/envtest
 bash scripts/env-sync.sh verify --dir /tmp/envtest/proj
 bash scripts/env-sync.sh verify --backup /tmp/envtest/backup --dir /tmp/envtest/proj
 
-# 4. Independent check (does not use env-sync): values and line numbers
+# 4. Independent check (does not use env-sync): values, key lines, comments
 python3 - <<'PY'
 import re, pathlib
+KEY = re.compile(r'^(?:export[ \t]+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$')
 def parse(p):
     out = {}
     for i, l in enumerate(p.read_text().splitlines(), 1):
-        m = re.match(r'^(?:export[ \t]+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$', l)
+        m = KEY.match(l)
         if m: out[m.group(1)] = (i, m.group(2))
+    return out
+def skeleton(p):
+    out = []
+    for l in p.read_text().splitlines():
+        out.append('<ASSIGNMENT>' if KEY.match(l) else l)
     return out
 base = pathlib.Path('/tmp/envtest')
 ref = parse(base/'proj/.env.example')
+ref_skel = skeleton(base/'proj/.env.example')
 for name in ('.env.dev', '.env.prd'):
     old, new = parse(base/'orig'/name), parse(base/'proj'/name)
     assert all(new.get(k, (0, ''))[1] == v[1] for k, v in old.items()), name
@@ -226,7 +263,8 @@ for name in ('.env.dev', '.env.prd'):
         assert new[k][0] == ref[k][0], (name, k, 'line')
     for k in set(new) - set(old):
         assert new[k][1] == '', (name, k, 'added non-empty')
-print('values + alignment + empty materialization: PASS')
+    assert skeleton(base/'proj'/name) == ref_skel, (name, 'comment/blank/line drift')
+print('values + key alignment + comment skeleton: PASS')
 PY
 ```
 
@@ -237,6 +275,8 @@ Negative checks worth running before trusting a change:
 # CRLF / unterminated quote in a target -> exit 1, writes nothing
 # target-only key -> apply aborts, verify FAIL (add it to .env.example first)
 # tamper one value after apply -> verify --backup reports VALUE DRIFT
+# edit one comment after apply -> verify FAIL with layout 1, apply restores it
+# append one blank line after apply -> verify FAIL, apply removes it
 ```
 
 ---
@@ -244,8 +284,8 @@ Negative checks worth running before trusting a change:
 ## 7. Security notes
 
 - Values never reach stdout/stderr, the table, or the report. Only key names,
-  line numbers, `set`/`empty`, and hashes of values (used for equality) exist in
-  temporary maps.
+  line numbers, `set`/`empty`, `layout` counts, and hashes of values (used for
+  equality) exist in temporary maps.
 - Generated files, work files, and backups contain raw values. `apply` uses a
   `mktemp -d` work dir (mode 700), a private staging dir inside the project, and
   a backup dir with mode 700; the default backup location is outside the repo.
@@ -259,9 +299,10 @@ Negative checks worth running before trusting a change:
 
 | Script result | Agent action |
 |---------------|--------------|
-| `status` drift | Show the summary; propose `apply` only if the operator asked |
-| `verify` exit 1 | Treat as a gate failure; list the drifting files; do not claim aligned |
+| `status` drift | Show the summary; propose `apply` only if the operator asked. `layout:N` means comments/blank lines/line count differ, not values |
+| `verify` exit 1 | Treat as a gate failure; list the drifting files and whether the cause is `misplaced` (keys) or `layout` (comments/blank lines/line count); do not claim aligned |
 | `apply` aborted pre-write | Quote the issue line; for undeclared keys, add them to `.env.example` with a comment first, then rerun; nothing was written |
 | `apply` FAIL (restored) | Report `FAIL (restored)` with the backup path; do not retry blindly |
 | `verify --backup` VALUE DRIFT | A value changed after apply; investigate, do not overwrite the backup |
+| `verify --backup` "layout is not aligned" | Values survived but comments/blank lines/line count drifted; run `apply` and re-check |
 | Reference invalid | Blocked: the operator must repair `.env.example` (layout authority) first |

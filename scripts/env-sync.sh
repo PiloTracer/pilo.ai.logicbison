@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
-# env-sync.sh - align every .env* file to the .env.example key layout.
+# env-sync.sh - align every .env* file to the .env.example line layout.
 #
 # Guarantees:
-#   * .env.example is the reference: each of its keys lands on the SAME line
-#     number in every target file.
+#   * .env.example is the reference: every one of its lines maps 1-to-1 to the
+#     same line number in every target file. A reference key line carries that
+#     key in the target; every non-key line (comment or blank) must be
+#     byte-identical. Line counts must match exactly.
+#   * Comment or blank-line drift is real drift: `verify` fails and `apply`
+#     rewrites the target from the reference skeleton. Put comments that must
+#     exist in every file in .env.example; target-only comments are not kept
+#     when a rewrite is needed.
 #   * No value is ever modified. Values are compared by SHA-256 before and
 #     after every write; any mismatch aborts and restores the backups.
-#   * Keys that exist only in a target file are preserved, appended in one
-#     shared block so they also align across files.
+#   * A key present only in a target file is a hard error: the reference owns
+#     the key set, so all files also share one key-to-line map.
 #   * A key missing from a target file is materialized as an empty assignment
 #     (`KEY=`) on its canonical line (operator decision 2026-11-10). This can
 #     change runtime semantics from "unset" to "empty" - `apply` is the only
@@ -53,9 +59,14 @@ Reference: <dir>/.env.example unless --ref is given. Targets: every regular
 <dir>/.env* file except the reference and backup/temp suffixes, or the exact
 basenames listed with --files.
 
+Layout authority: the reference line for line, comments and blank lines
+included. Every target must have the same line count and the same non-key
+lines; each reference key must sit on its reference line with the target's own
+value. Comment/blank drift is drift.
+
 Safety: apply backs up every target outside the repo, verifies key/value
-fingerprints before and after the atomic replace, and restores all backups if
-any check fails. Values are never printed.
+fingerprints and the full line skeleton before and after the atomic replace,
+and restores all backups if any check fails. Values are never printed.
 EOF
 }
 
@@ -238,7 +249,7 @@ discover_targets() {
     b="${p##*/}"
     [ "${b}" = "$(basename "${REF}")" ] && continue
     case "${b}" in
-      *.bak|*.orig|*.rej|*.swp|*.tmp|*~) continue ;;
+      *.bak|*.orig|*.rej|*.swp|*.tmp|*.keep|*.save|*.old|*.backup|*.dist|*~) continue ;;
       .env-sync.*|.env-sync-*) continue ;;
     esac
     TARGETS+=("${b}")
@@ -259,9 +270,53 @@ line_of_key() { # MAP KEY -> line or empty
   awk -F'\t' -v k="$2" '$2 == k { print $1; exit }' "$1"
 }
 
-# file_aligned TARGET MAP -> 0 aligned, 1 needs rewrite
+# layout_drift TARGET -> count of non-key reference lines that do not match the
+# target at the same line number, plus the absolute line-count difference.
+# Key-line placement is checked separately by file_aligned (and reported as
+# "misplaced"), so this counts only comments, blank lines, and missing/extra
+# lines.
+layout_drift() {
+  awk -v reffile="${REF}" '
+    function keyof(l,  t,p,k) {
+      t = l
+      sub(/^[ \t]+/, "", t)
+      if (t == "" || t ~ /^#/) return ""
+      sub(/^export[ \t]+/, "", t)
+      p = index(t, "=")
+      if (p == 0) return ""
+      k = substr(t, 1, p - 1)
+      if (k !~ /^[A-Za-z_][A-Za-z0-9_]*$/) return ""
+      return k
+    }
+    BEGIN {
+      n = 0
+      while ((getline l < reffile) > 0) {
+        sub(/\r$/, "", l)
+        refl[++n] = l
+      }
+      close(reffile)
+    }
+    {
+      sub(/\r$/, "", $0)
+      cur[NR] = $0
+    }
+    END {
+      d = (NR > n) ? NR - n : n - NR
+      m = (NR < n) ? NR : n
+      for (i = 1; i <= m; i++)
+        if (keyof(refl[i]) == "" && cur[i] != refl[i]) d++
+      print d
+    }
+  ' "$1"
+}
+
+# file_aligned TARGET MAP -> 0 aligned, 1 needs rewrite.
+# "Aligned" is the full 1-to-1 contract: exact line count, byte-identical
+# non-key lines, every reference key on its reference line, no extra keys.
 file_aligned() {
-  local map="$2" key exp got
+  local target="$1" map="$2" key exp got
+  [ "$(layout_drift "${target}")" = "0" ] || return 1
+
   while IFS=$'\t' read -r key exp; do
     got="$(line_of_key "${map}" "${key}")"
     [ -n "${got}" ] || return 1
@@ -348,6 +403,7 @@ render_report() {
   for name in ${TARGETS[@]+"${TARGETS[@]}"}; do
     i=$((i + 1))
     printf 'F\t%s\t%s\n' "${i}" "${name}" >> "${WORK_DIR}/records.tsv"
+    printf 'L\t%s\t%s\n' "${i}" "$(layout_drift "${DIR}/${name}")" >> "${WORK_DIR}/records.tsv"
     awk -F'\t' -v i="${i}" '{ printf "K\t%s\t%s\t%s\t%s\t%s\n", i, $1, $2, $3, $4 }' \
       "${WORK_DIR}/maps/${name}" >> "${WORK_DIR}/records.tsv"
     awk -F'\t' -v i="${i}" -v rf="${WORK_DIR}/refkeys" '
@@ -361,6 +417,7 @@ render_report() {
       -v reflines="${REF_LINES}" '
     $1 == "R" { nr++; rline[$3] = $2; rorder[nr] = $3 }
     $1 == "F" { nf++; fname[$2] = $3 }
+    $1 == "L" { lay[$2] = $3 }
     $1 == "K" { tline[$2, $4] = $3; tstate[$2, $4] = $6; thash[$2, $4] = $5 }
     $1 == "U" { ucount[$2]++; uname[$2] = uname[$2] " " $3; nu++ }
     END {
@@ -371,7 +428,7 @@ render_report() {
       if (mode == "status") {
         printf "env-sync status - %s\n", dir
         printf "reference: %s (%d keys, %d lines)  targets: %d\n", refbase, nr, reflines, nf
-        printf "layout: every file must carry exactly these keys on these lines\n\n"
+        printf "layout: every file must carry exactly these keys and the reference comment/blank lines\n\n"
         printf "%-*s  %-4s", kw, "KEY", "REF"
         for (f = 1; f <= nf; f++) printf "  %-*s", fw, fname[f]
         printf "  %-6s\n", "VALUES"
@@ -408,6 +465,7 @@ render_report() {
       bad = 0
       for (f = 1; f <= nf; f++) {
         drift = 0; misplaced = 0; undecl = (f in ucount) ? ucount[f] : 0
+        layoutn = (f in lay) ? lay[f] : 0
         for (i = 1; i <= nr; i++) {
           key = rorder[i]
           if ((f, key) in tline) {
@@ -416,14 +474,16 @@ render_report() {
             drift++
           }
         }
-        if (drift || misplaced || undecl) { bad = 1; status = "DRIFT" } else { status = "ALIGNED" }
+        if (drift || misplaced || layoutn || undecl) { bad = 1; status = "DRIFT" } else { status = "ALIGNED" }
         if (mode == "status")
-          printf "  %-18s %-7s missing %d, misplaced %d, undeclared %d\n", \
-                 fname[f], status, drift, misplaced, undecl
+          printf "  %-18s %-7s missing %d, misplaced %d, layout %d, undeclared %d\n", \
+                 fname[f], status, drift, misplaced, layoutn, undecl
         else
-          printf "  %-18s %-7s (missing %d, misplaced %d, undeclared %d)\n", \
-                 fname[f], status, drift, misplaced, undecl
+          printf "  %-18s %-7s (missing %d, misplaced %d, layout %d, undeclared %d)\n", \
+                 fname[f], status, drift, misplaced, layoutn, undecl
       }
+      if (mode == "status")
+        printf "\n  layout = comment/blank/line-count differences vs the reference (0 = exact 1-to-1)\n"
       if (nu > 0) {
         printf "\nUndeclared keys (not in %s; add them there with a comment, then re-run):\n", refbase
         for (f = 1; f <= nf; f++) if (f in uname) printf "  %s:%s\n", fname[f], uname[f]
@@ -452,7 +512,7 @@ print_undeclared() {
 }
 
 apply_run() {
-  local name target new key exp got before_missing=0 before_misplaced=0
+  local name target new key exp got before_missing=0 before_misplaced=0 before_layout=0
   local planned=0 total_values=0 added_total=0 mode failed manifest_hash manifest_name
 
   if [ -s "${WORK_DIR}/undeclared" ]; then
@@ -470,7 +530,7 @@ apply_run() {
 
   if [ "${planned}" -eq 0 ]; then
     say "apply: all ${#TARGETS[@]} target file(s) already aligned - nothing to write"
-    say "layout: ${REF_LINES} lines, ${REF_COUNT} keys - identical in every target"
+    say "layout: ${REF_LINES} lines (comments included), ${REF_COUNT} keys - identical in every target"
     say "RESULT: PASS"
     return 0
   fi
@@ -486,8 +546,9 @@ apply_run() {
         [ "${got}" = "${exp}" ] || before_misplaced=$((before_misplaced + 1))
       fi
     done < "${WORK_DIR}/expected.tsv"
+    before_layout="$(layout_drift "${DIR}/${name}")"
     added_total=$((added_total + before_missing))
-    say "  ${name}: rewrite (missing ${before_missing}, misplaced ${before_misplaced})"
+    say "  ${name}: rewrite (missing ${before_missing}, misplaced ${before_misplaced}, layout ${before_layout})"
   done
 
   if [ "${DRY_RUN}" -eq 1 ]; then
@@ -605,7 +666,7 @@ apply_run() {
   done < "${BACKUP_DIR}/manifest.txt"
 
   say "apply: rewrote ${#CHANGED[@]} file(s); ${total_values} keys present, existing values unchanged, ${added_total} added empty"
-  say "layout: ${REF_LINES} lines, ${REF_COUNT} keys - identical in every target"
+  say "layout: ${REF_LINES} lines (comments included), ${REF_COUNT} keys - identical in every target"
   say "backup: ${BACKUP_DIR}"
   say "RESULT: PASS"
   return 0

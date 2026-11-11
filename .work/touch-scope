@@ -1,21 +1,18 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-11-10",
-  "goal": "Add the env-sync skill + scripts/env-sync.sh: align every .env* file to the .env.example key layout (same key line in every file), preserve all values byte-for-byte (SHA-256 before/after), keep target-only keys in a shared aligned block, use comment placeholders for missing keys, and provide a side-by-side read-only comparison. Tested on a byte-identical copy of /mnt/work/Projects/system-news with backups; the live project stayed read-only. Owner answered the protected-registry approval with \"follow your best recommendation\" (2026-11-10): .cursorrules + template rows added, and the live system-news apply is approved with a persistent backup. Follow-up (operator 2026-11-10): materialize missing keys as empty assignments instead of comment placeholders; update script/docs/tests and re-apply the live system-news trio with a second backup.",
+  "updated": "2026-11-11",
+  "goal": "Fix the env-sync 1-to-1 contract: comments and blank lines are part of the .env.example layout, not just keys. Harden scripts/env-sync.sh so `file_aligned` requires the exact line count plus byte-identical non-key lines, report `layout:N` in status/verify/apply, and keep apply idempotent while preserving every value (SHA-256 before/after, backup + restore-on-fail). Add scripts/env-sync-test.sh regression coverage (reported reference-comments case, comment-only drift, commented-out assignments, trailing lines, undeclared keys, duplicate ref key, CRLF, backup value drift, file mode, idempotency). Update skills/env-sync/{skill,reference}.md, CHANGELOG, and registry prose. The live system-news trio was validated on a byte-identical copy only; applying to the live project remains an explicit operator step with a persistent backup.",
   "allowed_paths": [
     ".work/touch-scope",
     ".work/context/HANDOFF.md",
     ".work/active-ref",
-    ".work/analysis/20261110-mod06-env-sync-skill.md",
+    ".work/analysis/20261111-mod06-env-sync-layout.md",
     "README.md",
     "CHANGELOG.md",
     "skills/README.md",
-    "skills/SKILL_DEPENDENCIES.md",
     "skills/ai-director/reference.md",
-    "skills/ai-director/skill.md",
     "scripts/env-sync.sh",
-    ".cursorrules",
-    "templates/cursorrules.template",
+    "scripts/env-sync-test.sh",
     ".work/plans/NEXT.md"
   ],
   "allowed_patterns": [

@@ -205,7 +205,7 @@ All **24** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **concept-run** | Run MOD-01…08 architecture/NFR prompts | `list` · `status` · `run - MOD-06` (required for agent-assisted code) |
 | **db-migration** | Idempotent numbered SQL scripts (no Alembic chain) | `init` · `create - <description>` · `run` · `status` · `verify` |
 | **dev-stack** | Generate or update isolated Docker `bin/start.sh` | `init` · `status` |
-| **env-sync** | Align every `.env*` key to `.env.example` line-for-line; values untouched; side-by-side compare | `status` · `verify` · `apply` |
+| **env-sync** | Align every `.env*` file to `.env.example` line-for-line, comments included; values untouched; side-by-side compare | `status` · `verify` · `apply` |
 | **infra-terraform** | Terraform IaC lifecycle: plan-review gates, remote state + locking, drift, destroy discipline | `init` · `plan` · `apply` · `status` · `drift` |
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
 | **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |

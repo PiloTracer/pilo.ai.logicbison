@@ -1,22 +1,22 @@
 ---
 name: env-sync
 description: >-
-  Make every `.env*` file consistent by aligning its keys to the `.env.example`
-  reference: each variable sits on the same line number in every file, every
-  current value is preserved byte-for-byte, and the operator gets a side-by-side
-  comparison. Use when the user invokes @env-sync, says "make .env files
-  consistent", "align the env files", "sync .env vars", "compare .env files side
-  by side", "env drift", or asks to reconcile `.env`, `.env.dev`, `.env.prd`
-  with `.env.example`. Backed by `scripts/env-sync.sh`
-  (`status` / `verify` / `apply`).
+  Make every `.env*` file consistent by aligning it to the `.env.example`
+  reference, line for line: each variable sits on the same line number in every
+  file, comments and blank lines match byte-for-byte, every current value is
+  preserved, and the operator gets a side-by-side comparison. Use when the user
+  invokes @env-sync, says "make .env files consistent", "align the env files",
+  "sync .env vars", "compare .env files side by side", "env drift", or asks to
+  reconcile `.env`, `.env.dev`, `.env.prd` with `.env.example`. Backed by
+  `scripts/env-sync.sh` (`status` / `verify` / `apply`).
 ---
 
 # env-sync
 
 Keep every `.env*` file in one canonical line layout without ever touching a
 value. **`.env.example` is the layout authority** — one reference, many target
-files, identical key line numbers, and a side-by-side comparison the operator can
-read without exposing secrets.
+files, identical line numbers for keys *and* comments/blank lines, and a
+side-by-side comparison the operator can read without exposing secrets.
 
 **Tool-agnostic** (Cursor, Claude Code, opencode, Codex, DSH). **Pairs with:**
 `dev-stack` (`.env` creation), `session-control` (repo hygiene), project
@@ -31,9 +31,16 @@ codes, test recipe:** `reference.md`
   rewrites the text after `=` and never edits the reference file. Before and
   after every write, SHA-256 fingerprints of every key value must match; a
   mismatch aborts and restores the backups.
+- **The reference layout is exact, comments included.** Every non-key line
+  (comment or blank) must be byte-identical at the same line number in every
+  target, and every file must have the reference's exact line count. Comment,
+  blank-line, or line-count drift is real drift: `status` shows `layout:N`,
+  `verify` fails, and `apply` rewrites the target from the reference skeleton.
+  Put comments that must exist in every file in `.env.example`; target-only
+  comments are not preserved when a rewrite is needed.
 - **Never print or read values into chat.** No `cat`, `source`, or value diff.
-  `status`/`verify` report line numbers, `set`/`empty`, and same/diff
-  fingerprints only. `.cursorrules` § Data Privacy applies.
+  `status`/`verify` report line numbers, `set`/`empty`, `layout` counts, and
+  same/diff fingerprints only. `.cursorrules` § Data Privacy applies.
 - **Missing key → empty assignment** (`KEY=`) on its canonical line (operator
   decision 2026-11-10). Every reference key is present in every file, so the
   layout is greppable and strictly aligned. Caveat: this can change runtime
@@ -45,12 +52,13 @@ codes, test recipe:** `reference.md`
 - **Fail closed, never guess.** Refuse (no writes) on a broken reference,
   duplicate keys, multiline/continued values, unparsable lines, or CRLF input.
   Report the exact line and stop.
-- **The reference owns the key set.** A key present in any target but absent
-  from `.env.example` is a hard error: `apply` aborts, `status`/`verify` report
-  it. Add it to `.env.example` first, with a comment explaining where it is
-  enabled or disabled (environment-only keys must exist in every file, empty
-  where unused). This is what guarantees **identical line counts and identical
-  key-to-line maps** in every file — no trailing extras block.
+- **The reference owns the key set and the comments.** A key present in any
+  target but absent from `.env.example` is a hard error: `apply` aborts,
+  `status`/`verify` report it. Add it to `.env.example` first, with a comment
+  explaining where it is enabled or disabled (environment-only keys must exist
+  in every file, empty where unused). Together with the exact-layout rule, this
+  guarantees **identical line counts, identical key-to-line maps, and identical
+  comment/blank lines** in every file — no trailing extras block.
 - **`status`/`verify` are read-only. `apply` is the only writer** and is itself
   the same-message permission to modify `.env*` files (which are protected
   files). Never rewrite `.env*` outside an explicit `apply` invocation.
@@ -100,9 +108,9 @@ bash "${AGENT_OS_SOURCE}/scripts/env-sync.sh" <verb> [--dir PATH]
 | `verify` | nothing | CI/pre-commit gate, or after `apply` |
 | `apply` | target `.env*` files | Operator asked to make the files consistent |
 
-Exit codes: `0` pass, `1` drift / aborted / restored, `2` usage or reference
-error. `status` exits `0` even when the table shows drift — use `verify` for a
-gate.
+Exit codes: `0` pass, `1` drift (keys or layout), aborted, or restored, `2`
+usage or reference error. `status` exits `0` even when the table shows drift —
+use `verify` for a gate.
 
 ---
 
@@ -121,9 +129,16 @@ gate.
 | `set` / `empty` | value is non-empty / empty — the value itself is never shown |
 | `VALUES same/diff/n/a` | value fingerprints across files that have the key |
 
+Per-file summary rows add `layout:N`: the number of comment/blank-line
+mismatches plus the absolute line-count difference against the reference.
+`ALIGNED` requires `layout 0` as well as `missing 0`, `misplaced 0`, and
+`undeclared 0`; anything else is `DRIFT`.
+
 4. Flag anything that needs a decision: missing keys (they become `KEY=` on
    apply), **undeclared keys** (must be promoted into `.env.example` with a
-   comment first), and any `INVALID` file. Do not propose value edits.
+   comment first), **layout drift** (comments/blank lines/line count differ;
+   apply rewrites from the reference), and any `INVALID` file. Do not propose
+   value edits.
 
 ---
 
@@ -145,11 +160,16 @@ A5 backup proof → A6 report.
    reference), **stop before `apply`**. Add each key to `.env.example` with a
    comment explaining where it is enabled/disabled, then re-run. Never accept a
    trailing extras block: line counts and key lines must stay identical.
+6. If `status` reports **layout** drift (comments, blank lines, or line count
+   differ), that is normal after the reference changed: `apply` regenerates
+   those lines from `.env.example`. If a target has a custom comment that must
+   survive, move it into `.env.example` first — the reference owns comments.
 
 ### A2 — Review gate
 
-- If the operator has not seen the drift yet, show the summary counts and,
-  when the change is non-trivial, run `apply --dry-run` first (no writes).
+- If the operator has not seen the drift yet, show the summary counts
+  (`missing` / `misplaced` / `layout` / `undeclared`) and, when the change is
+  non-trivial, run `apply --dry-run` first (no writes).
 - `apply --dry-run` is safe: it validates and prints per-file counts only.
 
 ### A3 — Backup + apply
@@ -161,7 +181,8 @@ bash .ai/scripts/env-sync.sh apply --dir <path> --backup-dir <persistent-dir>
 - Omit `--backup-dir` to use the OS temp dir; pass one under the project's
   git-ignored `tmp/` when the backup must survive (never under version control;
   backups contain the original secrets).
-- Apply is idempotent: an already-aligned file is skipped and reported as such.
+- Apply is idempotent: an already-aligned file (keys and full layout) is skipped
+  and reported as such; a second run writes nothing.
 
 ### A4 — Verify (mandatory)
 
@@ -169,8 +190,9 @@ bash .ai/scripts/env-sync.sh apply --dir <path> --backup-dir <persistent-dir>
 bash .ai/scripts/env-sync.sh verify --dir <path>
 ```
 
-If `verify` fails after a successful apply, treat the apply as failed: report
-the file, the backup path, and the restore command
+`verify` now checks the full 1-to-1 contract: key lines, comments, blank lines,
+and line count. If it fails after a successful apply, treat the apply as failed:
+report the file, the `layout` count, the backup path, and the restore command
 (`cp -p <backup>/<file> <dir>/<file>`). The script already restores
 automatically on its own post-write mismatch.
 
@@ -190,16 +212,16 @@ are unchanged and the layout is aligned. Include the result in the report.
 
 **Directory:** <path> · **Reference:** .env.example (<N> keys, <L> lines)
 **Result:** PASS | FAIL (restored)
-**Layout:** <L> lines, <N> keys - identical in every file
+**Layout:** <L> lines (comments included), <N> keys - identical in every file
 
 | File | Before | After | Values |
 |------|--------|-------|--------|
-| .env.dev | missing 10, misplaced 48 | aligned (10 empty) | 51 unchanged |
-| .env.prd | missing 7, misplaced 51 | aligned (7 empty) | 54 unchanged |
+| .env.dev | missing 10, misplaced 48, layout 6 | aligned (10 empty, layout 0) | 51 unchanged |
+| .env.prd | missing 7, misplaced 51, layout 4 | aligned (7 empty, layout 0) | 54 unchanged |
 
-**Undeclared keys:** none (the reference owns the key set)
+**Undeclared keys:** none (the reference owns the key set and comments)
 **Backup:** <path> (mode 600 copies, 700 dir)
-**Proof:** `verify` PASS; `verify --backup` PASS
+**Proof:** `verify` PASS (layout 0); `verify --backup` PASS
 ```
 
 End with the Operator handoff close per the contract.
@@ -208,13 +230,17 @@ End with the Operator handoff close per the contract.
 
 ## Verify protocol
 
-1. `env-sync.sh verify [--dir PATH]` — strict alignment check.
+1. `env-sync.sh verify [--dir PATH]` — strict 1-to-1 check: key lines, comments,
+   blank lines, and line count.
 2. `env-sync.sh verify --backup DIR [--dir PATH]` — prove the values in the
-   current files match the pre-apply backup (the audit mode).
-3. Report per-file `ALIGNED` / `DRIFT` plus the `verify: PASS|FAIL` line. Exit
-   `1` on any drift or invalid input; surface that code, do not hide it.
+   current files match the pre-apply backup (the audit mode), and the layout is
+   aligned.
+3. Report per-file `ALIGNED` / `DRIFT` (with `missing` / `misplaced` / `layout` /
+   `undeclared`) plus the `verify: PASS|FAIL` line. Exit `1` on any drift or
+   invalid input; surface that code, do not hide it.
 
 Use `verify` in CI after `apply`; `status` remains the human comparison view.
+`layout 0` is mandatory for `ALIGNED` — a comment-only difference is a failure.
 
 ---
 
@@ -240,12 +266,14 @@ never claim success from a partial layout.
 
 - Editing a value (or an `.env.example` placeholder) to make files "match".
 - Printing raw values, `cat`-ing `.env*`, `source`-ing them, or diffing values.
+- Editing or reflowing comments in a target and expecting them to survive — put shared comments in `.env.example`, the reference owns the comment layout.
+- Adding comment lines to a target to "make the line numbers match" without copying the reference text; `layout` drift will (correctly) fail `verify`.
 - Leaving a key absent from a file when the operator asked for a full layout — apply materializes `KEY=`.
 - Running `apply` without a backup or without a post-write `verify`.
 - Expecting `apply` to rewrite `.env.example` (it never does) or adding an environment-only key to a target without promoting it to the reference first.
 - Leaving a target-only key out of `.env.example`, or accepting an extras block that breaks the identical line count.
 - Continuing after a `duplicate` / `multiline` / `CRLF` finding.
-- Claiming aligned without `verify` output as evidence.
+- Claiming aligned without `verify` output as evidence, or claiming aligned while `layout > 0`.
 
 ---
 
@@ -254,7 +282,7 @@ never claim success from a partial layout.
 | Situation | Use |
 |-----------|-----|
 | New `.env` from `.env.example` | Create it, then `@env-sync apply` to align |
-| `.env.dev` / `.env.prd` drift after adding a variable | `@env-sync status` → `apply` → `verify` |
+| `.env.dev` / `.env.prd` drift after adding a variable or comment | `@env-sync status` → `apply` → `verify` |
 | Pre-commit / CI env gate | `@env-sync verify` (exit 1 blocks) |
 | Suspect a bad apply | `@env-sync verify --backup <dir>` |
 | `dev-stack` init-env produced files | `@env-sync status` before starting the stack |
