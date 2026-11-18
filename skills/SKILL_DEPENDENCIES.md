@@ -119,6 +119,10 @@ foundation-complete  →  plan-master-ready  →  implementation-ready
 |--------------|------------|------|
 | **project-bootstrap** `init` | Repo contains `.ai/` (or is Agent OS root); **B0** brownfield gate detects existing `.work/` / `.cursorrules` / stack doc | - (brownfield prompts overwrite-all / overwrite-missing / keep / abort) |
 | **project-bootstrap** `status` | - | Read-only |
+| **project-bootstrap** `quickstart` | `.work/plans/` exists | Writes `.work/plans/QUICKSTART-PLAYBOOK.md` only (no HANDOFF/NEXT edits; no overwrite without `overwrite-playbook`) |
+| **project-bootstrap** `stack` | Pack exists under `templates/stacks/<pack>/` | - (runs `apply-stack-pack.sh`; non-destructive) |
+| **cicd-github** `install` | GitHub repo; template from `$AGENT_OS_SOURCE` | - (no overwrite without approval) |
+| **cicd-github** `status` / `verify` | - | Read-only |
 | **session-control** `start` | `{HANDOFF}` (offer bootstrap if missing) | Recommended: `@project-bootstrap init` |
 | **session-control** `close` | Prior `start` or dirty tree | - |
 | **session-control** `commit` | Dirty tree (offer `start` first if HANDOFF missing) | - |
@@ -254,9 +258,9 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 
 | Canonical verb | Meaning | Skills that implement it |
 |----------------|---------|---------------------------|
-| `status` | Read-only: report current state | plan-foundation, plan-master, plan-verify, plan-repair, session-control, code-implementation, code-verify, code-repair, feature-spec, db-migration, concept-run, dev-stack, env-sync, project-bootstrap, docs, infra-terraform |
+| `status` | Read-only: report current state | plan-foundation, plan-master, plan-verify, plan-repair, session-control, code-implementation, code-verify, code-repair, feature-spec, db-migration, concept-run, dev-stack, env-sync, project-bootstrap, docs, infra-terraform, cicd-github |
 | `repair` | Fix reported issues; re-verify | code-repair, plan-repair |
-| `verify` | Audit planning artifacts (foundation / master / alignment); `env-sync`: strict `.env*` layout gate | plan-verify, env-sync |
+| `verify` | Audit planning artifacts (foundation / master / alignment); `env-sync`: strict `.env*` layout gate; `cicd-github`: list workflow commands, do not run them | plan-verify, env-sync, cicd-github |
 | `probe` | Adaptive gap-driven interrogation loop; scores knowledge/plan coverage, asks targeted questions, fills gaps into registries. **New verb** (distinct from `status` read-only, `continue` resume-phase, `integrity` auto-sweep). Engine: [`probe-protocol.md`](probe-protocol.md) | plan-foundation, plan-master |
 | `commit` | Git commit/push without close | session-control |
 | `context` | Read-only full context load + uncommitted-aware summary; no writes | session-control |
@@ -296,6 +300,10 @@ All skills use the same verbs where applicable. This keeps muscle memory portabl
 **Alias policy:** When a verb is renamed, the old name is kept as an alias for **at least one minor version**. Aliases are listed inline in each skill's parse-invocation table and in the matrix above.
 
 **`env-sync` verbs:** `status` (side-by-side, read-only; aliases `compare`, `diff`), `verify` (strict layout gate, exit 1 on drift; alias `check`), `apply` (backup-verified layout rewrite; aliases `sync`, `fix`). `apply` is the only writer and the same-message permission for `.env*` edits.
+
+**`project-bootstrap` verbs:** `init`, `status`, `work-only`, `quickstart - lite|brownfield|full` (playbook only), `stack - <pack>` (non-destructive copy).
+
+**`cicd-github` verbs:** `install` (no overwrite without approval), `status`, `verify` (dry-run command list).
 
 ---
 

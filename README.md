@@ -44,7 +44,7 @@ Then in chat:
 
 ## What you get
 
-- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (24 skills in total).
+- **Skills** - `@session-control`, `@code-implementation`, `@plan-foundation`, … run the playbook (25 skills in total).
 - **Standards** - binding contracts (CONVENTIONS, FEATURE_STANDARD, observability, security) keep agent output honest.
 - **`.work/`** - the project's memory: plans, SPECs, ADRs, `HANDOFF.md`, `NEXT.md`. Survives session boundaries.
 - **Gates** - `plan-master-ready`, `implementation-ready`, milestone verify; skip a step and the agent **stops** with a redirect.
@@ -188,11 +188,11 @@ Agent OS is a **gated pipeline**: each stage unlocks the next. Skills enforce th
 
 ### Skills at a glance
 
-All **24** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
+All **25** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-id>` plus a mode (e.g. `@plan-foundation status`).
 
 | Skill | One line | Typical invoke |
 |-------|----------|----------------|
-| **project-bootstrap** | Scaffold `.work/`, `.cursorrules`, stack doc from templates | `init` · `status` |
+| **project-bootstrap** | Scaffold `.work/`, `.cursorrules`, stack doc from templates; `quickstart` writes the playbook only | `init` · `status` · `quickstart` · `stack` |
 | **plan-foundation** | Foundation docs 01–04, ADRs, SPECs, registries; certifies **plan-master-ready** | `greenfield` · `probe` · `status` · `certify plan-master-ready` |
 | **plan-master** | Master plan with milestones; certifies **implementation-ready** | `greenfield` · `continue` · `probe` · `status` · `revise` |
 | **plan-verify** | Plan audits; **brownfield** align without formal plan-foundation/master | `brownfield` · `foundation` · `master` · `alignment` |
@@ -207,6 +207,7 @@ All **24** skills live under [`skills/`](skills/README.md). Invoke as `@<skill-i
 | **dev-stack** | Generate or update isolated Docker `bin/start.sh` | `init` · `status` |
 | **env-sync** | Align every `.env*` file to `.env.example` line-for-line, comments included; values untouched; side-by-side compare | `status` · `verify` · `apply` |
 | **infra-terraform** | Terraform IaC lifecycle: plan-review gates, remote state + locking, drift, destroy discipline | `init` · `plan` · `apply` · `status` · `drift` |
+| **cicd-github** | GitHub Actions workflows that run Agent OS gate scripts | `install` · `status` · `verify` |
 | **process-router** | Read-only: “how do I…?” → right skill or guide | `- <question>` · `help` |
 | **docs** | Create guides, tutorials, reference docs under `.work/docs/` | `create guide` · `create tutorial` · `status` |
 | **deploy-files** | Fat-client deploy: full `.ai/` copy or in-place bootstrap | `copy - <path>` · `update` · `status` |

@@ -90,7 +90,7 @@ End the `status` report with the Operator handoff close (Form A `Next: …` or F
 
 | Bucket | Signals | Route to |
 |--------|---------|----------|
-| `engineering` | backend, API, database, migration, server, code, plan, architecture, documentation, guide, tutorial, how-to, feature doc | `@ai-director - <verbatim request>` |
+| `engineering` | backend, API, database, migration, server, code, plan, architecture, documentation, guide, tutorial, how-to, feature doc; **also:** onboarding, quick start, lite adoption, brownfield codebase, track progress, HANDOFF/NEXT, session start/close, verify before commit, fix bugs, CI, GitHub Actions, PR checks, deploy Agent OS, Spring Boot / stack pack, Terraform, Docker dev environment | `@ai-director - <verbatim request>` — **do not** re-implement lifecycle skills; ai-director routes to `project-bootstrap quickstart`, `cicd-github`, `session-control`, `code-verify`, etc. per its bucket table |
 | `ui` | UI, frontend, design, screen, component, visual, tailwind, CSS, a11y | `@ui-director` if installed, else `@ai-director` (native LLM) with `[degraded: .ai.ui not installed]` prefix |
 | `business` | business, strategy, niche, offer, pricing, brand, community, referral, proposal, objection, deal, pipeline, discovery, validate, content, writing, idea, product | `@biz-director` if installed, else `@ai-director` (native LLM) with `[degraded: .ai.biz not installed]` prefix |
 | `social` | social, community, social media, engagement, content moderation, forum, discussion, chat, user generated content, ucg, social network | `@soc-director` if installed, else `@ai-director` (native LLM) with `[degraded: .ai.soc not installed]` prefix |

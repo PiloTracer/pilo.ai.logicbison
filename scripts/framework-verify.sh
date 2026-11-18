@@ -744,6 +744,42 @@ else
   rm -f "${PCM_TMP}"
 fi
 
+# --- 11. env-sync + bootstrap smoke (regression) ---
+note "env-sync-test suite"
+if [[ -x "${REPO_ROOT}/scripts/env-sync-test.sh" ]]; then
+  bash "${REPO_ROOT}/scripts/env-sync-test.sh" || die "env-sync-test.sh failed"
+  ok "env-sync-test.sh"
+else
+  die "missing executable scripts/env-sync-test.sh"
+fi
+
+note "bootstrap-smoke"
+chmod +x "${REPO_ROOT}/scripts/bootstrap-smoke.sh" \
+  "${REPO_ROOT}/scripts/apply-stack-pack.sh" \
+  "${REPO_ROOT}/scripts/last-gate-record.sh" 2>/dev/null || true
+bash "${REPO_ROOT}/scripts/bootstrap-smoke.sh" || die "bootstrap-smoke.sh failed"
+ok "bootstrap-smoke"
+
+note "lifecycle script smokes"
+if ! bash "${REPO_ROOT}/scripts/apply-stack-pack.sh" --list | grep -qx 'spring-boot'; then
+  die "apply-stack-pack --list missing spring-boot"
+else
+  ok "apply-stack-pack --list"
+fi
+LG_TMP="$(mktemp -d "${TMPDIR:-/tmp}/aos-last-gate.XXXXXX")"
+git -C "${LG_TMP}" init -q
+LAST_GATE_ROOT="${LG_TMP}" bash "${REPO_ROOT}/scripts/last-gate-record.sh" \
+  --verifier framework-verify-smoke --verdict pass \
+  --command "true" --exit 0 || die "last-gate-record.sh failed"
+LAST_GATE_ROOT="${LG_TMP}" bash "${REPO_ROOT}/scripts/last-gate-record.sh" \
+  --verifier framework-verify-smoke-empty --verdict pass || die "last-gate-record.sh empty-command failed"
+if ! "$PY" -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["verifier"]=="framework-verify-smoke-empty" and d["commands"]==[]' \
+  "${LG_TMP}/.work/reports/last-gate.json"; then
+  die "last-gate.json invalid"
+fi
+rm -rf "${LG_TMP}"
+ok "last-gate-record.sh"
+
 if [[ "${failures}" -gt 0 ]]; then
   echo ""
   echo "framework-verify: ${failures} check(s) failed" >&2

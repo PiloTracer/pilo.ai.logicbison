@@ -6,18 +6,18 @@ Full skill registry, dependency map, and routing tables for the `@ai-director` o
 
 ## 1. Complete skill registry (all `.ai` skills)
 
-All 24 registered skills. Source of truth: `skills/README.md`.
+All 25 registered skills. Source of truth: `skills/README.md`.
 
 | `@` handle | Folder | Role | Modes | Writes? | Depends on |
 |------------|--------|------|-------|---------|------------|
-| `project-bootstrap` | `project-bootstrap/` | Scaffold `.work/`, `.cursorrules`, stack doc from templates | `init`, `status` | Yes (`.work/`, `.cursorrules`, `DOCS_TECH_STACK.md`) | `.ai/` present |
+| `project-bootstrap` | `project-bootstrap/` | Scaffold `.work/`, `.cursorrules`, stack doc from templates; `quickstart` writes the playbook only | `init`, `status`, `quickstart - lite\|brownfield\|full`, `stack - <pack>` | Yes (`.work/`, `.cursorrules` on init; playbook only on quickstart) | `.ai/` present for init |
 | `plan-foundation` | `plan-foundation/` | Foundation docs 01–04, ADRs, SPECs, registries; certifies plan-master-ready | `greenfield`, `continue`, `probe`, `probe - status`, `probe - until ready`, `status`, `certify plan-master-ready` | Yes (foundation docs, ADRs, PROBE_LEDGER, registries) | Recommended: `@project-bootstrap init` |
 | `plan-master` | `plan-master/` | Master implementation plan with milestones; certifies implementation-ready | `greenfield`, `continue`, `probe`, `probe - status`, `revise`, `integrity`, `status`, `show` | Yes (`*-full-plan.md`, PROBE_LEDGER) | **Required:** plan-master-ready |
 | `plan-verify` | `plan-verify/` | Plan audits: foundation, master, alignment, coverage, brownfield | `foundation`, `master`, `alignment`, `brownfield`, `status` | Read-only (report) | Target artifacts exist for mode |
 | `plan-repair` | `plan-repair/` | Fix plan gaps; brownfield synthesis from repo evidence | `repair`, `foundation`, `master`, `brownfield`, `status` | Yes (plan docs) | Findings from `@plan-verify` or user goal |
 | `session-control` | `session-control/` | Session bookends; updates HANDOFF + NEXT; optional git | `start`, `close`, `close commit`, `close commit push`, `commit`, `commit push`, `status` | Yes (`{HANDOFF}`, `{ITERATION_CARRIER}`, optional git) | Recommended: `@project-bootstrap init` |
 | `code-implementation` | `code-implementation/` | Iteration execution from NEXT.md; per-task gates | `plan - M{N}`, `start`, `continue`, `continue - N`, `continue - until blocked`, `complete`, `status` | Yes (code, `{ITERATION_CARRIER}`, `{HANDOFF}`) | **Required:** Approved master plan or HANDOFF waiver |
-| `code-verify` | `code-verify/` | Audits: milestone, uncommitted, last commit/push | `milestone`, `uncommitted`, `last`, `status` | Read-only (report) | **Required:** Active milestone (for milestone mode) |
+| `code-verify` | `code-verify/` | Audits: milestone, uncommitted, last commit/push | `milestone`, `uncommitted`, `last`, `status` | Report; `.work/reports/last-gate.json` on uncommitted pass | **Required:** Active milestone (for milestone mode) |
 | `code-repair` | `code-repair/` | Fix verifier/migration/SPEC findings; re-verify before pass | `repair - from <source>`, `repair - custom - …`, `status` | Yes (code) | Verifier report or custom brief |
 | `feature-spec` | `feature-spec/` | Triage, author, review, or amend feature SPECs | `intake - <sentence>`, `create - <slug>`, `review - <path>`, `amend - <slug>`, `approve`, `status` | Yes (SPECs) | FEATURE_STANDARD |
 | `concept-run` | `concept-run/` | Run MOD-01…08 architecture/NFR prompts | `list`, `status`, `run - MOD-0N` | Varies (attachments) | Trigger table in `concepts/README.md` |
@@ -25,6 +25,7 @@ All 24 registered skills. Source of truth: `skills/README.md`.
 | `dev-stack` | `dev-stack/` | Generate/update isolated Docker compose dev helper | `init`, `status` | Yes (`bin/start.sh`) | `docker-compose*.yml` present |
 | `env-sync` | `env-sync/` | Align every `.env*` file to the `.env.example` line layout, comments included; values untouched; side-by-side compare | `status` (`compare`), `verify`, `apply` (backup-verified) | Yes (target `.env*` files on `apply` only) | `.env.example` reference |
 | `infra-terraform` | `infra-terraform/` | Terraform IaC: init/plan/apply lifecycle with plan-review gates, remote state + locking, drift, destroy discipline | `init`, `plan`, `apply`, `status`, `drift`, `destroy` | Yes (`.tf` config, state) | **Required:** remote backend + locking for shared envs; approved plan for `apply`; same-message approval for `destroy` |
+| `cicd-github` | `cicd-github/` | GitHub Actions workflows calling Agent OS gate scripts | `install`, `status`, `verify` | Yes (`.github/workflows/`) | Consumer repo; optional on framework source |
 | `process-router` | `process-router/` | Read-only: "how do I…?" → right skill or guide | `- <question>`, `help` | Read-only | — |
 | `tauri-development` | `tauri-development/` | Domain guidance for Tauri desktop apps: IPC security, shell/webview patterns, Rust backend conventions, API bridge, event-driven state | `status`, `help` | Read-only | Tauri project with `src-tauri/` |
 | `deploy-files` | `deploy-files/` | Deploy `.ai` files to target project (fat-client; in-place bootstrap or outbound copy; `update` = rules-aware merge under `.ai/`) | `copy - <path>`, `update`, `status`, bare (in-place bootstrap) | Yes (target `.ai/` + scaffold) | Source git repo |
@@ -67,7 +68,10 @@ All 24 registered skills. Source of truth: `skills/README.md`.
 |-------|-------|
 | **Greenfield bootstrap** | `@project-bootstrap init` → `@plan-foundation greenfield` → `@plan-foundation certify` → `@plan-master greenfield` → `@plan-master status` |
 | **Brownfield adoption** | `@plan-verify brownfield` → `@plan-repair brownfield` → `@plan-verify brownfield` → `@plan-foundation certify` → `@plan-master greenfield` or `continue` |
-| **Daily session** | `@session-control start` → `@code-implementation status` → work → `@session-control close` |
+| **Lite onboarding (~30 min)** | `@project-bootstrap quickstart - lite` → `@session-control start` → work → `@code-verify uncommitted` → `@session-control close` (`.quick/onboarding-30min.md`) |
+| **Stack pack (e.g. Spring Boot)** | `@project-bootstrap stack - <pack>` → merge fragments → `@dev-stack init` when compose present |
+| **GitHub CI gates** | `@cicd-github install` → push → confirm workflow (`templates/ci/github-actions/framework-gates.yml`) |
+| **Daily session** | `@session-control start` → `@code-implementation status` → work → `@code-verify uncommitted` (optional) → `@session-control close` |
 | **Per milestone** | `@code-implementation plan - M{N}` → `@code-implementation start` → `@code-implementation continue` (loop) → `@code-verify milestone` → `@code-implementation complete` |
 | **Feature intake to code** | `@feature-spec intake` → `@feature-spec create` → `@feature-spec review` → `@feature-spec approve` → plan → implement |
 | **Schema change** | `@db-migration init` (once) → `@db-migration create - <desc>` → `@db-migration verify` |
@@ -115,6 +119,11 @@ Before `@code-implementation complete`, ensure these all pass:
 | User says (paraphrased) | Classified bucket | Execute |
 |------------------------|-------------------|---------|
 | "Start a new project" | `bootstrap` | `@project-bootstrap init` → `@plan-foundation greenfield` |
+| "Quick / lite onboarding, existing repo" | `bootstrap-quickstart` | `@project-bootstrap quickstart - lite` → `@session-control start` |
+| "Brownfield, skip full greenfield first" | `bootstrap-quickstart` | `@project-bootstrap quickstart - brownfield` → `@plan-verify brownfield` |
+| "Apply Spring Boot / stack pack" | `bootstrap-stack` | `@project-bootstrap stack - spring-boot` |
+| "GitHub Actions / CI for this repo" | `cicd-github` | `@cicd-github install` |
+| "How does work flow from idea to ship?" | `lifecycle-orient` | `.quick/software-lifecycle.md` + `@process-router - <narrow question>` if needed |
 | "Create foundation docs" | `foundation` | `@plan-foundation greenfield` |
 | "I'm not sure about the requirements" | `foundation-probe` | `@plan-foundation probe` |
 | "Certify the plan" | `foundation-certify` | `@plan-foundation certify plan-master-ready` |
@@ -193,3 +202,7 @@ When a user request spans multiple domains or belongs to another framework (e.g.
 | Templates | `templates/` | cursorrules.template, bootstrap scripts |
 | Decision tree | `START_HERE.md` | Operator entry point |
 | Process router | `PROCESS_ROUTER.md` | Process Q&A reference |
+| Onboarding (lite) | `.quick/onboarding-30min.md` | First-day session loop |
+| Lifecycle map | `.quick/software-lifecycle.md` | Create → plan → build → track → verify → deliver |
+| Gate audit file | `.work/reports/last-gate.json` | Written on `@code-verify uncommitted` pass |
+| Evolution plan | `.work/plans/20261117-framework-evolution-plan.md` | Maintainer roadmap M1–M5 |

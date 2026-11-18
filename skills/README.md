@@ -49,6 +49,7 @@ Use for **new** skills and for any **rename** (update `.cursorrules`, this READM
 | feature-spec | `feature-spec/` | Author, review, amend feature SPECs per FEATURE_STANDARD |
 | concept-run | `concept-run/` | Run MOD-01…MOD-08 concept prompts; attach output to PR/NEXT/SPEC |
 | infra-terraform | `infra-terraform/` | **Terraform IaC:** init/plan/apply with plan-review gates, remote state + locking, drift detection, destroy discipline |
+| cicd-github | `cicd-github/` | **GitHub Actions:** install workflow templates that run framework gate scripts (no duplicated CI logic) |
 | project-bootstrap | `project-bootstrap/` | Bootstrap `.work/`, `.cursorrules`, `DOCS_TECH_STACK.md` from templates |
 | docs | `docs/` | **Documentation:** create guides, tutorials, reference docs under `.work/docs/` |
 | project-query-setup | `project-query-setup/` | **Optional integration:** guide through tools-project API key creation, MCP registration, connectivity test. OS-aware (tailors guidance per framework). |

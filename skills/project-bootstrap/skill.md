@@ -25,8 +25,12 @@ One-time (or reset) setup for repositories using Agent OS. **Does not** replace 
 | `@project-bootstrap` **init** | Create missing `.work/` files, `.cursorrules`, `DOCS_TECH_STACK.md` from templates |
 | `@project-bootstrap` **status** | Read-only: what exists, which `REPLACE:` tokens remain in `.cursorrules` |
 | `@project-bootstrap` **work-only** | Copy `.work/` skeleton only (never overwrite existing files) |
+| `@project-bootstrap` **quickstart** `- lite\|brownfield\|full` | Write `.work/plans/QUICKSTART-PLAYBOOK.md` from template; print mode-specific 7-step table (no overwrite of HANDOFF) |
+| `@project-bootstrap` **stack** `- <pack>` | Run `scripts/apply-stack-pack.sh <pack> <repo-root>` (non-destructive); report copied vs skipped paths |
 
 **Default:** `status` if unclear; suggest `init` when `.work/context/HANDOFF.md` is missing.
+
+**quickstart modes:** `lite` = session + manual NEXT (see `docs/adoption/minimal-adoption.md`); `brownfield` = `plan-verify brownfield` path; `full` = foundation → master → M1.
 
 ---
 
@@ -98,6 +102,27 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 
 ---
 
+## Quickstart protocol
+
+Writes **one** file: `.work/plans/QUICKSTART-PLAYBOOK.md`. Does not edit HANDOFF, NEXT, or `.cursorrules`. Does not run `plan-foundation`.
+
+1. Mode must be `lite`, `brownfield`, or `full`. Anything else → stop and print the three modes.
+2. If `.work/plans/` is missing → stop. Next command is `@project-bootstrap init`. Do not create `.work/` from this mode.
+3. Template: `$AGENT_OS_SOURCE/templates/work/plans/QUICKSTART-PLAYBOOK.md` when that env var is set and the file exists; otherwise `templates/work/plans/QUICKSTART-PLAYBOOK.md` from the framework root.
+4. If the destination already exists → stop unless this message contains `overwrite-playbook`.
+5. Replace `{{MODE}}` with the mode and `{{DATE}}` with UTC `YYYY-MM-DD`. Leave every other line unchanged.
+6. Print the 7-step table for **that mode only** (the other mode sections stay in the file).
+
+---
+
+## Stack protocol
+
+1. Pack name is required (`spring-boot` is the shipped pack). List packs with `bash scripts/apply-stack-pack.sh --list` when the name is missing.
+2. Run `bash scripts/apply-stack-pack.sh <pack> <repo-root>` from the framework source (or `$AGENT_OS_SOURCE/scripts/apply-stack-pack.sh` on a thin client). Default repo root is the consumer cwd.
+3. The script copies missing files only. It does not merge `CONVENTIONS`, compose, or Dockerfiles. Report `copied` and `skipped` lines, then point at `templates/stacks/<pack>/README.md` for the merge.
+
+---
+
 ## Status protocol
 
 Report:
@@ -125,6 +150,7 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 | `templates/DOCS_TECH_STACK.md.template` | Stack pins |
 | `templates/work/context/HANDOFF.md.template` | Session handoff |
 | `templates/work/plans/NEXT.md.template` | Backlog + iteration block |
+| `templates/work/plans/QUICKSTART-PLAYBOOK.md` | Lite/brownfield/full daily loop (`quickstart` fills `{{MODE}}` / `{{DATE}}`) |
 | `templates/work/plans/foundation/YYYYMMDD-01-*.template` | P0 scope (plan-foundation may author instead) |
 | `templates/work/plans/full/YYYYMMDD-full-plan.md.template` | Master plan outline |
 | `templates/work/features/example-slug/…` | Feature SPEC |

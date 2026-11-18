@@ -487,3 +487,6 @@ htmlcov/
 reasonix.toml
 
 **/commit-ref-pending/
+
+# Rewritten on every local gate run; not a source artifact.
+.work/reports/last-gate.json

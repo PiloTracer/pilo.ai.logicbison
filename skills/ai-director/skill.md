@@ -107,7 +107,11 @@ Read `{HANDOFF}` and `{ITERATION_CARRIER}` for context. Classify the request int
 
 | Bucket | Signals | Lead skill |
 |--------|---------|------------|
-| `bootstrap` | "start project", "set up", "first time", ".work missing" | `project-bootstrap` |
+| `bootstrap` | "start project", "set up", "first time", ".work missing" | `project-bootstrap` (`init` or `quickstart`) |
+| `bootstrap-quickstart` | "30 minutes", "lite adoption", "existing repo fast", "onboarding", "brownfield start", "not ready for full planning" | `project-bootstrap quickstart - lite\|brownfield\|full` → `.quick/onboarding-30min.md` |
+| `bootstrap-stack` | "Spring Boot stack", "apply stack pack", "technology template" | `project-bootstrap stack - <pack>` (e.g. `spring-boot`) |
+| `cicd-github` | "GitHub Actions", "CI", "PR checks", "pipeline gates", "automated checks on merge" | `cicd-github install` → `status` / `verify` |
+| `lifecycle-orient` | "whole process", "create to deploy", "how does development flow work", "track issues and follow-up" | Read `.quick/software-lifecycle.md` → route to phase skill (`session-control`, `code-verify`, …) |
 | `foundation` | "blueprint", "understand project", "foundation docs", "create P0-P6" | `plan-foundation greenfield` |
 | `foundation-probe` | "vague scope", "uncertain requirements", "understand the domain" | `plan-foundation probe` |
 | `foundation-certify` | "check if ready", "certify plan-master-ready" | `plan-foundation certify` |
@@ -160,6 +164,12 @@ Map the classified bucket to the correct skill chain. Respect the dependency gra
 | User says | Execute |
 |-----------|---------|
 | "Start a new project" | `@project-bootstrap init` → `@plan-foundation greenfield` |
+| "Onboard this repo quickly / lite path / ~30 min" | `@project-bootstrap quickstart - lite` → `@session-control start` (see `.quick/onboarding-30min.md`) |
+| "We have code already, no master plan yet" | `@project-bootstrap quickstart - brownfield` → `@plan-verify brownfield` |
+| "Explain the full engineering lifecycle here" | `.quick/software-lifecycle.md` → `@session-control status` |
+| "Add Spring Boot (or stack pack)" | `@project-bootstrap stack - spring-boot` → merge per pack README |
+| "Set up CI on GitHub" | `@cicd-github install` → push and confirm Actions |
+| "Prove checks ran before we commit" | `@code-verify uncommitted` (writes `.work/reports/last-gate.json` on pass) |
 | "I need to understand the project requirements" | `@plan-foundation probe` |
 | "Create a master implementation plan" | Check plan-master-ready. If yes → `@plan-master greenfield`. If no → `@plan-foundation certify` first. |
 | "Is the plan ready for coding?" | `@plan-master status` → if implementation-ready: yes, route to code. If no, report gaps. |

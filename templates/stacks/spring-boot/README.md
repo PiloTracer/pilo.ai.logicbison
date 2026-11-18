@@ -11,6 +11,15 @@ Stack **fragments** for consumer repos whose backend is Spring Boot. This is not
 
 ## How to apply
 
+**Automated (non-destructive):**
+
+```bash
+bash "$AGENT_OS_SOURCE/scripts/apply-stack-pack.sh" spring-boot /path/to/repo
+# or: @project-bootstrap stack - spring-boot
+```
+
+Then merge per table below (script skips files that already exist).
+
 1. Copy the fragments you need into the consumer repo (never wholesale-replace existing files):
    - `CONVENTIONS.spring-boot.md` → merge into the project's `.work/standards/YYYYMMDD-CONVENTIONS.md`.
    - `DOCS_TECH_STACK.spring-boot.md` → merge into `DOCS_TECH_STACK.md` §1 and §3 rows.

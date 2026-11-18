@@ -1,19 +1,24 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-11-11",
-  "goal": "Fix the env-sync 1-to-1 contract: comments and blank lines are part of the .env.example layout, not just keys. Harden scripts/env-sync.sh so `file_aligned` requires the exact line count plus byte-identical non-key lines, report `layout:N` in status/verify/apply, and keep apply idempotent while preserving every value (SHA-256 before/after, backup + restore-on-fail). Add scripts/env-sync-test.sh regression coverage (reported reference-comments case, comment-only drift, commented-out assignments, trailing lines, undeclared keys, duplicate ref key, CRLF, backup value drift, file mode, idempotency). Update skills/env-sync/{skill,reference}.md, CHANGELOG, and registry prose. The live system-news trio was validated on a byte-identical copy only; applying to the live project remains an explicit operator step with a persistent backup.",
+  "updated": "2026-11-17",
+  "goal": "Lifecycle adoption M1-M4: quickstart/stack bootstrap, last-gate ledger, cicd-github skill, env-sync and bootstrap smokes in framework-verify. Plan: .work/plans/20261117-framework-evolution-plan.md.",
   "allowed_paths": [
+    ".gitignore",
+    ".quick/README.md",
+    ".quick/onboarding-30min.md",
+    ".quick/software-lifecycle.md",
     ".work/touch-scope",
     ".work/context/HANDOFF.md",
-    ".work/active-ref",
-    ".work/analysis/20261111-mod06-env-sync-layout.md",
+    ".work/plans/NEXT.md",
+    ".work/plans/20261117-framework-evolution-plan.md",
+    ".work/analysis/20261117-mod06-lifecycle-adoption.md",
     "README.md",
     "CHANGELOG.md",
-    "skills/README.md",
-    "skills/ai-director/reference.md",
-    "scripts/env-sync.sh",
-    "scripts/env-sync-test.sh",
-    ".work/plans/NEXT.md"
+    "docs/adoption/minimal-adoption.md",
+    "standards/20261117-CICD_CONVENTIONS.md",
+    "templates/ci/github-actions/framework-gates.yml",
+    "templates/stacks/spring-boot/README.md",
+    "templates/work/plans/QUICKSTART-PLAYBOOK.md"
   ],
   "allowed_patterns": [
     "scripts/**",

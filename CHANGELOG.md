@@ -5,6 +5,11 @@ All notable changes to Agent OS are documented here. Format inspired by [Keep a 
 ## [Unreleased]
 
 ### Added
+- **Lifecycle adoption pack (M1–M4)** — `@project-bootstrap quickstart` (`lite|brownfield|full`) + `stack - <pack>`; `scripts/apply-stack-pack.sh`, `scripts/bootstrap-smoke.sh`, `scripts/last-gate-record.sh`; `.work/plans/20261117-framework-evolution-plan.md`; `.quick/onboarding-30min.md`, `.quick/software-lifecycle.md`; `templates/work/plans/QUICKSTART-PLAYBOOK.md`.
+- **`cicd-github` skill** — install/status/verify for `templates/ci/github-actions/framework-gates.yml`; `standards/20261117-CICD_CONVENTIONS.md`.
+- **`code-verify`** — uncommitted pass writes `.work/reports/last-gate.json` via `last-gate-record.sh`.
+- **`framework-verify`** — section 11 runs `env-sync-test.sh` + `bootstrap-smoke.sh`, plus smokes for `apply-stack-pack.sh --list` and `last-gate-record.sh`.
+- **`quickstart` contract** — writes `.work/plans/QUICKSTART-PLAYBOOK.md` only. It does not patch NEXT or HANDOFF. `last-gate-record.sh` resolves Python via `scripts/lib/portability.sh`. `apply-stack-pack.sh` lists packs without GNU `find -printf`.
 - **`env-sync` skill + `scripts/env-sync.sh`** — aligns every `.env*` file to the `.env.example` layout, line for line: each reference key lands on the same line in every target, comments and blank lines are copied byte-for-byte, the reference owns the full key set (a target-only key is a hard error until promoted with a comment), and a missing key is materialized as an empty real assignment (`KEY=`). Values are never modified or printed: `apply` compares SHA-256 value fingerprints before and after the atomic write (added keys must be empty), backs up every target outside the repo (mode 700), and restores all backups on any mismatch; `verify --backup` is the independent audit. `status` (`compare`/`diff`) prints a side-by-side table (`ok:N` / `at:N` / `--` / `set|empty` / `same|diff`) without exposing values. Fail-closed on duplicate keys, multiline values, unparsable lines, CRLF, or a broken reference. Registered in `skills/README.md`, `skills/SKILL_DEPENDENCIES.md`, root `README.md` (24 skills), and `ai-director` routing.
 
 ### Changed

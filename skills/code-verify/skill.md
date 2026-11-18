@@ -288,6 +288,20 @@ When the diff touches application source or tests and the session is AI-assisted
 
 ### U4 - Shared verification gates (if application source/tests touched)
 
+### U4b - Record gate ledger (on pass)
+
+When verdict is **pass** or **pass with conditions**, write audit trail:
+
+```bash
+bash scripts/last-gate-record.sh --verifier code-verify-uncommitted --verdict pass \
+  --command "touch-scope-verify" --exit <code> \
+  --command "blast-radius-check" --exit <code>
+```
+
+(add one `--command` / `--exit` pair per gate command actually run)
+
+Output: `.work/reports/last-gate.json`. Close does not read it.
+
 ### U5 - Report
 
 ```markdown

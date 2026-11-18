@@ -1,0 +1,24 @@
+# Agent OS framework gates — install at .github/workflows/framework-gates.yml
+# Copy: @cicd-github install
+name: framework-gates
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  agent-os-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preflight toolchain
+        run: bash scripts/framework-verify.sh
+        continue-on-error: false
+
+      - name: Skill structure verify
+        run: python3 scripts/skill-functional-verify.py
+
+      - name: Iteration gate evidence (NEXT.md)
+        run: bash scripts/gate-verify.sh .work/plans/NEXT.md
