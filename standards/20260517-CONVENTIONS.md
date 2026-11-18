@@ -37,12 +37,13 @@ Pairs with: foundation architecture doc, `REPLACE:TECH_STACK_DOC`, ADRs under `.
 
 - No binary floats for money — use decimal types end-to-end.
 - Document rounding, scale, and presentation rules in the feature SPEC and here.
+- When the SPEC defines a formula, expected test values come from an independent source (spreadsheet, prior system, domain expert, or published reference). Do not compute them by running the new code.
 - External format constraints (XSD, ISO 20022, etc.) must cite the integration mirror, not memory.
 
 ## 5. Time
 
 - Store UTC in persistence; expose ISO-8601 in APIs unless a jurisdiction requires a fixed offset — document in SPEC + here.
-- Provide a single clock helper in the platform layer for testability.
+- Provide a single clock helper in the platform layer, and inject randomness and id generation the same way, so domain logic stays deterministic in tests.
 
 ## 6. Errors
 
@@ -69,6 +70,7 @@ Binding policy: `.cursorrules` § **Migration policy**. Summary:
 - Exceptions (one-off, destructive, non-numbered, manual hotfix, outside the runner): **human approval in the same message**; agents do not execute.
 - Test DB ad-hoc DML: **human approval**; prefer mocks/fixtures (see `.cursorrules` § Test Data).
 - Cross-context DDL requires extra review per `.cursorrules`.
+- Replacing a column is three idempotent scripts in order: add the new column, switch readers and writers, drop the old column later and only with same-message approval. Agents do not backfill shared databases.
 
 ## 10. Performance budgets
 
@@ -84,3 +86,4 @@ Binding policy: `.cursorrules` § **Migration policy**. Summary:
 
 - ≥1 reviewer for application code.
 - ≥2 reviewers (one security-tagged) for auth, secrets, cross-context migrations, and high-risk domains defined in the threat model.
+- Before changing existing behavior, add a characterization test that pins current behavior and show it passing. Docs-only changes are exempt.

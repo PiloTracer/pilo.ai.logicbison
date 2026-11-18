@@ -139,7 +139,8 @@ Explicit kebab-case slug → skip this step.
 5. Fill **§15 Concept / NFR registry** - one row per MOD-01…MOD-08 with Applies yes/no + reason (or run `@concept-run list` for trigger hints).
 6. Set `**Status:** Draft`.
 7. When creating for **brownfield catalog** or cross-cutting surfaces (shell, layout, analytics): add optional **§14 Implementation map** (FEATURE_STANDARD) with primary file paths from `@plan-verify coverage` or user inventory.
-8. Output create report with path and open questions (§13). Any operator-required approval/question (e.g. open §13 questions) must ALSO appear in the closing handoff block (enumerated, with `path:line`); end the report with the Operator handoff close per SKILL_DEPENDENCIES.md.
+8. When the SPEC defines a formula, name the independent source of expected values. Do not treat output of the implementation as that source.
+9. Output create report with path and open questions (§13). Any operator-required approval/question (e.g. open §13 questions) must ALSO appear in the closing handoff block (enumerated, with `path:line`); end the report with the Operator handoff close per SKILL_DEPENDENCIES.md.
 
 **Stop** if user has not stated problem scope - ask once for one-paragraph purpose.
 
@@ -189,6 +190,7 @@ End the report with the Operator handoff close (Form A `Next: …` or Form B `**
 3. Structure: **Purpose of amendment**, **Binding changes** (numbered), **Evidence** (ADR/questionnaire link), **SPEC sections affected**.
 4. Do **not** edit the original SPEC file.
 5. Cross-link from amendment to base SPEC and any ADR.
+6. When a binding change alters a formula, name the independent source of the new expected values.
 
 End the report with the Operator handoff close (Form A `Next: …` or Form B `**Needs your approval:**` / `**Needs your answer:**` / `**Next step:**`) per SKILL_DEPENDENCIES.md.
 

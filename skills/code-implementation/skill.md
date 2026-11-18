@@ -27,6 +27,9 @@ Execute implementation iterations derived from an **Approved master plan** (`{PL
 - **No implementation without a valid iteration block.** If `NEXT.md` lacks one, run `plan` first (alias: `plan-iteration`).
 - **No code without reading the relevant SPEC(s) first.** Evidence-first: read before writing.
 - **No task is `done` until its gate passes.** Tests + lint + type-check must exit 0 before advancing.
+- **Characterize before changing behavior.** When a task changes existing behavior, add a test that pins the current behavior and show it passing before the edit. Docs-only edits skip this. Framework shell scripts stay on `framework-verify`.
+- **Do not weaken a gate.** Do not delete, skip, or rewrite a test, and do not disable a lint or type rule, to obtain a pass, unless the same message approves that exact change.
+- **Three-strike stop.** After three failed attempts on the same failure, stop and report what was tried and the likely cause. Do not keep editing.
 - **Scope discipline.** Do not modify any file not declared in the task's file list. Undo and document any accidental out-of-scope change.
 - **Schema changes go through `db-migration`.** Stop the task, create the migration script, resume. No inline DDL in application code. Follow `.cursorrules` § **Migration policy** (startup runner, verify, human approval for exceptions/test DML).
 - **Verification commands** come from `{AGENT_RULES_FILE}` § Docker (or § local/CI from `REPLACE:TECH_STACK_DOC` when not containerized). Never hardcode another project's service name, workdir, or toolchain.
@@ -209,7 +212,7 @@ Resolve the batch **before** the task loop. Default when `-` is omitted: **`coun
    - Check whether the active `## Current iteration` has at least one task with a populated `Files` column (not empty, not `…`).
    - If **neither** scope declaration exists → **stop the batch** immediately; emit a [scope-undeclared blocked report](#scope-undeclared-blocked-report).
    - If scope IS declared → proceed to the per-task loop.
-6. **Per-task loop:** read → implement → [Task gate](#task-gate) → progress line on pass; **stop batch** on fail/blocker/schema/protected-file.
+6. **Per-task loop:** read → when the task changes existing behavior, add a characterization test and show it passing → implement → [Task gate](#task-gate) → progress line on pass; **stop batch** on fail/blocker/schema/protected-file, or after three failed attempts on the same failure.
 7. **Batch-end sweep** (mandatory when files changed).
 8. Emit batch summary with sweep verdict.
 9. All tasks `done` → recommend **complete** (do not auto-finalize).
@@ -246,7 +249,7 @@ Five-prompt table: [reference.md § Task gate (detailed)](reference.md#task-gate
 
 ### Post-fix re-gate
 
-Re-run full task gate after any fix: [reference.md § Task gate (detailed)](reference.md#task-gate-detailed).
+Re-run the full task gate after any fix: [reference.md § Task gate (detailed)](reference.md#task-gate-detailed). After three failed attempts on the same failure, stop and report what was tried and the likely cause.
 
 
 ## Status protocol

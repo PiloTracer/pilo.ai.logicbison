@@ -1,27 +1,22 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-11-17",
-  "goal": "Lifecycle adoption M1-M4: quickstart/stack bootstrap, last-gate ledger, cicd-github skill, env-sync and bootstrap smokes in framework-verify. Plan: .work/plans/20261117-framework-evolution-plan.md.",
+  "updated": "2026-11-18",
+  "goal": "Adopt the six coding-playbook gaps from .work/plans/20261118-coding-playbook-intake.md",
   "allowed_paths": [
-    ".gitignore",
-    ".quick/README.md",
-    ".quick/onboarding-30min.md",
-    ".quick/software-lifecycle.md",
+    ".cursorrules",
+    "templates/cursorrules.template",
+    "skills/code-implementation/skill.md",
+    "skills/code-repair/skill.md",
+    "skills/db-migration/skill.md",
+    "skills/feature-spec/skill.md",
+    "standards/20260517-CONVENTIONS.md",
+    "CHANGELOG.md",
+    ".work/plans/20261118-coding-playbook-intake.md",
     ".work/touch-scope",
     ".work/context/HANDOFF.md",
-    ".work/plans/NEXT.md",
-    ".work/plans/20261117-framework-evolution-plan.md",
-    ".work/analysis/20261117-mod06-lifecycle-adoption.md",
-    "README.md",
-    "CHANGELOG.md",
-    "docs/adoption/minimal-adoption.md",
-    "standards/20261117-CICD_CONVENTIONS.md",
-    "templates/ci/github-actions/framework-gates.yml",
-    "templates/stacks/spring-boot/README.md",
-    "templates/work/plans/QUICKSTART-PLAYBOOK.md"
+    ".work/active-ref",
+    ".work/feedback/20261118-improvements.md",
+    "1"
   ],
-  "allowed_patterns": [
-    "scripts/**",
-    "skills/**"
-  ]
+  "allowed_patterns": []
 }

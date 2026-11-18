@@ -21,6 +21,8 @@ Remediation layer for the implementation workflow. **Implements fixes**; does no
 
 - **Findings in, evidence out.** Start from a numbered findings table (prior verifier report in chat, run the source verifier now, or decompose a custom brief). No code changes without documented F* rows.
 - **Re-verify mandatory.** After repairs, re-run the **same** upstream check that produced the findings (see [R4](#r4--re-verify-mandatory)). Claim **repaired** only when that check passes (or **pass with gaps** only for documented waivers).
+- **Do not weaken a gate.** Do not delete, skip, or rewrite a test, and do not disable a lint or type rule, to obtain a pass, unless the same message approves that exact change.
+- **Three-strike stop.** After three failed attempts on the same finding, stop and report what was tried and the likely cause. Do not keep editing.
 - **Standards-bound.** Apply `.cursorrules`, CONVENTIONS, FEATURE_STANDARD, relevant SPECs, and `.ai/concepts/README.md` § Trigger table on every fix diff. AI-assisted by default; MOD-06 required when agent-authored code changes unless **`human-only`** in the same message.
 - **Scope discipline.** Edit only paths tied to findings or an explicit user file list. Out-of-scope expansion requires user approval in the same message.
 - **Schema via db-migration.** No inline DDL. Follow `.cursorrules` § **Migration policy**. Mass backfills forbidden; test DB ad-hoc DML requires human approval.
@@ -165,6 +167,7 @@ Output a **Repair plan** (≤15 lines): order of F* ids, files to touch, whether
 - **Concepts** - `@concept-run - MOD-06` when agent fixes application code; MOD-01 when diff crosses hard module boundaries per `{BOUNDARY_MAP}`.
 - **TODO/FIXME** - promote to `UNKNOWNS.md` or task `Notes` before claiming F* fixed.
 - **Stop** if a fix requires protected file edit without approval.
+- **Three-strike stop.** After three failed attempts on the same finding, stop and report what was tried and the likely cause.
 
 <a id="r4--re-verify-mandatory"></a>
 ### R4 - Re-verify (mandatory)

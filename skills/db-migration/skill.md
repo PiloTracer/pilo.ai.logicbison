@@ -24,7 +24,8 @@ Manage database schema and data with **idempotent numbered SQL scripts** - no ve
 - **Scripts are append-only.** Add new numbered scripts. Never renumber, delete, or reorganize existing scripts.
 - **No version table.** The runner does not track which scripts have been applied. Idempotency guarantees safety.
 - **Order is explicit.** Scripts execute in alphanumeric order (`001_`, `002_`, …). Gaps are acceptable but discouraged.
-- **One script per conceptual change.** Don't cram unrelated DDL into one file. Don't split one table across three files.
+- **One script per conceptual change.** Don't cram unrelated DDL into one file. Don't split one new table across three files.
+- **Column replacement is three idempotent scripts:** add, switch readers and writers, drop later with same-message approval. No agent backfill. Startup re-run stays.
 - **Stop on first error.** If a script fails, the runner halts. Fix the script, restart. No partial state.
 - **Never embed secrets.** Migration scripts contain DDL/DML only. Credentials, keys, tokens live in environment variables or KMS.
 - **Policy:** `.cursorrules` § **Migration policy** (startup runner, verify idempotency, verify applied, exceptions, test DB mutations) is canonical; this skill implements items 1–3.
@@ -264,6 +265,7 @@ migrations/
 | Reference data | `INSERT … ON CONFLICT DO NOTHING` | `{NNN}_inserts.sql` (append) or new numbered |
 | Constraints/indexes | `ALTER TABLE … ADD CONSTRAINT IF NOT EXISTS` | `{NNN}_constraints.sql` (append) or new numbered |
 | Schema change (add column) | `ALTER TABLE … ADD COLUMN IF NOT EXISTS` | Append to latest `schema_changes` script or new numbered |
+| Column replacement | Add, switch, then a later approved drop | new numbered scripts |
 
 <a id="c3--apply-idempotency-pattern"></a>
 ### C3 - Apply idempotency pattern
