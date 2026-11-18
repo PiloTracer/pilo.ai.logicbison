@@ -189,7 +189,7 @@ Same set as [S1](reference.md#s1-baseline-reads-mandatory):
 
 | # | File (repo-root path) | Pass criteria |
 |---|----------------------|----------------|
-| 1 | `.cursorrules` | identity, 7 core principles, protected files, no-commit rule |
+| 1 | `.cursorrules` | identity, core principles, protected files, no-commit rule |
 | 2 | `.work/context/HANDOFF.md` | §Session status → §Open owner actions |
 | 3 | `.work/plans/NEXT.md` | Recommended next + owner blockers |
 | 4 | `.work/plans/UNKNOWNS.md` | every open unknown + owner + Blocks |

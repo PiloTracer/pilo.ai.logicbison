@@ -182,10 +182,11 @@ Skills live under `.ai/skills/<id>/skill.md` (folder name = id). When a task mat
 | feature-spec | Author, review, amend feature SPECs |
 | concept-run | Run MOD-01…MOD-08 concept prompts |
 | infra-terraform | Terraform IaC: init/plan/apply lifecycle, remote state + locking, drift, destroy discipline |
+| cicd-github | GitHub Actions workflows that run the framework gate scripts |
 | project-bootstrap | Copy `.work/` skeleton, `.cursorrules`, stack doc from templates |
 | docs | Create/manage project docs under `.work/docs/` |
 | ai-director | Free-text orchestrator; routes to `.ai` skill chain; skill-gap detection |
-| x-director | Cross-framework orchestrator (`.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`) |
+| x-director | Cross-framework orchestrator for `.ai` and the six sibling frameworks |
 
 **New skills:** add `.ai/skills/<id>/skill.md`; register above. Naming: `.ai/skills/README.md` § Naming protocol (`{domain}-{role}`, kebab-case).
 

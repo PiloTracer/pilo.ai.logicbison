@@ -2,7 +2,7 @@
 
 > **This is a template file.** In your adopter repo it is maintained by **`@code-implementation`** (the `## Current iteration` block) and **`@session-control close`** (the `## Recommended next` row). In this framework repo it stays as a demo skeleton.
 
-**Updated:** 2026-11-17
+**Updated:** 2026-11-18
 
 ---
 
@@ -10,7 +10,8 @@
 
 | Item | Artifact |
 |------|----------|
-| **Lifecycle adoption M1–M4 (2026-11-17)** | `@project-bootstrap quickstart` + `stack`; `scripts/{apply-stack-pack,bootstrap-smoke,last-gate-record}.sh`; `cicd-github` skill + `templates/ci/github-actions/framework-gates.yml` + `standards/20261117-CICD_CONVENTIONS.md`; `.quick/onboarding-30min.md`, `.quick/software-lifecycle.md`; `.work/plans/20261117-framework-evolution-plan.md`; `framework-verify` §11. Pizote playbook `5a6c0cc`. Committed this close as AIOS-1. `.cursorrules` row still open (HANDOFF owner action 6). |
+| **Playbook intake + skill registry (2026-11-18)** | Six reliability rules in skills and conventions. `.cursorrules` and `templates/cursorrules.template` list all 25 skills (`plan-sync`, `cicd-github`). Session-start check says "core principles". Plan `.work/plans/20261118-coding-playbook-intake.md`. `framework-verify` exit 0. |
+| **Lifecycle adoption M1–M4 (2026-11-17)** | `@project-bootstrap quickstart` + `stack`; `scripts/{apply-stack-pack,bootstrap-smoke,last-gate-record}.sh`; `cicd-github` skill + `templates/ci/github-actions/framework-gates.yml` + `standards/20261117-CICD_CONVENTIONS.md`; `.quick/onboarding-30min.md`, `.quick/software-lifecycle.md`; `.work/plans/20261117-framework-evolution-plan.md`; `framework-verify` §11. Pizote playbook `5a6c0cc`. Committed this close as AIOS-1. `.cursorrules` skill row added 2026-11-18 (HANDOFF owner action 6). |
 | **env-sync full 1-to-1 comment layout (2026-11-11)** | `scripts/env-sync.sh` — `file_aligned` now requires the exact line count plus byte-identical non-key lines; `layout:N` in `status`/`verify`/`apply`; comment-only/line-count drift fails `verify` and is rewritten idempotently by `apply`; target discovery ignores `.keep`/`.save`/`.old`/`.backup`/`.dist`. New `scripts/env-sync-test.sh` (56 checks). Docs: `skills/env-sync/{skill,reference}.md`, `CHANGELOG.md`, registry prose; MOD-06 `.work/analysis/20261111-mod06-env-sync-layout.md`. Live system-news validated on a byte-identical copy (126 values, 124 lines / 63 keys, `verify --backup` PASS, second apply no-op); live trio still drifted. Committed AIOS-1. |
 | **env-sync skill + `.env` layout script (2026-11-10)** | `skills/env-sync/` + `scripts/env-sync.sh` (align `.env*` keys to `.env.example` line-for-line; `status`/`verify`/`apply`; backup + SHA-256 value preservation + restore-on-fail); registered in 24-skill prose + `.cursorrules` + template; live `.env*` set unified on `/mnt/work/Projects/system-news` (114 lines / 61 keys each, identical key lines; env-only CADDY keys promoted with a comment; 122 values preserved, `verify --backup` PASS); MOD-06 `.work/analysis/20261110-mod06-env-sync-skill.md`; committed AIOS-1 (two commits: `f6a66c7` + this close). |
 | **tools-project MCP P0 + pizote deploy (2026-10-30)** | Interpreter probe in `opencode.json.template` + `install-opencode-config.sh` (repairs bare `python`), client refreshed to `1.1.0`/8 tools, consumer-root placement + `--update` refresh in `deploy-basic.sh`/`deploy-files.sh`, Claude `.mcp.json` + DSH registration matrix, `framework-verify` MCP assertions. Deployed to pizote; live detail/activities/attachment verified. P1 (`update` verb, UA/self-check, doc mirror) open. |

@@ -1,22 +1,16 @@
 {
   "ref": "AIOS-1",
   "updated": "2026-11-18",
-  "goal": "Adopt the six coding-playbook gaps from .work/plans/20261118-coding-playbook-intake.md",
+  "goal": "Register missing skills and drop the stale principle count",
   "allowed_paths": [
     ".cursorrules",
     "templates/cursorrules.template",
-    "skills/code-implementation/skill.md",
-    "skills/code-repair/skill.md",
-    "skills/db-migration/skill.md",
-    "skills/feature-spec/skill.md",
-    "standards/20260517-CONVENTIONS.md",
+    "skills/session-control/skill.md",
+    "skills/session-control/reference.md",
     "CHANGELOG.md",
-    ".work/plans/20261118-coding-playbook-intake.md",
-    ".work/touch-scope",
     ".work/context/HANDOFF.md",
-    ".work/active-ref",
-    ".work/feedback/20261118-improvements.md",
-    "1"
+    ".work/plans/NEXT.md",
+    ".work/touch-scope"
   ],
   "allowed_patterns": []
 }

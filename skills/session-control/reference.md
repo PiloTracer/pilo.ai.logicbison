@@ -704,7 +704,7 @@ Read these files **in full** (or confirm missing). Record `pass` only after read
 
 | # | File (repo-root path) | Pass criteria |
 |---|------|----------------|
-| 1 | `.cursorrules` | Can state: identity, 7 core principles, protected files, no-commit rule |
+| 1 | `.cursorrules` | Can state: identity, core principles, protected files, no-commit rule |
 | 2 | `.work/context/HANDOFF.md` | Know: session-critical sections (§Session status through §Open owner actions). The artifact table (§What this cycle produced) and tail sections (§Hygiene, §Doc 04 gate, §Tracked inventory) are reference - skim for relevance, not mandatory for start. |
 | 3 | `.work/plans/NEXT.md` | Know: single recommended next action + owner blockers |
 | 4 | `.work/plans/UNKNOWNS.md` | Know: every open unknown, its `Blocks` target (task / ADR / milestone), and its `Owner`. Cross-check against HANDOFF §Explicit unknowns and §Open owner actions - stale entries must be noted in the start report. |
@@ -898,7 +898,7 @@ Same set as [S1](#s1--baseline-reads-mandatory):
 
 | # | File (repo-root path) | Pass criteria |
 |---|----------------------|----------------|
-| 1 | `.cursorrules` | identity, 7 core principles, protected files, no-commit rule |
+| 1 | `.cursorrules` | identity, core principles, protected files, no-commit rule |
 | 2 | `.work/context/HANDOFF.md` | §Session status → §Open owner actions |
 | 3 | `.work/plans/NEXT.md` | Recommended next + owner blockers |
 | 4 | `.work/plans/UNKNOWNS.md` | every open unknown + owner + Blocks |

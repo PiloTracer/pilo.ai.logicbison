@@ -134,6 +134,7 @@ Skills live under `skills/<id>/skill.md` (folder name = id). When a task matches
 | deploy-files | Fat-client deploy into target (in-place no-overwrite bootstrap + `update` rules-aware merge) |
 | deploy-basic | Thin-client bootstrap: `.cursorrules` + `.work/` + stack doc only; rest resolves via `AGENT_OS_SOURCE` |
 | project-query-setup | Optional tools-project API key + MCP registration + connectivity test |
+| plan-sync | Parse plan markdown → manifest v1 → POST plan-import (dry-run gate, operator confirmation) |
 | plan-foundation | P0–P6 orchestration; certify plan-master-ready |
 | plan-master | Master implementation plan; certify implementation-ready |
 | plan-verify | Plan audits: foundation, master, alignment, coverage (code→SPEC), brownfield |
@@ -150,10 +151,11 @@ Skills live under `skills/<id>/skill.md` (folder name = id). When a task matches
 | feature-spec | Author, review, amend feature SPECs |
 | concept-run | Run MOD-01…MOD-08 concept prompts |
 | infra-terraform | Terraform IaC: init/plan/apply lifecycle, remote state + locking, drift, destroy discipline |
+| cicd-github | GitHub Actions workflows that run the framework gate scripts |
 | project-bootstrap | Copy `.work/` skeleton, `.cursorrules`, stack doc from templates |
 | docs | Create/manage project docs under `.work/docs/` |
 | ai-director | Free-text orchestrator; routes to `.ai` skill chain; skill-gap detection |
-| x-director | Cross-framework orchestrator (`.ai` + `.ai.ui` + `.ai.biz` + `.ai.soc`) |
+| x-director | Cross-framework orchestrator for `.ai` and the six sibling frameworks |
 
 **New skills:** add `skills/<id>/skill.md`; register above. Naming: `skills/README.md` § Naming protocol (`{domain}-{role}`, kebab-case).
 
