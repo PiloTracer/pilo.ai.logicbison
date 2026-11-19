@@ -17,8 +17,11 @@ Read the section for the language already on the task. Take it from the file suf
 | `.go` | Go |
 | `.rs` | Rust |
 | `.ts`, `.tsx`, `.js`, `.mjs`, `.cjs` | TypeScript |
+| `.java` | Java |
 
 Untyped JavaScript reads the TypeScript section and skips a rule that needs a type checker. Record that skip.
+
+A suffix in this table whose loaded card has no section for that language: record `skip - no section for this language` and follow consumer CONVENTIONS. Do not invent a rule.
 
 No suffix and no recorded stack: stop. Do not pick a runtime. The next command is `@plan-foundation` at `p2-backend` (`skills/plan-foundation/reference.md`). Parallelism, collections, and speed are not evidence for that grill.
 

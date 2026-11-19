@@ -4,7 +4,9 @@
 
 ## Session status
 
-**Closed:** 2026-11-19 - language decision cards (AIOS-1). Six topic cards under `standards/language/` load only when a task is choosing that decision. They do not pick the language. A named pattern needs two real variants. An extra test must fail if its rule is reversed. Paired keep/drop runs are still `unmeasured`. Cards landed in `dfd1bc7`; this close adds the reversed-rule test line.
+**Closed:** 2026-11-19 - concurrency scenarios and Java sections on the six language cards (AIOS-1). Inbound HTTP, outbound HTTP, and database access now require one shared pool, a stated bound, and a cancel path. Paired keep/drop runs stay `unmeasured`. A read of codeiva applied the Python rules only; that other tree was not committed.
+
+**Prior closed:** 2026-11-19 - language decision cards (AIOS-1). Six topic cards under `standards/language/` load only when a task is choosing that decision. They do not pick the language. A named pattern needs two real variants. An extra test must fail if its rule is reversed. Paired keep/drop runs are still `unmeasured`. Cards landed in `dfd1bc7`; this close adds the reversed-rule test line.
 
 **Prior closed:** 2026-11-18 - six reliability rules adopted, and both rules tables now list all 25 skills including `plan-sync` and `cicd-github` (AIOS-1). `framework-verify` exit 0.
 
@@ -80,6 +82,7 @@ End with **`@session-control close`** (add `commit` / `commit push` only when re
 
 | Date | Session | Artifacts |
 |------|---------|-----------|
+| 2026-11-19 | Concurrency scenarios + Java sections | `standards/language/` Java sections on collections, errors, statements, patterns, concurrency, and a Java profiler line on the speed card. `SCN-IN`, `SCN-OUT`, `SCN-DB`. Selector `.java` row. MOD-06 `.work/analysis/20261119-mod06-concurrency-scenarios.md`. Paired runs still `unmeasured`. codeiva edits were not committed. |
 | 2026-11-19 | Language decision cards | `standards/language/` selector and six cards. `code-implementation` reads them before an edit. `p2-backend` records that the cards are not evidence for the language. MOD-06 `.work/analysis/20261118-mod06-language-decision-cards.md`. Plan `.work/plans/20261118-language-decision-cards.md`. Most of the set is `dfd1bc7`. This close adds the reversed-rule test line. `skill-functional-verify` PASS. `mod06-output-check` PASS. Paired runs `unmeasured`. |
 | 2026-11-18 | Playbook intake + skill registry | Six reliability rules in the skills and conventions (`ddf90e0`, rules files `ea0cf3a`). Both rules tables list 25 skills (`plan-sync`, `cicd-github`). Session-start check no longer says "7 core principles". Plan `.work/plans/20261118-coding-playbook-intake.md`. `framework-verify` exit 0; blast-radius warn. |
 | 2026-11-17 | Lifecycle adoption M1–M4 | `templates/work/plans/QUICKSTART-PLAYBOOK.md`; `.quick/onboarding-30min.md`, `.quick/software-lifecycle.md`; `skills/cicd-github/`; `scripts/{apply-stack-pack,bootstrap-smoke,last-gate-record}.sh`; `standards/20261117-CICD_CONVENTIONS.md`; `templates/ci/github-actions/framework-gates.yml`; `framework-verify` §11. Pizote playbook committed there as `5a6c0cc`. MOD-06 `.work/analysis/20261117-mod06-lifecycle-adoption.md`. `framework-verify` pass; blast-radius warn. |

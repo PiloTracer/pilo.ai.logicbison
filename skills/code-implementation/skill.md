@@ -349,7 +349,7 @@ When a task cannot proceed mid-implementation:
 - Skipping **SC1 self-critique** because the task "looked simple".
 - Loading a topic card because a word appeared, when the task is not choosing that decision.
 - Leaving out a card when the task is choosing that decision, in order to keep the count small.
-- Using a topic card, including concurrency, as a reason to pick Python, Go, Rust, or TypeScript. That choice is `p2-backend`.
+- Using a topic card, including concurrency, as a reason to pick Python, Go, Rust, TypeScript, or Java. That choice is `p2-backend`.
 - Claiming a fix succeeded without **re-gating** the affected task(s).
 - Skipping the **Batch-end sweep** at end of `continue` (single-task or batch).
 - Proceeding to complete without `@code-verify milestone`.

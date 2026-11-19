@@ -2,7 +2,7 @@
 
 Default to the structure whose operation is the one the caller performs. Read only the section for the language the selector already resolved.
 
-**Status:** Binding when the selector loads this card · 2026-11-18
+**Status:** Binding when the selector loads this card · 2026-11-18; Java 2026-11-19
 **Needs:** nothing beyond the selector. Consumer CONVENTIONS win.
 
 ## Python
@@ -29,6 +29,12 @@ Default to the structure whose operation is the one the caller performs. Read on
 - **COL-TS2.** A typed object for a fixed key set. `Map` for dynamic keys. `Set` for membership.
 - **COL-TS3.** Do not use an array as a set.
 
+## Java
+
+- **COL-JV1.** `ArrayList` to grow an ordered sequence. A `Set` for membership. A `Map` for keyed lookup. Reason: a list scan for membership is linear.
+- **COL-JV2.** Do not modify a collection while iterating it. Fail-fast iterators throw `ConcurrentModificationException` on a best-effort basis. Build a new collection, or remove through the iterator. Do not rely on that exception for correctness.
+- **COL-JV3.** A `Stream` when the caller must not hold the whole sequence. Collect to a `List` when the caller needs size, indexing, or a second pass. Do not mutate the source inside a stream.
+
 ## Example
 
 Python, `COL-PY1`. Membership uses a set. The caller that needs a second pass materializes a list. Other languages follow their own section in this same shape.
@@ -47,4 +53,4 @@ The project lint and tests. A test that asserts membership or order uses the str
 
 ## Ledger
 
-Mechanics checked 2026-11-18 against `20261118-SOURCES.md`. The if/then is this card. Paired task: `unmeasured`.
+Mechanics checked 2026-11-18 against `20261118-SOURCES.md`. Java `COL-JV1`–`COL-JV3` checked 2026-11-19 (HTTP 200). The list-scan reason is this card. Paired task: `unmeasured`.

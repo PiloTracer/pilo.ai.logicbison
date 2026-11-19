@@ -1,24 +1,22 @@
 {
   "ref": "AIOS-1",
-  "updated": "2026-11-18",
-  "goal": "Topic cards for an already-chosen language; no runtime picking",
+  "updated": "2026-11-19",
+  "goal": "Java sections on the language cards, plus concurrency scenarios",
   "allowed_paths": [
-    "skills/code-implementation/skill.md",
-    "skills/code-implementation/reference.md",
-    "skills/plan-foundation/reference.md",
-    "standards/20260517-CONVENTIONS.md",
-    "standards/language/README.md",
+    "standards/language/20261118-DECISIONS-concurrency.md",
     "standards/language/20261118-DECISIONS-collections.md",
     "standards/language/20261118-DECISIONS-errors.md",
     "standards/language/20261118-DECISIONS-statements.md",
     "standards/language/20261118-DECISIONS-patterns.md",
-    "standards/language/20261118-DECISIONS-concurrency.md",
     "standards/language/20261118-DECISIONS-optimization.md",
     "standards/language/20261118-SOURCES.md",
-    ".work/plans/20261118-language-decision-cards.md",
-    ".work/analysis/20261118-mod06-language-decision-cards.md",
-    ".work/touch-scope",
-    "CHANGELOG.md"
+    "standards/language/README.md",
+    "skills/code-implementation/skill.md",
+    "CHANGELOG.md",
+    ".work/analysis/20261119-mod06-concurrency-scenarios.md",
+    ".work/context/HANDOFF.md",
+    ".work/active-ref",
+    ".work/touch-scope"
   ],
   "allowed_patterns": []
 }

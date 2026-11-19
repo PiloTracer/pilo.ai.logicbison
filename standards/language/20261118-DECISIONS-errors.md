@@ -2,7 +2,7 @@
 
 An expected miss is a value. A broken operation is an error. A broken invariant is the only panic.
 
-**Status:** Binding when the selector loads this card · 2026-11-18
+**Status:** Binding when the selector loads this card · 2026-11-18; Java 2026-11-19
 **Needs:** nothing beyond the selector. Consumer CONVENTIONS win.
 
 ## Python
@@ -29,6 +29,12 @@ An expected miss is a value. A broken operation is an error. A broken invariant 
 - **ERR-TS2.** `catch` binds `unknown`. Narrow it before reading a property.
 - **ERR-TS3.** `strict` stays on. `any` is not how an error is silenced.
 
+## Java
+
+- **ERR-JV1.** Catch the exception type that failed. A `catch (Exception)` or `catch (Throwable)` only at a process boundary, and the task notes say why.
+- **ERR-JV2.** Expected absence on a return is an empty `Optional` or an empty collection. An exception means the operation failed. `Optional` is a return type, never a field, and never null itself.
+- **ERR-JV3.** A resource acquired here is released with try-with-resources. A `finally` close is only when the type is not `AutoCloseable`.
+
 ## Example
 
 Go, `ERR-GO1`. The failure is checked and wrapped. A request does not panic. Other languages follow their own section in this same shape.
@@ -49,4 +55,4 @@ The project type checker and tests. Add one test for the failure path this task 
 
 ## Ledger
 
-Mechanics checked 2026-11-18 against `20261118-SOURCES.md`. Paired task: `unmeasured`.
+Mechanics checked 2026-11-18 against `20261118-SOURCES.md`. Java `ERR-JV1`–`ERR-JV3` checked 2026-11-19 (HTTP 200). Paired task: `unmeasured`.

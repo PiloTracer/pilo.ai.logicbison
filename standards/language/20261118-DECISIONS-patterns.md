@@ -2,7 +2,7 @@
 
 The module that owns the invariant owns the type. Public surface stays small.
 
-**Status:** Binding when the selector loads this card · 2026-11-18
+**Status:** Binding when the selector loads this card · 2026-11-18; Java 2026-11-19
 **Needs:** nothing beyond the selector. Consumer CONVENTIONS win. This card does not set folder layout.
 
 - **PAT-0.** No named pattern (Factory, Strategy, Observer, Singleton, Adapter, and the rest) unless this task has two real variants now. Name the pattern and the reason in the task notes. One implementation stays a function or a concrete type.
@@ -30,6 +30,12 @@ The module that owns the invariant owns the type. Public surface stays small.
 - **PAT-TS1.** Export the types that cross the module boundary. Leave the rest unexported.
 - **PAT-TS2.** A function for a transform. A class when the value has a lifecycle: open, use, close.
 - **PAT-TS3.** No `any` on an exported type. `unknown` plus a narrow is the escape.
+
+## Java
+
+- **PAT-JV1.** A method when there is no state to keep. A class when several operations share a resource or mutable state. A `record` for a fixed data carrier, not for a type with a lifecycle.
+- **PAT-JV2.** Return a concrete type. Add an interface only once two real variants exist (`PAT-0`). Do not declare an interface for mocking before it is used.
+- **PAT-JV3.** Fields that carry an invariant stay private. Callers use the method the type owns.
 
 ## Example
 
@@ -60,4 +66,4 @@ The project type checker or compiler on the touched packages. A new exported typ
 
 ## Ledger
 
-`PAT-GO1` matches the Go Code Review Comments on interfaces (`20261118-SOURCES.md`). Paired task: `unmeasured`.
+`PAT-GO1` matches the Go Code Review Comments on interfaces (`20261118-SOURCES.md`). `PAT-JV1` records and `PAT-JV3` access control checked 2026-11-19 (HTTP 200). `PAT-JV2` is this card plus `PAT-0`. Paired task: `unmeasured`.
