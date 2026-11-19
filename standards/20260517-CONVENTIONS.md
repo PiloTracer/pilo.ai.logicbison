@@ -18,6 +18,8 @@ Pairs with: foundation architecture doc, `REPLACE:TECH_STACK_DOC`, ADRs under `.
 | SQL | Idempotent numbered scripts under `REPLACE:MIGRATIONS_DIR` | No inline DDL in application code paths |
 | Shell | POSIX `sh` or `bash` with `set -euo pipefail` | `shellcheck` in CI when scripts are committed |
 
+Collections, errors, statements, module patterns, concurrency, and speed are not decided in this file. When a task is choosing one of those, `.ai/standards/language/README.md` (thin client: `$AGENT_OS_SOURCE/standards/language/README.md`) names every matching card for the language already chosen. A passing word does not count. This file wins if they conflict. Those cards do not choose the language.
+
 ## 2. Type discipline
 
 - Enforce strict typing on all production code (language-appropriate: `pyright --strict`, `tsc --noEmit`, etc.).

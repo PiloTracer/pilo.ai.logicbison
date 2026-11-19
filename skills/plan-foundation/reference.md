@@ -500,6 +500,7 @@ Mirror vendor artifacts under `.work/docs/integration/<vendor>-<version>/` + `MA
 - `csharp` | C# + .NET
 - `java-spring-boot` | Java + Spring Boot
 **Default:** python-fastapi (fallback when evidence-neutral)
+**Not evidence:** `.ai/standards/language/` cards (thin client: `$AGENT_OS_SOURCE/standards/language/`). They apply only after this choice is recorded. Do not cite parallelism, collections, or a speed wish as the reason for an option. A recommendation still cites D4, D8, D5, or `p1-integrations` (`stated` or `assumed`).
 
 #### INTERACTION: p2-database
 

@@ -159,7 +159,9 @@ HANDOFF waiver or `@plan-master status` **implementation-ready** before code: [r
 
 ### ST1 - Mandatory reads
 
-Six-file read table (NEXT, SPECs, standards, HANDOFF): [reference.md § Start protocol (detailed)](reference.md#start-protocol-detailed) (ST1).
+Seven-row read table (NEXT, SPECs, standards, HANDOFF, language selector): [reference.md § Start protocol (detailed)](reference.md#start-protocol-detailed) (ST1).
+
+Before the first edit, read `.ai/standards/language/README.md` (thin client: `$AGENT_OS_SOURCE/standards/language/README.md`). Load every card whose decision this task is actually making. A passing word does not load a card. The language comes from the file suffix or the recorded stack. If neither exists, stop and return to `p2-backend`. These cards do not pick a language.
 
 ### ST2 - Environment snapshot
 
@@ -212,12 +214,18 @@ Resolve the batch **before** the task loop. Default when `-` is omitted: **`coun
    - Check whether the active `## Current iteration` has at least one task with a populated `Files` column (not empty, not `…`).
    - If **neither** scope declaration exists → **stop the batch** immediately; emit a [scope-undeclared blocked report](#scope-undeclared-blocked-report).
    - If scope IS declared → proceed to the per-task loop.
-6. **Per-task loop:** read → when the task changes existing behavior, add a characterization test and show it passing → implement → [Task gate](#task-gate) → progress line on pass; **stop batch** on fail/blocker/schema/protected-file, or after three failed attempts on the same failure.
+6. **Per-task loop:** read → apply [Language selector](#language-selector) and write its three lines before editing → when the task changes existing behavior, add a characterization test and show it passing → implement → [Task gate](#task-gate) → progress line on pass; **stop batch** on fail/blocker/schema/protected-file, or after three failed attempts on the same failure.
 7. **Batch-end sweep** (mandatory when files changed).
 8. Emit batch summary with sweep verdict.
 9. All tasks `done` → recommend **complete** (do not auto-finalize).
 
 **Batch progress lines, batch summary template, batch-end sweep steps, stop conditions:** [`reference.md` § Continue protocol (detailed)](reference.md#continue-protocol-detailed).
+
+### Language selector
+
+<a id="language-selector"></a>
+
+`.ai/standards/language/README.md` is the list (thin client: `$AGENT_OS_SOURCE/standards/language/README.md`). The language is already chosen. Load every card for a decision the task is actually making, and cite their rule ids in the task `Notes` before editing. A passing word loads nothing. No recorded language: stop and return to `p2-backend`. Consumer `.work/standards/*CONVENTIONS*` wins on conflict. Card verify commands are an extra task-gate row (`reference.md` § Task gate). Row 6 of SC1 applies only when a card was loaded.
 
 ### Scope-undeclared blocked report
 
@@ -245,7 +253,7 @@ Run after every task before marking `done`. All checks must pass. **Mechanical o
 
 ### SC1 - Self-critique
 
-Five-prompt table: [reference.md § Task gate (detailed)](reference.md#task-gate-detailed) (SC1).
+Rows 1–5 always, plus row 6 when a topic card was loaded: [reference.md § Task gate (detailed)](reference.md#task-gate-detailed) (SC1).
 
 ### Post-fix re-gate
 
@@ -339,6 +347,9 @@ When a task cannot proceed mid-implementation:
 - Reporting "tests pass" without running them and reviewing output.
 - Skipping the task gate because "it's a small change."
 - Skipping **SC1 self-critique** because the task "looked simple".
+- Loading a topic card because a word appeared, when the task is not choosing that decision.
+- Leaving out a card when the task is choosing that decision, in order to keep the count small.
+- Using a topic card, including concurrency, as a reason to pick Python, Go, Rust, or TypeScript. That choice is `p2-backend`.
 - Claiming a fix succeeded without **re-gating** the affected task(s).
 - Skipping the **Batch-end sweep** at end of `continue` (single-task or batch).
 - Proceeding to complete without `@code-verify milestone`.

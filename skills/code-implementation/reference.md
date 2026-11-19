@@ -579,6 +579,7 @@ Before ST1 (and before first line of application code):
 | 4 | `.work/standards/*FEATURE_STANDARD*` | Can state: service/repo/test layout for this context |
 | 5 | `.work/context/HANDOFF.md` | Know: owner blockers, waivers, previous session state |
 | 6 | **Optional:** `.ai/docs/guides/workflows/README.md` (artifact matrix) and `20260518-guide-workflows-index.md` (curriculum), or repo equivalents | When concepts/workflows apply: know bootstrap, tutorials, and which artifacts touch plan vs implementation |
+| 7 | `.ai/standards/language/README.md` (thin client: `$AGENT_OS_SOURCE/standards/language/README.md`) | Language source (suffix or stack). Every card whose decision this task is making, or `no card`. Rule ids in `Notes` before the edit. No language on record → stop, `p2-backend` |
 
 If any mandatory read **fails** → stop. Fix before implementing.
 
@@ -654,7 +655,8 @@ Run after every task implementation before marking `done`. All checks must pass.
 | Protected files | `git diff --name-only` reviewed | No `.cursorrules` §Protected Files paths unless user explicitly approved |
 | Scope discipline | `git diff --name-only` | All paths in declared task file list |
 | MOD-06 (AI-assisted) | `@concept-run - MOD-06` when iteration touched code | Output attached to PR, task `Notes`, or iteration registry; **required** before **complete** (see CO1) |
-| **SC1 self-critique** | [SC1 - Self-critique](#sc1--self-critique) below | Five bullets recorded in task `Notes` or iteration log |
+| **SC1 self-critique** | [SC1 - Self-critique](#sc1--self-critique) below | Rows 1–5 recorded in task `Notes` or iteration log. Row 6 when a topic card was loaded; otherwise `skip - no card` |
+| **Language card verify** | Command on the loaded card, when it is not already TEST, LINT, or TYPE | Exit 0, or `skip - no card loaded`, or `skip - tool not in this repo` with the command named. A skip is not a pass for a repo that claims that language |
 
 **Also verify (manual - no single exit code):**
 
@@ -665,7 +667,7 @@ Run after every task implementation before marking `done`. All checks must pass.
 
 ### SC1 - Self-critique
 
-Two-minute structured re-read of the task diff before marking `done`. Answer all five in task `Notes` (or, in batch mode, the iteration log) - one bullet each, ≤1 line. **Do not** answer with "none" or "n/a" reflexively; if a row is truly empty, write the reason (e.g. `none - touched only one self-contained file`).
+Two-minute structured re-read of the task diff before marking `done`. Answer every applicable row in task `Notes` (or, in batch mode, the iteration log) - one bullet each, ≤1 line. **Do not** answer with "none" or "n/a" reflexively; if a row is truly empty, write the reason (e.g. `none - touched only one self-contained file`). Row 6 applies only when a topic card was loaded.
 
 | # | Prompt | Purpose |
 |---|--------|---------|
@@ -674,6 +676,7 @@ Two-minute structured re-read of the task diff before marking `done`. Answer all
 | 3 | Which referenced file did I assume unchanged but did not re-read this session? | Stale-assumption bugs |
 | 4 | Is there a test for the first failure mode I would expect? If no, where is it captured? | Coverage gap → must land in `Notes` or `UNKNOWNS.md` |
 | 5 | Any non-fatal lint / type / compiler warnings in touched files? Count + summary. | Warning rot |
+| 6 | Only when a topic card was loaded: which rule did this diff break (aliasing, swallowed error, hidden control flow, unbounded fan-out, or a speed claim with no baseline)? | Topic footgun. If no card loaded: `skip - no card` |
 
 If SC1 surfaces a real concern (not just "looks fine") → **either fix it now or open a `U*` row** in `{PLANS_ROOT}/UNKNOWNS.md` referencing this task. Marking `done` while leaving an SC1 concern undocumented is a gate **fail**.
 
