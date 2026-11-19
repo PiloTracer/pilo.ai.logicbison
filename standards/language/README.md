@@ -55,6 +55,8 @@ Match the Example on each loaded card. Same shape, the language of this task.
 
 Run each loaded card's verify command when it is not already `REPLACE:TEST_COMMAND`, `REPLACE:LINT_COMMAND`, or `REPLACE:TYPECHECK_COMMAND`. If the tool is absent, record `skip - tool not in this repo` and the command. A skip is not a pass for a repo that claims that language.
 
+When a card asks for an extra test, that test fails if the rule is reversed: a set test fails on a scan, a failure test fails if the error is swallowed, a closure test fails if every pass keeps the last value, and a race run fails if shared data is unprotected. A task that loaded no card adds no extra test.
+
 ## Keep or drop
 
 Scratch consumer only. One task per topic, twice: card loaded, and card not loaded. Keep a rule only when the with-card run changes the choice or the first-pass verify result. A row marked `unmeasured` stays. This session did not run those pairs.
