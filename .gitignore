@@ -490,3 +490,4 @@ reasonix.toml
 
 # Rewritten on every local gate run; not a source artifact.
 .work/reports/last-gate.json
+.work/feedback
